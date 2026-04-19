@@ -38,3 +38,7 @@ audit_report.pdf
 audit_report.tex
 
 *.exe
+
+# Local tool settings and sensitive mock data
+.claude/
+tests/fixtures/crypto_config_mock/
