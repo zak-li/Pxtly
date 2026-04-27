@@ -20,7 +20,9 @@ redis==7.3.0
 celery==5.6.2
 
 grpcio==1.78.0
-grpcio-tools==1.78.0
+# grpcio-tools is a build-time codegen tool (not a runtime dep) and pins
+# protobuf to a different major than what the rest of the stack needs.
+# Install it ad-hoc when regenerating .proto stubs, not in production.
 protobuf==5.29.6
 PyYAML==6.0.3
 
