@@ -1,37 +1,47 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+
+export type EntityKind = 'asset' | 'org' | 'tx';
 
 @Injectable({ providedIn: 'root' })
 export class EntityService {
   private base = environment.apiBase;
-  open$ = new BehaviorSubject(false);
-  activeId$ = new BehaviorSubject<string | null>(null);
-  activeKind$ = new BehaviorSubject<'asset' | 'org' | 'tx' | null>(null);
-  detail$ = new BehaviorSubject<Record<string, any> | null>(null);
-  loading$ = new BehaviorSubject(false);
-  error$ = new BehaviorSubject<string | null>(null);
+  readonly open$ = new BehaviorSubject(false);
+  readonly activeId$ = new BehaviorSubject<string | null>(null);
+  readonly activeKind$ = new BehaviorSubject<EntityKind | null>(null);
+  readonly detail$ = new BehaviorSubject<Record<string, unknown> | null>(null);
+  readonly loading$ = new BehaviorSubject(false);
+  readonly error$ = new BehaviorSubject<string | null>(null);
 
-  async open(id: string, kind: 'asset' | 'org' | 'tx') {
+  constructor(private http: HttpClient) {}
+
+  async open(id: string, kind: EntityKind): Promise<void> {
     this.open$.next(true);
     this.activeId$.next(id);
     this.activeKind$.next(kind);
     this.detail$.next(null);
     this.error$.next(null);
     this.loading$.next(true);
+
+    const pathMap: Record<EntityKind, string> = {
+      asset: `assets/${id}`,
+      org:   `organizations/${id}`,
+      tx:    `transactions/${id}`,
+    };
+
     try {
-      const path = kind === 'asset' ? `assets/${id}` : kind === 'org' ? `organizations/${id}` : `transactions/${id}`;
-      const res = await fetch(`${this.base}/${path}`, { credentials: 'include' });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      this.detail$.next(await res.json());
-    } catch (e: any) {
-      this.error$.next(e.message);
+      const data = await this.http
+        .get<Record<string, unknown>>(`${this.base}/${pathMap[kind]}`)
+        .toPromise();
+      this.detail$.next(data ?? null);
+    } catch (e: unknown) {
+      this.error$.next(e instanceof Error ? e.message : 'Request failed');
     } finally {
       this.loading$.next(false);
     }
   }
 
-  close() {
-    this.open$.next(false);
-  }
+  close(): void { this.open$.next(false); }
 }

@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { AuthService } from '../../services/auth.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { AuthService, User } from '../../services/auth.service';
 import { ApiStatusService } from '../../services/api-status.service';
 import { ToastService } from '../../services/toast.service';
 
@@ -19,24 +21,36 @@ import { ToastService } from '../../services/toast.service';
         <div class="header-divider"></div>
         <ng-container *ngIf="user">
           <button class="header-btn" (click)="logout()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
             {{ user.email }}
           </button>
         </ng-container>
-        <button class="status-icon" [class.status-icon--ok]="apiOk" [class.status-icon--warn]="!apiOk" title="{{ apiOk ? 'API online' : 'API offline' }}">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+        <button class="status-icon"
+          [class.status-icon--ok]="apiOk"
+          [class.status-icon--warn]="!apiOk"
+          [title]="apiOk ? 'API online' : 'API offline'">
+          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="6"/>
+          </svg>
         </button>
       </div>
     </header>
   `
 })
-export class StatusLineComponent implements OnInit {
-  user: any = null;
+export class StatusLineComponent implements OnInit, OnDestroy {
+  user: User | null = null;
   apiOk = false;
   agentModel = '';
+  private destroy$ = new Subject<void>();
 
   get apiLabel(): string {
-    return this.apiOk ? (this.agentModel ? `MODEL · ${this.agentModel.toUpperCase()}` : 'API · ONLINE') : 'API · OFFLINE';
+    return this.apiOk
+      ? (this.agentModel ? `MODEL · ${this.agentModel.toUpperCase()}` : 'API · ONLINE')
+      : 'API · OFFLINE';
   }
 
   constructor(
@@ -45,13 +59,18 @@ export class StatusLineComponent implements OnInit {
     private toast: ToastService
   ) {}
 
-  ngOnInit() {
-    this.auth.user$.subscribe(u => this.user = u);
-    this.apiStatus.apiOk$.subscribe(v => this.apiOk = v);
-    this.apiStatus.agentModel$.subscribe(v => this.agentModel = v);
+  ngOnInit(): void {
+    this.auth.user$.pipe(takeUntil(this.destroy$)).subscribe(u => this.user = u);
+    this.apiStatus.apiOk$.pipe(takeUntil(this.destroy$)).subscribe(v => this.apiOk = v);
+    this.apiStatus.agentModel$.pipe(takeUntil(this.destroy$)).subscribe(v => this.agentModel = v);
   }
 
-  async logout() {
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  async logout(): Promise<void> {
     await this.auth.logout();
     this.toast.show('Signed out', 'ok');
   }

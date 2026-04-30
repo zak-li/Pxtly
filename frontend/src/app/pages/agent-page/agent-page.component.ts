@@ -1,4 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { ChatService, Message } from '../../services/chat.service';
 
@@ -21,22 +23,29 @@ import { ChatService, Message } from '../../services/chat.service';
     </div>
   `
 })
-export class AgentPageComponent implements OnInit {
+export class AgentPageComponent implements OnInit, OnDestroy {
   messages: Message[] = [];
   showLogin = false;
+  private destroy$ = new Subject<void>();
 
   constructor(private auth: AuthService, private chat: ChatService) {}
 
-  async ngOnInit() {
+  async ngOnInit(): Promise<void> {
     await this.auth.hydrate();
-    this.auth.checked$.subscribe(checked => {
+
+    this.auth.checked$.pipe(takeUntil(this.destroy$)).subscribe(checked => {
       if (checked && this.auth.user$.value === null) this.showLogin = true;
     });
-    this.auth.user$.subscribe(u => {
+    this.auth.user$.pipe(takeUntil(this.destroy$)).subscribe(u => {
       if (u !== null) this.showLogin = false;
     });
-    this.chat.messages$.subscribe(m => this.messages = m);
+    this.chat.messages$.pipe(takeUntil(this.destroy$)).subscribe(m => this.messages = m);
   }
 
-  onLogin() { this.showLogin = false; }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  onLogin(): void { this.showLogin = false; }
 }

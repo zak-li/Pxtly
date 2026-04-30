@@ -1,6 +1,8 @@
-import { Component, OnInit, HostListener } from '@angular/core';
-import { PaletteService, PaletteItem } from '../../services/palette.service';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { EntityService } from '../../services/entity.service';
+import { PaletteItem, PaletteService } from '../../services/palette.service';
 
 @Component({
   selector: 'app-command-palette',
@@ -11,7 +13,6 @@ import { EntityService } from '../../services/entity.service';
         <div class="palette-input-wrap">
           <span class="palette-prompt">&gt;</span>
           <input class="palette-input"
-            #searchInput
             placeholder="Search assets, organizations, transactions..."
             (input)="onSearch($event)"
             (keydown)="onKey($event)"
@@ -51,9 +52,7 @@ import { EntityService } from '../../services/entity.service';
             </button>
           </ng-container>
           <ng-template #emptyState>
-            <div class="palette-empty">
-              {{ loading ? 'Searching...' : 'Type to search' }}
-            </div>
+            <div class="palette-empty">{{ loading ? 'Searching...' : 'Type to search' }}</div>
           </ng-template>
         </div>
         <div class="palette-footer">
@@ -65,45 +64,52 @@ import { EntityService } from '../../services/entity.service';
     </div>
   `
 })
-export class CommandPaletteComponent implements OnInit {
+export class CommandPaletteComponent implements OnInit, OnDestroy {
   open = false;
   items: PaletteItem[] = [];
   loading = false;
   cursor = 0;
-  private debounce: any;
+  private debounceId: ReturnType<typeof setTimeout> | null = null;
+  private destroy$ = new Subject<void>();
 
   constructor(private palette: PaletteService, private entity: EntityService) {}
 
-  ngOnInit() {
-    this.palette.open$.subscribe(v => { this.open = v; this.cursor = 0; });
-    this.palette.items$.subscribe(v => { this.items = v; this.cursor = 0; });
-    this.palette.loading$.subscribe(v => this.loading = v);
+  ngOnInit(): void {
+    this.palette.open$.pipe(takeUntil(this.destroy$)).subscribe(v => { this.open = v; this.cursor = 0; });
+    this.palette.items$.pipe(takeUntil(this.destroy$)).subscribe(v => { this.items = v; this.cursor = 0; });
+    this.palette.loading$.pipe(takeUntil(this.destroy$)).subscribe(v => this.loading = v);
+  }
+
+  ngOnDestroy(): void {
+    if (this.debounceId !== null) clearTimeout(this.debounceId);
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   @HostListener('document:keydown', ['$event'])
-  onGlobalKey(e: KeyboardEvent) {
+  onGlobalKey(e: KeyboardEvent): void {
     if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
       e.preventDefault();
       this.palette.toggle();
     }
   }
 
-  close() { this.palette.close(); }
+  close(): void { this.palette.close(); }
 
-  onSearch(e: Event) {
-    clearTimeout(this.debounce);
+  onSearch(e: Event): void {
+    if (this.debounceId !== null) clearTimeout(this.debounceId);
     const q = (e.target as HTMLInputElement).value;
-    this.debounce = setTimeout(() => this.palette.search(q), 250);
+    this.debounceId = setTimeout(() => this.palette.search(q), 250);
   }
 
-  onKey(e: KeyboardEvent) {
+  onKey(e: KeyboardEvent): void {
     if (e.key === 'Escape') { this.palette.close(); return; }
     if (e.key === 'ArrowDown') { e.preventDefault(); this.cursor = Math.min(this.cursor + 1, this.items.length - 1); }
-    if (e.key === 'ArrowUp') { e.preventDefault(); this.cursor = Math.max(this.cursor - 1, 0); }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); this.cursor = Math.max(this.cursor - 1, 0); }
     if (e.key === 'Enter' && this.items[this.cursor]) this.pick(this.items[this.cursor]);
   }
 
-  pick(item: PaletteItem) {
+  pick(item: PaletteItem): void {
     this.palette.close();
     this.entity.open(item.id, item.kind);
   }

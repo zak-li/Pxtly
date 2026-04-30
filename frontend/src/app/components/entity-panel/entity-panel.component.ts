@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { EntityService } from '../../services/entity.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { EntityKind, EntityService } from '../../services/entity.service';
 
 @Component({
   selector: 'app-entity-panel',
@@ -34,28 +36,37 @@ import { EntityService } from '../../services/entity.service';
     </ng-container>
   `
 })
-export class EntityPanelComponent implements OnInit {
+export class EntityPanelComponent implements OnInit, OnDestroy {
   open = false;
   id: string | null = null;
-  kind: string | null = null;
-  detail: any = null;
+  kind: EntityKind | null = null;
+  detail: Record<string, unknown> | null = null;
   loading = false;
   error: string | null = null;
   entries: { key: string; value: string }[] = [];
+  private destroy$ = new Subject<void>();
 
   constructor(public entity: EntityService) {}
 
-  ngOnInit() {
-    this.entity.open$.subscribe(v => this.open = v);
-    this.entity.activeId$.subscribe(v => this.id = v);
-    this.entity.activeKind$.subscribe(v => this.kind = v);
-    this.entity.loading$.subscribe(v => this.loading = v);
-    this.entity.error$.subscribe(v => this.error = v);
-    this.entity.detail$.subscribe(d => {
+  ngOnInit(): void {
+    this.entity.open$.pipe(takeUntil(this.destroy$)).subscribe(v => this.open = v);
+    this.entity.activeId$.pipe(takeUntil(this.destroy$)).subscribe(v => this.id = v);
+    this.entity.activeKind$.pipe(takeUntil(this.destroy$)).subscribe(v => this.kind = v);
+    this.entity.loading$.pipe(takeUntil(this.destroy$)).subscribe(v => this.loading = v);
+    this.entity.error$.pipe(takeUntil(this.destroy$)).subscribe(v => this.error = v);
+    this.entity.detail$.pipe(takeUntil(this.destroy$)).subscribe(d => {
       this.detail = d;
       this.entries = d
-        ? Object.entries(d).map(([k, v]) => ({ key: k, value: typeof v === 'object' ? JSON.stringify(v) : String(v) }))
+        ? Object.entries(d).map(([k, v]) => ({
+            key: k,
+            value: typeof v === 'object' ? JSON.stringify(v, null, 2) : String(v)
+          }))
         : [];
     });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

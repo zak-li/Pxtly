@@ -1,5 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { OptsService } from '../../services/opts.service';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { Opts, OptsService } from '../../services/opts.service';
 
 @Component({
   selector: 'app-options-panel',
@@ -43,7 +45,7 @@ import { OptsService } from '../../services/opts.service';
         <div class="opt-group opts-full-row">
           <div class="opt-label">RAG</div>
           <div class="seg">
-            <button id="ragOn" class="seg-btn" [class.active]="opts.ragEnabled" (click)="optsService.update({ragEnabled: true})">On</button>
+            <button id="ragOn"  class="seg-btn" [class.active]="opts.ragEnabled"  (click)="optsService.update({ragEnabled: true})">On</button>
             <button id="ragOff" class="seg-btn" [class.active]="!opts.ragEnabled" (click)="optsService.update({ragEnabled: false})">Off</button>
           </div>
         </div>
@@ -54,18 +56,24 @@ import { OptsService } from '../../services/opts.service';
     </div>
   `
 })
-export class OptionsPanelComponent implements OnInit {
+export class OptionsPanelComponent implements OnInit, OnDestroy {
   @Input() open = false;
-  opts: any = {};
+  opts!: Opts;
+  private destroy$ = new Subject<void>();
 
   constructor(public optsService: OptsService) {}
 
-  ngOnInit() {
-    this.optsService.opts$.subscribe(o => this.opts = o);
+  ngOnInit(): void {
+    this.optsService.opts$.pipe(takeUntil(this.destroy$)).subscribe(o => this.opts = o);
   }
 
-  update(key: string, event: Event) {
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  update(key: keyof Opts, event: Event): void {
     const val = parseFloat((event.target as HTMLInputElement).value);
-    this.optsService.update({ [key]: val } as any);
+    this.optsService.update({ [key]: val });
   }
 }

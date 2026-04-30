@@ -1,10 +1,11 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { CsrfInterceptor } from './interceptors/csrf.interceptor';
 
 import { ToastComponent } from './components/toast/toast.component';
 import { StatusLineComponent } from './components/status-line/status-line.component';
@@ -45,7 +46,10 @@ import { AgentPageComponent } from './pages/agent-page/agent-page.component';
     FormsModule,
     HttpClientModule,
   ],
-  providers: [],
+  providers: [
+    CsrfInterceptor,
+    { provide: HTTP_INTERCEPTORS, useExisting: CsrfInterceptor, multi: true },
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

@@ -1,35 +1,41 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+
+interface AgentStatus { ready?: boolean; model?: string; provider?: string; }
 
 @Injectable({ providedIn: 'root' })
 export class ApiStatusService implements OnDestroy {
   private base = environment.apiBase;
-  apiOk$ = new BehaviorSubject(false);
-  agentReady$ = new BehaviorSubject(false);
-  agentModel$ = new BehaviorSubject('');
-  agentProvider$ = new BehaviorSubject('');
-  private interval: any;
+  private intervalId: ReturnType<typeof setInterval>;
 
-  constructor() {
+  readonly apiOk$ = new BehaviorSubject(false);
+  readonly agentReady$ = new BehaviorSubject(false);
+  readonly agentModel$ = new BehaviorSubject('');
+  readonly agentProvider$ = new BehaviorSubject('');
+
+  constructor(private http: HttpClient) {
     this.poll();
-    this.interval = setInterval(() => this.poll(), 30000);
+    this.intervalId = setInterval(() => this.poll(), 30_000);
   }
 
-  private async poll() {
+  private async poll(): Promise<void> {
     try {
       const [health, status] = await Promise.all([
-        fetch(`${this.base}/health`, { credentials: 'include' }).then(r => r.ok),
-        fetch(`${this.base}/agent/status`, { credentials: 'include' }).then(r => r.ok ? r.json() : null)
+        this.http.get(`${this.base}/health`).toPromise().then(() => true).catch(() => false),
+        this.http.get<AgentStatus>(`${this.base}/agent/status`).toPromise().catch(() => null),
       ]);
-      this.apiOk$.next(health);
+      this.apiOk$.next(health as boolean);
       if (status) {
         this.agentReady$.next(status.ready ?? false);
         this.agentModel$.next(status.model ?? '');
         this.agentProvider$.next(status.provider ?? '');
       }
-    } catch { this.apiOk$.next(false); }
+    } catch {
+      this.apiOk$.next(false);
+    }
   }
 
-  ngOnDestroy() { clearInterval(this.interval); }
+  ngOnDestroy(): void { clearInterval(this.intervalId); }
 }

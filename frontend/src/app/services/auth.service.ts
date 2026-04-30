@@ -1,21 +1,23 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 
 export interface User { id: string; email: string; role: string; }
+export interface LoginResponse { mfa_required?: boolean; access_token?: string; }
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private base = environment.apiBase;
-  user$ = new BehaviorSubject<User | null>(null);
-  checked$ = new BehaviorSubject(false);
+
+  readonly user$ = new BehaviorSubject<User | null>(null);
+  readonly checked$ = new BehaviorSubject(false);
 
   constructor(private http: HttpClient) {}
 
-  async hydrate() {
+  async hydrate(): Promise<void> {
     try {
-      const user = await this.http.get<User>(`${this.base}/auth/me`, { withCredentials: true }).toPromise();
+      const user = await this.http.get<User>(`${this.base}/auth/me`).toPromise();
       this.user$.next(user ?? null);
     } catch {
       this.user$.next(null);
@@ -24,30 +26,23 @@ export class AuthService {
     }
   }
 
-  async login(username: string, password: string, mfaToken?: string): Promise<{ mfa_required?: boolean }> {
-    const csrf = this.getCsrf();
-    const res = await this.http.post<any>(`${this.base}/auth/login`, { username, password, mfa_token: mfaToken }, {
-      withCredentials: true,
-      headers: csrf ? { 'X-CSRF-Token': csrf } : {}
-    }).toPromise();
+  async login(username: string, password: string, mfaToken?: string): Promise<LoginResponse> {
+    const body: Record<string, string> = { username, password };
+    if (mfaToken) body['mfa_token'] = mfaToken;
+
+    const res = await this.http
+      .post<LoginResponse>(`${this.base}/auth/login`, body)
+      .toPromise();
+
     if (res?.mfa_required) return { mfa_required: true };
     await this.hydrate();
     return {};
   }
 
-  async logout() {
-    const csrf = this.getCsrf();
+  async logout(): Promise<void> {
     try {
-      await this.http.post(`${this.base}/auth/logout`, {}, {
-        withCredentials: true,
-        headers: csrf ? { 'X-CSRF-Token': csrf } : {}
-      }).toPromise();
+      await this.http.post(`${this.base}/auth/logout`, {}).toPromise();
     } catch {}
     this.user$.next(null);
-  }
-
-  private getCsrf(): string | null {
-    const match = document.cookie.match(/(?:^|;\s*)rwa_csrf=([^;]*)/);
-    return match ? decodeURIComponent(match[1]) : null;
   }
 }

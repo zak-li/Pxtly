@@ -1,6 +1,8 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { ChatService } from '../../services/chat.service';
-import { OptsService } from '../../services/opts.service';
+import { Opts, OptsService } from '../../services/opts.service';
 import { SuggestionsComponent } from '../suggestions/suggestions.component';
 
 @Component({
@@ -61,49 +63,54 @@ import { SuggestionsComponent } from '../suggestions/suggestions.component';
     </div>
   `
 })
-export class InputBarComponent implements OnInit {
+export class InputBarComponent implements OnInit, OnDestroy {
   @ViewChild('sug') sugRef!: SuggestionsComponent;
   text = '';
   busy = false;
-  opts: any = {};
+  opts!: Opts;
   optsPanelOpen = false;
+  private destroy$ = new Subject<void>();
 
   constructor(private chat: ChatService, private optsService: OptsService) {}
 
-  ngOnInit() {
-    this.chat.busy$.subscribe(b => this.busy = b);
-    this.optsService.opts$.subscribe(o => this.opts = o);
+  ngOnInit(): void {
+    this.chat.busy$.pipe(takeUntil(this.destroy$)).subscribe(b => this.busy = b);
+    this.optsService.opts$.pipe(takeUntil(this.destroy$)).subscribe(o => this.opts = o);
   }
 
-  send() {
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  send(): void {
     if (!this.text.trim() || this.busy) return;
     this.chat.send(this.text.trim(), this.optsService.snapshot);
     this.text = '';
   }
 
-  onEnter(event: Event) {
-    const ke = event as KeyboardEvent;
-    if (ke.shiftKey) return;
+  onEnter(event: Event): void {
+    if ((event as KeyboardEvent).shiftKey) return;
     event.preventDefault();
     this.send();
   }
 
-  onSuggestion(s: string) { this.text = s; }
+  onSuggestion(s: string): void { this.text = s; }
 
-  onArrowUp(event: Event) {
+  onArrowUp(event: Event): void {
     if (!this.text && !this.busy) {
       event.preventDefault();
       this.sugRef.toggle();
     }
   }
 
-  toggleStream(event: Event) {
+  toggleStream(event: Event): void {
     this.optsService.update({ stream: (event.target as HTMLInputElement).checked });
   }
 
-  toggleOpts() { this.optsPanelOpen = !this.optsPanelOpen; }
+  toggleOpts(): void { this.optsPanelOpen = !this.optsPanelOpen; }
 
-  autoResize(event: Event) {
+  autoResize(event: Event): void {
     const el = event.target as HTMLTextAreaElement;
     el.style.height = 'auto';
     el.style.height = Math.min(el.scrollHeight, 140) + 'px';
