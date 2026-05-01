@@ -55,7 +55,7 @@ async def _do_sync_fabric_state(asset_id: str) -> dict:
         if upd:
             sets = ", ".join([f"{k} = :{k}" for k in upd])
             upd["aid"] = asset_id
-            ustmt = text(f"UPDATE assets SET {sets} WHERE asset_id = :aid")  # noqa: S608
+            ustmt = text(f"UPDATE assets SET {sets} WHERE asset_id = :aid")  # noqa: S608  # nosec B608
             await session.execute(ustmt, upd)
             await session.commit()
 
