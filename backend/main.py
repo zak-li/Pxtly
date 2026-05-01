@@ -206,9 +206,8 @@ Instrumentator().instrument(app)
 setup_global_exception_handlers(app)
 app.include_router(api_router, prefix="/api/v1")
 
-_assets_dir = os.path.join(_dist, "assets")
-if os.path.isdir(_assets_dir):
-    app.mount("/assets", StaticFiles(directory=_assets_dir), name="spa-assets")
+if os.path.isdir(_dist):
+    app.mount("/", StaticFiles(directory=_dist, html=True), name="spa")
 
 
 @app.exception_handler(Exception)
@@ -312,15 +311,14 @@ async def get_metrics(request: Request) -> Response:
     return Response(generate_latest(), media_type=CONTENT_TYPE_LATEST)
 
 
-# SPA catch-all — must be last so API/health/metrics routes take priority.
-# We refuse to serve the SPA shell for /api/* paths so a typo in a client
-# request gets a proper 404 instead of an HTML page that the client can't
-# parse and that masks real routing bugs during fuzzing.
+# SPA catch-all — serves index.html for any Angular route not matched above.
+# Only reached when StaticFiles mount above didn't find a real file
+# (i.e. Angular Router paths like /agent).
 @app.get("/{full_path:path}", include_in_schema=False)
 async def serve_spa(full_path: str) -> Response:
     if full_path.startswith("api/") or full_path.startswith("health/"):
         return JSONResponse(status_code=404, content={"error": "NotFound"})
-    return FileResponse(
-        os.path.join(_dist, "index.html"),
-        headers={"Cache-Control": "no-cache, no-store, must-revalidate"},
-    )
+    index = os.path.join(_dist, "index.html")
+    if os.path.isfile(index):
+        return FileResponse(index, headers={"Cache-Control": "no-cache, no-store, must-revalidate"})
+    return JSONResponse(status_code=503, content={"error": "FrontendNotBuilt"})
