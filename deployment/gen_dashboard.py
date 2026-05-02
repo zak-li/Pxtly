@@ -4,12 +4,12 @@ GRAFANA = "http://10.10.10.150:3000"
 AUTH    = ("admin", "admin")
 DS      = "ffgx1hbr25a0wc"
 
-def ds_ref():
+def ds():
     return {"type": "prometheus", "uid": DS}
 
-def t(expr, legend="", ref="A"):
+def q(expr, legend="", ref="A"):
     return {
-        "datasource": ds_ref(),
+        "datasource": ds(),
         "expr": expr,
         "legendFormat": legend or "__auto",
         "refId": ref,
@@ -17,122 +17,182 @@ def t(expr, legend="", ref="A"):
         "range": True,
     }
 
-def row_panel(id, title, y):
-    return {
-        "id": id, "title": title, "type": "row",
-        "collapsed": False,
-        "gridPos": {"x": 0, "y": y, "w": 24, "h": 1}
-    }
-
-def stat(id, title, targets, gridPos, unit="short", color_mode="background",
-         graph_mode="area", thresholds=None, mappings=None, decimals=None,
-         fixed_color=None):
-    defaults = {
-        "unit": unit,
-        "color": {"mode": "thresholds"} if not fixed_color else {"mode": "fixed", "fixedColor": fixed_color},
-        "thresholds": thresholds or {"mode": "absolute", "steps": [{"color": "blue", "value": None}]},
-        "custom": {}
-    }
+def stat(pid, title, expr, x, y, w, h, unit="short", thresholds=None,
+         mappings=None, fixed=None, decimals=None, color_mode="value",
+         graph="area", text_mode="auto", legend=""):
+    field = {"unit": unit, "custom": {}}
+    if fixed:
+        field["color"] = {"mode": "fixed", "fixedColor": fixed}
+        field["thresholds"] = {"mode": "absolute", "steps": [{"color": fixed, "value": None}]}
+    else:
+        field["color"] = {"mode": "thresholds"}
+        field["thresholds"] = thresholds or {"mode": "absolute", "steps": [{"color": "blue", "value": None}]}
     if mappings:
-        defaults["mappings"] = mappings
+        field["mappings"] = mappings
     if decimals is not None:
-        defaults["decimals"] = decimals
+        field["decimals"] = decimals
     return {
-        "id": id, "title": title, "type": "stat",
-        "datasource": ds_ref(),
-        "targets": targets,
-        "gridPos": gridPos,
+        "id": pid, "title": title, "type": "stat",
+        "datasource": ds(),
+        "targets": [q(expr, legend or title, "A")],
+        "gridPos": {"x": x, "y": y, "w": w, "h": h},
         "options": {
             "reduceOptions": {"calcs": ["lastNotNull"]},
             "colorMode": color_mode,
-            "graphMode": graph_mode,
+            "graphMode": graph,
             "justifyMode": "center",
             "orientation": "auto",
-            "textMode": "auto"
+            "textMode": text_mode,
+            "wideLayout": True,
+            "showPercentChange": False,
+            "percentChangeColorMode": "standard"
         },
-        "fieldConfig": {"defaults": defaults, "overrides": []}
+        "fieldConfig": {"defaults": field, "overrides": []}
     }
 
-def timeseries(id, title, targets, gridPos, unit="short", fill=10,
-               grad="opacity", legend_calcs=None, overrides=None, line_width=2):
+def gauge(pid, title, expr, x, y, w, h, unit="percent", thresholds=None, max_v=100):
     return {
-        "id": id, "title": title, "type": "timeseries",
-        "datasource": ds_ref(),
-        "targets": targets,
-        "gridPos": gridPos,
+        "id": pid, "title": title, "type": "gauge",
+        "datasource": ds(),
+        "targets": [q(expr, title, "A")],
+        "gridPos": {"x": x, "y": y, "w": w, "h": h},
         "options": {
-            "tooltip": {"mode": "multi"},
+            "reduceOptions": {"calcs": ["lastNotNull"]},
+            "showThresholdLabels": False,
+            "showThresholdMarkers": True,
+            "orientation": "auto",
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "sizing": "auto"
+        },
+        "fieldConfig": {
+            "defaults": {
+                "unit": unit,
+                "min": 0,
+                "max": max_v,
+                "color": {"mode": "thresholds"},
+                "thresholds": thresholds or {"mode": "absolute", "steps": [
+                    {"color": "green", "value": None},
+                    {"color": "yellow", "value": 70},
+                    {"color": "red", "value": 90}
+                ]},
+                "custom": {}
+            },
+            "overrides": []
+        }
+    }
+
+def timeseries(pid, title, targets, x, y, w, h, unit="short", fill=18,
+               line_width=2, overrides=None, legend_mode="list", show_legend=True):
+    return {
+        "id": pid, "title": title, "type": "timeseries",
+        "datasource": ds(),
+        "targets": targets,
+        "gridPos": {"x": x, "y": y, "w": w, "h": h},
+        "options": {
+            "tooltip": {"mode": "multi", "sort": "desc"},
             "legend": {
-                "displayMode": "table" if legend_calcs else "list",
+                "displayMode": legend_mode if show_legend else "hidden",
                 "placement": "bottom",
-                "calcs": legend_calcs or []
+                "calcs": ["mean", "max"] if legend_mode == "table" else [],
+                "showLegend": show_legend
             }
         },
         "fieldConfig": {
             "defaults": {
                 "unit": unit,
                 "custom": {
+                    "drawStyle": "line",
+                    "lineInterpolation": "smooth",
                     "lineWidth": line_width,
                     "fillOpacity": fill,
-                    "gradientMode": grad,
-                    "spanNulls": True
+                    "gradientMode": "opacity",
+                    "spanNulls": True,
+                    "showPoints": "never",
+                    "pointSize": 5,
+                    "stacking": {"mode": "none", "group": "A"},
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "scaleDistribution": {"type": "linear"},
+                    "thresholdsStyle": {"mode": "off"}
                 }
             },
             "overrides": overrides or []
         }
     }
 
-def bargauge(id, title, targets, gridPos, unit="short", orientation="horizontal", display_mode="gradient"):
-    return {
-        "id": id, "title": title, "type": "bargauge",
-        "datasource": ds_ref(),
-        "targets": targets,
-        "gridPos": gridPos,
-        "options": {
-            "reduceOptions": {"calcs": ["lastNotNull"]},
-            "orientation": orientation,
-            "displayMode": display_mode,
-            "valueMode": "color",
-            "minVizHeight": 10,
-            "minVizWidth": 0,
-            "text": {}
-        },
-        "fieldConfig": {
-            "defaults": {
-                "unit": unit,
-                "color": {"mode": "palette-classic"},
-                "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": None}]}
-            },
-            "overrides": []
-        }
-    }
-
 panels = []
 pid = 1
 
-# ─── Row 1: Service Health ─────────────────────────────────────────────────────
+# ─── Row 1: Top KPI strip (6 hero cards, h=5) ─────────────────────────────────
 y = 0
-panels.append(row_panel(pid, "Service Health", y)); pid += 1
-y += 1
 
+panels.append(stat(pid, "Services Up", 'sum(up)', 0, y, 4, 5,
+    unit="short", color_mode="background",
+    thresholds={"mode": "absolute", "steps": [
+        {"color": "red", "value": None},
+        {"color": "yellow", "value": 3},
+        {"color": "green", "value": 5}
+    ]})); pid += 1
+
+panels.append(stat(pid, "Request Rate", 'sum(rate(http_requests_total[2m]))', 4, y, 4, 5,
+    unit="reqps", color_mode="value", fixed="blue", graph="area",
+    decimals=1)); pid += 1
+
+panels.append(stat(pid, "Latency p95",
+    'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[2m])) by (le))',
+    8, y, 4, 5, unit="s", color_mode="background",
+    thresholds={"mode": "absolute", "steps": [
+        {"color": "green", "value": None},
+        {"color": "yellow", "value": 0.5},
+        {"color": "red", "value": 1.5}
+    ]})); pid += 1
+
+panels.append(stat(pid, "Error Rate",
+    'sum(rate(http_requests_total{status=~"5.."}[2m])) / clamp_min(sum(rate(http_requests_total[2m])), 0.001) * 100',
+    12, y, 4, 5, unit="percent", color_mode="background",
+    thresholds={"mode": "absolute", "steps": [
+        {"color": "green", "value": None},
+        {"color": "yellow", "value": 1},
+        {"color": "red", "value": 5}
+    ]})); pid += 1
+
+panels.append(stat(pid, "CPU",
+    '100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100)',
+    16, y, 4, 5, unit="percent", color_mode="background",
+    thresholds={"mode": "absolute", "steps": [
+        {"color": "green", "value": None},
+        {"color": "yellow", "value": 70},
+        {"color": "red", "value": 90}
+    ]})); pid += 1
+
+panels.append(stat(pid, "Memory",
+    '(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100',
+    20, y, 4, 5, unit="percent", color_mode="background",
+    thresholds={"mode": "absolute", "steps": [
+        {"color": "green", "value": None},
+        {"color": "yellow", "value": 75},
+        {"color": "red", "value": 90}
+    ]})); pid += 1
+y += 5
+
+# ─── Row 2: Service Availability timeline (full width, h=5) ────────────────────
 panels.append({
     "id": pid, "title": "Service Availability",
     "type": "state-timeline",
-    "datasource": ds_ref(),
+    "datasource": ds(),
     "targets": [
-        t('up{job="node-exporter"}', "System", "A"),
-        t('up{job="rwa-api"}', "RWA API", "B"),
-        t('up{job="postgres"}', "PostgreSQL", "C"),
-        t('up{job="redis"}', "Redis", "D"),
-        t('up{job="prometheus"}', "Prometheus", "E"),
+        q('up{job="node-exporter"}', "System", "A"),
+        q('up{job="rwa-api"}', "RWA API", "B"),
+        q('up{job="postgres"}', "PostgreSQL", "C"),
+        q('up{job="redis"}', "Redis", "D"),
+        q('up{job="prometheus"}', "Prometheus", "E"),
     ],
-    "gridPos": {"x": 0, "y": y, "w": 24, "h": 6},
+    "gridPos": {"x": 0, "y": y, "w": 24, "h": 5},
     "options": {
-        "mergeValues": True,
-        "showValue": "never",
-        "alignValue": "center",
-        "rowHeight": 0.85,
-        "legend": {"displayMode": "list", "placement": "bottom"},
+        "mergeValues": True, "showValue": "never",
+        "alignValue": "center", "rowHeight": 0.9,
+        "legend": {"displayMode": "list", "placement": "bottom", "showLegend": True},
         "tooltip": {"mode": "single"}
     },
     "fieldConfig": {
@@ -150,467 +210,145 @@ panels.append({
         },
         "overrides": []
     }
-})
-pid += 1
-y += 6
+}); pid += 1
+y += 5
 
-# ─── Row 2: System Resources ───────────────────────────────────────────────────
-panels.append(row_panel(pid, "System Resources", y)); pid += 1
-y += 1
-
-GREEN_YELLOW_RED = {"mode": "absolute", "steps": [
-    {"color": "green", "value": None},
-    {"color": "yellow", "value": 70},
-    {"color": "red", "value": 90}
-]}
-
-panels.append(stat(pid, "CPU Usage",
-    [t('100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100)', "CPU %")],
-    {"x": 0, "y": y, "w": 4, "h": 4},
-    unit="percent", thresholds=GREEN_YELLOW_RED))
-pid += 1
-
-panels.append(stat(pid, "Memory Usage",
-    [t('(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100', "RAM %")],
-    {"x": 4, "y": y, "w": 4, "h": 4},
-    unit="percent",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "green", "value": None},
-        {"color": "yellow", "value": 75},
-        {"color": "red", "value": 90}
-    ]}))
-pid += 1
-
-panels.append(stat(pid, "Disk Usage",
-    [t('100 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} * 100)', "Disk %")],
-    {"x": 8, "y": y, "w": 4, "h": 4},
-    unit="percent",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "green", "value": None},
-        {"color": "yellow", "value": 70},
-        {"color": "red", "value": 85}
-    ]}))
-pid += 1
-
-panels.append(stat(pid, "Load Average (1m)",
-    [t('node_load1', "Load")],
-    {"x": 12, "y": y, "w": 4, "h": 4},
-    unit="short",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "green", "value": None},
-        {"color": "yellow", "value": 2},
-        {"color": "red", "value": 4}
-    ]}))
-pid += 1
-
-panels.append(stat(pid, "Network In",
-    [t('sum(rate(node_network_receive_bytes_total{device!~"lo|docker.*|br.*|veth.*"}[2m]))', "In")],
-    {"x": 16, "y": y, "w": 4, "h": 4},
-    unit="Bps", color_mode="value", fixed_color="blue",
-    thresholds={"mode": "absolute", "steps": [{"color": "blue", "value": None}]}))
-pid += 1
-
-panels.append(stat(pid, "Network Out",
-    [t('sum(rate(node_network_transmit_bytes_total{device!~"lo|docker.*|br.*|veth.*"}[2m]))', "Out")],
-    {"x": 20, "y": y, "w": 4, "h": 4},
-    unit="Bps", color_mode="value", fixed_color="orange",
-    thresholds={"mode": "absolute", "steps": [{"color": "orange", "value": None}]}))
-pid += 1
-y += 4
-
-panels.append(timeseries(pid, "CPU Mode Breakdown",
-    [
-        t('avg(rate(node_cpu_seconds_total{mode="user"}[2m])) * 100', "User", "A"),
-        t('avg(rate(node_cpu_seconds_total{mode="system"}[2m])) * 100', "System", "B"),
-        t('avg(rate(node_cpu_seconds_total{mode="iowait"}[2m])) * 100', "I/O Wait", "C"),
-    ],
-    {"x": 0, "y": y, "w": 12, "h": 8},
-    unit="percent", fill=12, grad="opacity",
-    legend_calcs=["mean", "max"]))
-pid += 1
-
-panels.append(timeseries(pid, "Memory Breakdown",
-    [
-        t('node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes', "Used", "A"),
-        t('node_memory_Buffers_bytes + node_memory_Cached_bytes', "Cache and Buffers", "B"),
-        t('node_memory_MemAvailable_bytes', "Available", "C"),
-    ],
-    {"x": 12, "y": y, "w": 12, "h": 8},
-    unit="bytes", fill=15, grad="opacity",
-    legend_calcs=["mean", "last"]))
-pid += 1
-y += 8
-
-panels.append(timeseries(pid, "Disk I/O",
-    [
-        t('rate(node_disk_read_bytes_total[2m])', "Read", "A"),
-        t('rate(node_disk_written_bytes_total[2m])', "Write", "B"),
-    ],
-    {"x": 0, "y": y, "w": 12, "h": 7},
-    unit="Bps", fill=8, grad="opacity",
+# ─── Row 3: API Traffic & Latency (h=10) ───────────────────────────────────────
+panels.append(timeseries(pid, "Request Rate",
+    [q('sum(rate(http_requests_total[2m]))', "Total", "A")],
+    0, y, 12, 10, unit="reqps", fill=25, line_width=3, show_legend=False,
     overrides=[
-        {"matcher": {"id": "byName", "options": "Write"}, "properties": [
-            {"id": "color", "value": {"mode": "fixed", "fixedColor": "orange"}}
+        {"matcher": {"id": "byName", "options": "Total"}, "properties": [
+            {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}
         ]}
-    ]))
-pid += 1
-
-panels.append(timeseries(pid, "Network Throughput",
-    [
-        t('sum(rate(node_network_receive_bytes_total{device!~"lo|docker.*|br.*|veth.*"}[2m]))', "Receive", "A"),
-        t('sum(rate(node_network_transmit_bytes_total{device!~"lo|docker.*|br.*|veth.*"}[2m]))', "Transmit", "B"),
-    ],
-    {"x": 12, "y": y, "w": 12, "h": 7},
-    unit="Bps", fill=8, grad="opacity"))
-pid += 1
-y += 7
-
-# ─── Row 3: API Performance ────────────────────────────────────────────────────
-panels.append(row_panel(pid, "API Performance", y)); pid += 1
-y += 1
-
-panels.append(stat(pid, "Request Rate",
-    [t('sum(rate(http_requests_total[2m]))', "req/s")],
-    {"x": 0, "y": y, "w": 4, "h": 4},
-    unit="reqps", color_mode="value", fixed_color="blue",
-    thresholds={"mode": "absolute", "steps": [{"color": "blue", "value": None}]}))
-pid += 1
-
-panels.append(stat(pid, "Error Rate",
-    [t('sum(rate(http_requests_total{status=~"5.."}[2m])) / sum(rate(http_requests_total[2m])) * 100', "Error %")],
-    {"x": 4, "y": y, "w": 4, "h": 4},
-    unit="percent",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "green", "value": None},
-        {"color": "yellow", "value": 1},
-        {"color": "red", "value": 5}
-    ]}))
-pid += 1
-
-panels.append(stat(pid, "Latency p50",
-    [t('histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[2m])) by (le))', "p50")],
-    {"x": 8, "y": y, "w": 4, "h": 4},
-    unit="s",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "green", "value": None},
-        {"color": "yellow", "value": 0.5},
-        {"color": "red", "value": 1}
-    ]}))
-pid += 1
-
-panels.append(stat(pid, "Latency p95",
-    [t('histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[2m])) by (le))', "p95")],
-    {"x": 12, "y": y, "w": 4, "h": 4},
-    unit="s",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "green", "value": None},
-        {"color": "yellow", "value": 1},
-        {"color": "red", "value": 2}
-    ]}))
-pid += 1
-
-panels.append(stat(pid, "Latency p99",
-    [t('histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[2m])) by (le))', "p99")],
-    {"x": 16, "y": y, "w": 4, "h": 4},
-    unit="s",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "green", "value": None},
-        {"color": "yellow", "value": 2},
-        {"color": "red", "value": 5}
-    ]}))
-pid += 1
-
-panels.append(stat(pid, "Total Requests (1h)",
-    [t('sum(increase(http_requests_total[1h]))', "1h total")],
-    {"x": 20, "y": y, "w": 4, "h": 4},
-    unit="short", color_mode="value", fixed_color="purple",
-    thresholds={"mode": "absolute", "steps": [{"color": "purple", "value": None}]}))
-pid += 1
-y += 4
-
-panels.append(timeseries(pid, "Request Rate by Endpoint",
-    [t('sum by(handler) (rate(http_requests_total[2m]))', "{{handler}}", "A")],
-    {"x": 0, "y": y, "w": 12, "h": 8},
-    unit="reqps", fill=5, grad="none",
-    legend_calcs=["mean", "max"]))
-pid += 1
+    ])); pid += 1
 
 panels.append({
-    "id": pid, "title": "Request Latency Distribution",
+    "id": pid, "title": "Latency Distribution",
     "type": "heatmap",
-    "datasource": ds_ref(),
-    "targets": [t('sum(rate(http_request_duration_seconds_bucket[2m])) by (le)', "{{le}}", "A")],
-    "gridPos": {"x": 12, "y": y, "w": 12, "h": 8},
+    "datasource": ds(),
+    "targets": [q('sum(rate(http_request_duration_seconds_bucket[2m])) by (le)', "{{le}}", "A")],
+    "gridPos": {"x": 12, "y": y, "w": 12, "h": 10},
     "options": {
         "calculate": False,
-        "yAxis": {"unit": "s"},
-        "color": {"scheme": "Oranges", "mode": "scheme", "exponent": 0.5},
+        "yAxis": {"unit": "s", "decimals": 2},
+        "color": {"scheme": "Spectral", "mode": "scheme", "exponent": 0.5, "reverse": True, "steps": 64},
         "tooltip": {"show": True, "yHistogram": False},
-        "legend": {"show": True}
+        "legend": {"show": True},
+        "rowsFrame": {"layout": "auto"},
+        "cellGap": 1,
+        "filterValues": {"le": 1e-9}
     },
     "fieldConfig": {
-        "defaults": {"custom": {"scaleDistribution": {"type": "log", "log": 2}}},
+        "defaults": {"custom": {"scaleDistribution": {"type": "log", "log": 2}, "hideFrom": {"tooltip": False, "viz": False, "legend": False}}},
         "overrides": []
     }
-})
-pid += 1
+}); pid += 1
+y += 10
+
+# ─── Row 4: System resources (h=8) ─────────────────────────────────────────────
+panels.append(timeseries(pid, "CPU and Memory",
+    [
+        q('100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100)', "CPU %", "A"),
+        q('(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100', "Memory %", "B"),
+    ],
+    0, y, 12, 8, unit="percent", fill=20, line_width=2,
+    legend_mode="table",
+    overrides=[
+        {"matcher": {"id": "byName", "options": "CPU %"}, "properties": [
+            {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}}
+        ]},
+        {"matcher": {"id": "byName", "options": "Memory %"}, "properties": [
+            {"id": "color", "value": {"mode": "fixed", "fixedColor": "purple"}}
+        ]},
+    ])); pid += 1
+
+panels.append(timeseries(pid, "Disk and Network",
+    [
+        q('sum(rate(node_disk_read_bytes_total[2m]))', "Disk Read", "A"),
+        q('sum(rate(node_disk_written_bytes_total[2m]))', "Disk Write", "B"),
+        q('sum(rate(node_network_receive_bytes_total{device!~"lo|docker.*|br.*|veth.*"}[2m]))', "Net In", "C"),
+        q('sum(rate(node_network_transmit_bytes_total{device!~"lo|docker.*|br.*|veth.*"}[2m]))', "Net Out", "D"),
+    ],
+    12, y, 12, 8, unit="Bps", fill=12, line_width=2,
+    legend_mode="table")); pid += 1
 y += 8
 
-panels.append(timeseries(pid, "Latency Percentiles Over Time",
+# ─── Row 5: Data tier (h=8) ────────────────────────────────────────────────────
+panels.append(timeseries(pid, "PostgreSQL Activity",
     [
-        t('histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[2m])) by (le))', "p50", "A"),
-        t('histogram_quantile(0.90, sum(rate(http_request_duration_seconds_bucket[2m])) by (le))', "p90", "B"),
-        t('histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket[2m])) by (le))', "p99", "C"),
+        q('sum(rate(pg_stat_database_xact_commit[2m]))', "Commits/s", "A"),
+        q('sum(rate(pg_stat_database_xact_rollback[2m]))', "Rollbacks/s", "B"),
+        q('pg_stat_activity_count{state="active"}', "Active Connections", "C"),
     ],
-    {"x": 0, "y": y, "w": 12, "h": 7},
-    unit="s", fill=10, grad="opacity",
+    0, y, 12, 8, unit="short", fill=18, line_width=2,
+    legend_mode="table",
     overrides=[
-        {"matcher": {"id": "byName", "options": "p50"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}]},
-        {"matcher": {"id": "byName", "options": "p90"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "orange"}}]},
-        {"matcher": {"id": "byName", "options": "p99"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]},
-    ]))
-pid += 1
-
-panels.append(bargauge(pid, "Requests by HTTP Status",
-    [t('sum by(status) (rate(http_requests_total[5m]))', "{{status}}", "A")],
-    {"x": 12, "y": y, "w": 12, "h": 7},
-    unit="reqps", orientation="horizontal", display_mode="gradient"))
-pid += 1
-y += 7
-
-# ─── Row 4: PostgreSQL ─────────────────────────────────────────────────────────
-panels.append(row_panel(pid, "PostgreSQL", y)); pid += 1
-y += 1
-
-PG_UP_MAP = [{"type": "value", "options": {
-    "0": {"text": "DOWN", "color": "red", "index": 0},
-    "1": {"text": "UP", "color": "green", "index": 1}
-}}]
-PG_UP_THRESH = {"mode": "absolute", "steps": [{"color": "red", "value": None}, {"color": "green", "value": 1}]}
-
-panels.append(stat(pid, "Status",
-    [t('pg_up', "PG")],
-    {"x": 0, "y": y, "w": 3, "h": 4},
-    graph_mode="none", mappings=PG_UP_MAP,
-    thresholds=PG_UP_THRESH))
-pid += 1
-
-panels.append(stat(pid, "Active Connections",
-    [t('pg_stat_activity_count{state="active"}', "Active")],
-    {"x": 3, "y": y, "w": 3, "h": 4},
-    unit="short",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "green", "value": None},
-        {"color": "yellow", "value": 50},
-        {"color": "red", "value": 100}
-    ]}))
-pid += 1
-
-panels.append(stat(pid, "Database Size",
-    [t('sum(pg_database_size_bytes)', "Size")],
-    {"x": 6, "y": y, "w": 3, "h": 4},
-    unit="bytes", color_mode="value", fixed_color="blue",
-    thresholds={"mode": "absolute", "steps": [{"color": "blue", "value": None}]}))
-pid += 1
-
-panels.append(stat(pid, "Cache Hit Ratio",
-    [t('sum(pg_stat_database_blks_hit) / (sum(pg_stat_database_blks_hit) + sum(pg_stat_database_blks_read) + 1) * 100', "Hit %")],
-    {"x": 9, "y": y, "w": 3, "h": 4},
-    unit="percent",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "red", "value": None},
-        {"color": "yellow", "value": 80},
-        {"color": "green", "value": 95}
-    ]}))
-pid += 1
-
-panels.append(timeseries(pid, "Transaction Rate",
-    [
-        t('sum(rate(pg_stat_database_xact_commit[2m]))', "Commits", "A"),
-        t('sum(rate(pg_stat_database_xact_rollback[2m]))', "Rollbacks", "B"),
-    ],
-    {"x": 12, "y": y, "w": 12, "h": 8},
-    unit="ops", fill=10, grad="opacity",
-    legend_calcs=["mean", "max"],
-    overrides=[
-        {"matcher": {"id": "byName", "options": "Rollbacks"}, "properties": [
-            {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
-        ]}
-    ]))
-pid += 1
-y += 4
-
-panels.append(timeseries(pid, "Connection States",
-    [
-        t('pg_stat_activity_count{state="active"}', "Active", "A"),
-        t('pg_stat_activity_count{state="idle"}', "Idle", "B"),
-        t('pg_stat_activity_count{state="idle in transaction"}', "Idle in Transaction", "C"),
-    ],
-    {"x": 0, "y": y, "w": 12, "h": 7},
-    unit="short", fill=8, grad="opacity"))
-pid += 1
-
-panels.append(timeseries(pid, "Row Operations",
-    [
-        t('sum(rate(pg_stat_database_tup_fetched[2m]))', "Fetched", "A"),
-        t('sum(rate(pg_stat_database_tup_inserted[2m]))', "Inserted", "B"),
-        t('sum(rate(pg_stat_database_tup_updated[2m]))', "Updated", "C"),
-        t('sum(rate(pg_stat_database_tup_deleted[2m]))', "Deleted", "D"),
-    ],
-    {"x": 12, "y": y, "w": 12, "h": 7},
-    unit="ops", fill=5, grad="none",
-    legend_calcs=["mean"],
-    overrides=[
-        {"matcher": {"id": "byName", "options": "Deleted"}, "properties": [
-            {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
-        ]}
-    ]))
-pid += 1
-y += 7
-
-# ─── Row 5: Redis ──────────────────────────────────────────────────────────────
-panels.append(row_panel(pid, "Redis", y)); pid += 1
-y += 1
-
-REDIS_UP_MAP = [{"type": "value", "options": {
-    "0": {"text": "DOWN", "color": "red", "index": 0},
-    "1": {"text": "UP", "color": "green", "index": 1}
-}}]
-REDIS_UP_THRESH = {"mode": "absolute", "steps": [{"color": "red", "value": None}, {"color": "green", "value": 1}]}
-
-panels.append(stat(pid, "Status",
-    [t('redis_up', "Redis")],
-    {"x": 0, "y": y, "w": 3, "h": 4},
-    graph_mode="none", mappings=REDIS_UP_MAP,
-    thresholds=REDIS_UP_THRESH))
-pid += 1
-
-panels.append(stat(pid, "Memory Used",
-    [t('redis_memory_used_bytes', "Memory")],
-    {"x": 3, "y": y, "w": 3, "h": 4},
-    unit="bytes", color_mode="value", fixed_color="orange",
-    thresholds={"mode": "absolute", "steps": [{"color": "orange", "value": None}]}))
-pid += 1
-
-panels.append(stat(pid, "Connected Clients",
-    [t('redis_connected_clients', "Clients")],
-    {"x": 6, "y": y, "w": 3, "h": 4},
-    unit="short",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "green", "value": None},
-        {"color": "yellow", "value": 100},
-        {"color": "red", "value": 500}
-    ]}))
-pid += 1
-
-panels.append(stat(pid, "Cache Hit Rate",
-    [t('redis_keyspace_hits_total / (redis_keyspace_hits_total + redis_keyspace_misses_total + 1) * 100', "Hit %")],
-    {"x": 9, "y": y, "w": 3, "h": 4},
-    unit="percent",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "red", "value": None},
-        {"color": "yellow", "value": 70},
-        {"color": "green", "value": 90}
-    ]}))
-pid += 1
-
-panels.append(timeseries(pid, "Commands Per Second",
-    [t('rate(redis_commands_total[2m])', "{{cmd}}", "A")],
-    {"x": 12, "y": y, "w": 12, "h": 8},
-    unit="ops", fill=5, grad="none",
-    legend_calcs=["mean", "max"]))
-pid += 1
-y += 4
-
-panels.append(timeseries(pid, "Memory Over Time",
-    [
-        t('redis_memory_used_bytes', "Used", "A"),
-        t('redis_memory_peak_bytes', "Peak", "B"),
-    ],
-    {"x": 0, "y": y, "w": 12, "h": 7},
-    unit="bytes", fill=12, grad="opacity",
-    overrides=[
-        {"matcher": {"id": "byName", "options": "Peak"}, "properties": [
-            {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}},
-            {"id": "custom.lineStyle", "value": {"dash": [8, 8], "fill": "dash"}},
-            {"id": "custom.fillOpacity", "value": 0}
-        ]}
-    ]))
-pid += 1
-
-panels.append(timeseries(pid, "Cache Hits vs Misses",
-    [
-        t('rate(redis_keyspace_hits_total[2m])', "Hits", "A"),
-        t('rate(redis_keyspace_misses_total[2m])', "Misses", "B"),
-    ],
-    {"x": 12, "y": y, "w": 12, "h": 7},
-    unit="ops", fill=10, grad="opacity",
-    overrides=[
-        {"matcher": {"id": "byName", "options": "Hits"}, "properties": [
+        {"matcher": {"id": "byName", "options": "Commits/s"}, "properties": [
             {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}
         ]},
-        {"matcher": {"id": "byName", "options": "Misses"}, "properties": [
+        {"matcher": {"id": "byName", "options": "Rollbacks/s"}, "properties": [
             {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+        ]},
+        {"matcher": {"id": "byName", "options": "Active Connections"}, "properties": [
+            {"id": "color", "value": {"mode": "fixed", "fixedColor": "blue"}},
+            {"id": "custom.axisPlacement", "value": "right"}
         ]}
-    ]))
-pid += 1
-y += 7
+    ])); pid += 1
 
-# ─── Row 6: RWA Business Metrics ──────────────────────────────────────────────
-panels.append(row_panel(pid, "RWA Business Metrics", y)); pid += 1
-y += 1
+panels.append(timeseries(pid, "Redis Activity",
+    [
+        q('rate(redis_keyspace_hits_total[2m])', "Hits/s", "A"),
+        q('rate(redis_keyspace_misses_total[2m])', "Misses/s", "B"),
+        q('redis_memory_used_bytes', "Memory Used", "C"),
+    ],
+    12, y, 12, 8, unit="short", fill=18, line_width=2,
+    legend_mode="table",
+    overrides=[
+        {"matcher": {"id": "byName", "options": "Hits/s"}, "properties": [
+            {"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}
+        ]},
+        {"matcher": {"id": "byName", "options": "Misses/s"}, "properties": [
+            {"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}
+        ]},
+        {"matcher": {"id": "byName", "options": "Memory Used"}, "properties": [
+            {"id": "color", "value": {"mode": "fixed", "fixedColor": "orange"}},
+            {"id": "unit", "value": "bytes"},
+            {"id": "custom.axisPlacement", "value": "right"}
+        ]}
+    ])); pid += 1
+y += 8
 
-panels.append(stat(pid, "Total Transactions",
-    [t('sum(rwa_transactions_total)', "Transactions")],
-    {"x": 0, "y": y, "w": 4, "h": 4},
-    unit="short", color_mode="value", fixed_color="purple",
-    thresholds={"mode": "absolute", "steps": [{"color": "purple", "value": None}]}))
-pid += 1
+# ─── Row 6: Business KPIs (h=5) ───────────────────────────────────────────────
+panels.append(stat(pid, "Total Transactions", 'sum(rwa_transactions_total)',
+    0, y, 5, 5, unit="short", color_mode="value", fixed="purple", graph="area")); pid += 1
 
-panels.append(stat(pid, "Average AML Score",
-    [t('avg(rwa_aml_score_avg)', "AML Score")],
-    {"x": 4, "y": y, "w": 4, "h": 4},
-    unit="percentunit", decimals=2,
+panels.append(stat(pid, "Average AML Score", 'avg(rwa_aml_score_avg)',
+    5, y, 5, 5, unit="percentunit", decimals=2, color_mode="background",
     thresholds={"mode": "absolute", "steps": [
         {"color": "green", "value": None},
         {"color": "yellow", "value": 0.5},
         {"color": "red", "value": 0.8}
-    ]}))
-pid += 1
+    ]})); pid += 1
 
-panels.append(stat(pid, "KYC Expiring Soon",
-    [t('sum(rwa_kyc_expiring_count)', "KYC")],
-    {"x": 8, "y": y, "w": 4, "h": 4},
-    unit="short",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "green", "value": None},
-        {"color": "yellow", "value": 5},
-        {"color": "red", "value": 20}
-    ]}))
-pid += 1
-
-panels.append(stat(pid, "Compliance Blocks",
-    [t('sum(rwa_compliance_blocks_total)', "Blocks")],
-    {"x": 12, "y": y, "w": 4, "h": 4},
-    unit="short",
+panels.append(stat(pid, "Compliance Blocks", 'sum(rwa_compliance_blocks_total)',
+    10, y, 5, 5, unit="short", color_mode="background",
     thresholds={"mode": "absolute", "steps": [
         {"color": "green", "value": None},
         {"color": "yellow", "value": 10},
         {"color": "red", "value": 50}
-    ]}))
-pid += 1
+    ]})); pid += 1
 
-panels.append(stat(pid, "Celery Tasks Total",
-    [t('sum(rwa_celery_tasks_total)', "Tasks")],
-    {"x": 16, "y": y, "w": 4, "h": 4},
-    unit="short", color_mode="value", fixed_color="blue",
-    thresholds={"mode": "absolute", "steps": [{"color": "blue", "value": None}]}))
-pid += 1
+panels.append(stat(pid, "KYC Expiring", 'sum(rwa_kyc_expiring_count)',
+    15, y, 5, 5, unit="short", color_mode="background",
+    thresholds={"mode": "absolute", "steps": [
+        {"color": "green", "value": None},
+        {"color": "yellow", "value": 5},
+        {"color": "red", "value": 20}
+    ]})); pid += 1
 
-panels.append(stat(pid, "Circuit Breaker",
-    [t('max(rwa_circuit_breaker_state)', "State")],
-    {"x": 20, "y": y, "w": 4, "h": 4},
-    graph_mode="none",
+panels.append(stat(pid, "Circuit Breaker", 'max(rwa_circuit_breaker_state)',
+    20, y, 4, 5, color_mode="background", graph="none",
     mappings=[{"type": "value", "options": {
         "0": {"text": "CLOSED", "color": "green", "index": 0},
         "1": {"text": "OPEN", "color": "red", "index": 1},
@@ -619,131 +357,29 @@ panels.append(stat(pid, "Circuit Breaker",
     thresholds={"mode": "absolute", "steps": [
         {"color": "green", "value": None},
         {"color": "red", "value": 1}
-    ]}))
-pid += 1
-y += 4
+    ]})); pid += 1
+y += 5
 
-panels.append(bargauge(pid, "Assets by Status",
-    [t('rwa_assets_by_status', "{{status}}", "A")],
-    {"x": 0, "y": y, "w": 8, "h": 8},
-    unit="short", orientation="horizontal", display_mode="gradient"))
-pid += 1
-
-panels.append(timeseries(pid, "Transaction Rate Over Time",
-    [t('rate(rwa_transactions_total[2m])', "{{type}}", "A")],
-    {"x": 8, "y": y, "w": 16, "h": 8},
-    unit="ops", fill=15, grad="opacity",
-    legend_calcs=["mean", "max"]))
-pid += 1
-y += 8
-
-panels.append(timeseries(pid, "Compliance Block Rate",
-    [t('rate(rwa_compliance_blocks_total[5m])', "{{reason}}", "A")],
-    {"x": 0, "y": y, "w": 12, "h": 7},
-    unit="ops", fill=10, grad="opacity"))
-pid += 1
+# ─── Row 7: Business trends (h=8) ─────────────────────────────────────────────
+panels.append(timeseries(pid, "Transaction Rate",
+    [q('rate(rwa_transactions_total[2m])', "{{type}}", "A")],
+    0, y, 12, 8, unit="ops", fill=25, line_width=3,
+    legend_mode="table")); pid += 1
 
 panels.append(timeseries(pid, "AML Score Trend",
-    [t('avg(rwa_aml_score_avg)', "AML Score", "A")],
-    {"x": 12, "y": y, "w": 12, "h": 7},
-    unit="percentunit", fill=20, grad="opacity",
+    [q('avg(rwa_aml_score_avg)', "AML Score", "A")],
+    12, y, 12, 8, unit="percentunit", fill=30, line_width=3, show_legend=False,
     overrides=[
         {"matcher": {"id": "byName", "options": "AML Score"}, "properties": [
-            {"id": "custom.thresholdsStyle", "value": {"mode": "area"}},
-            {"id": "thresholds", "value": {"mode": "absolute", "steps": [
-                {"color": "green", "value": None},
-                {"color": "yellow", "value": 0.5},
-                {"color": "red", "value": 0.8}
-            ]}}
+            {"id": "color", "value": {"mode": "fixed", "fixedColor": "purple"}},
+            {"id": "min", "value": 0},
+            {"id": "max", "value": 1}
         ]}
-    ]))
-pid += 1
-y += 7
+    ])); pid += 1
 
-# ─── Row 7: Blockchain and Infrastructure ─────────────────────────────────────
-panels.append(row_panel(pid, "Blockchain and Infrastructure", y)); pid += 1
-y += 1
-
-panels.append(stat(pid, "Chaincode Duration p50",
-    [t('histogram_quantile(0.50, sum(rate(rwa_chaincode_duration_seconds_bucket[2m])) by (le))', "p50")],
-    {"x": 0, "y": y, "w": 4, "h": 4},
-    unit="s",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "green", "value": None},
-        {"color": "yellow", "value": 0.5},
-        {"color": "red", "value": 1}
-    ]}))
-pid += 1
-
-panels.append(stat(pid, "Chaincode Duration p95",
-    [t('histogram_quantile(0.95, sum(rate(rwa_chaincode_duration_seconds_bucket[2m])) by (le))', "p95")],
-    {"x": 4, "y": y, "w": 4, "h": 4},
-    unit="s",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "green", "value": None},
-        {"color": "yellow", "value": 1},
-        {"color": "red", "value": 3}
-    ]}))
-pid += 1
-
-panels.append(stat(pid, "Celery Task Rate",
-    [t('sum(rate(rwa_celery_tasks_total[5m]))', "tasks/s")],
-    {"x": 8, "y": y, "w": 4, "h": 4},
-    unit="ops", color_mode="value", fixed_color="blue",
-    thresholds={"mode": "absolute", "steps": [{"color": "blue", "value": None}]}))
-pid += 1
-
-panels.append(stat(pid, "TSDB Head Series",
-    [t('prometheus_tsdb_head_series', "Series")],
-    {"x": 12, "y": y, "w": 4, "h": 4},
-    unit="short", color_mode="value", fixed_color="gray",
-    thresholds={"mode": "absolute", "steps": [{"color": "gray", "value": None}]}))
-pid += 1
-
-panels.append(stat(pid, "Samples Appended Rate",
-    [t('rate(prometheus_tsdb_head_samples_appended_total[2m])', "samples/s")],
-    {"x": 16, "y": y, "w": 4, "h": 4},
-    unit="short", color_mode="value", fixed_color="gray",
-    thresholds={"mode": "absolute", "steps": [{"color": "gray", "value": None}]}))
-pid += 1
-
-panels.append(stat(pid, "Active Scrape Targets",
-    [t('sum(up)', "Up")],
-    {"x": 20, "y": y, "w": 4, "h": 4},
-    unit="short",
-    thresholds={"mode": "absolute", "steps": [
-        {"color": "red", "value": None},
-        {"color": "yellow", "value": 3},
-        {"color": "green", "value": 5}
-    ]}))
-pid += 1
-y += 4
-
-panels.append(timeseries(pid, "Chaincode Duration Percentiles",
-    [
-        t('histogram_quantile(0.50, sum(rate(rwa_chaincode_duration_seconds_bucket[2m])) by (le))', "p50", "A"),
-        t('histogram_quantile(0.95, sum(rate(rwa_chaincode_duration_seconds_bucket[2m])) by (le))', "p95", "B"),
-        t('histogram_quantile(0.99, sum(rate(rwa_chaincode_duration_seconds_bucket[2m])) by (le))', "p99", "C"),
-    ],
-    {"x": 0, "y": y, "w": 12, "h": 7},
-    unit="s", fill=10, grad="opacity",
-    overrides=[
-        {"matcher": {"id": "byName", "options": "p50"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "green"}}]},
-        {"matcher": {"id": "byName", "options": "p95"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "orange"}}]},
-        {"matcher": {"id": "byName", "options": "p99"}, "properties": [{"id": "color", "value": {"mode": "fixed", "fixedColor": "red"}}]},
-    ]))
-pid += 1
-
-panels.append(timeseries(pid, "Celery Tasks Over Time",
-    [t('rate(rwa_celery_tasks_total[2m])', "{{task}}", "A")],
-    {"x": 12, "y": y, "w": 12, "h": 7},
-    unit="ops", fill=8, grad="none",
-    legend_calcs=["mean", "max"]))
-pid += 1
-
-# ─── Build & Deploy ────────────────────────────────────────────────────────────
+# ─── Build & Deploy ───────────────────────────────────────────────────────────
 dash = {
-    "uid": "rwa-ops-v2",
+    "uid": "rwa-platform",
     "title": "RWA Platform",
     "tags": ["rwa", "production"],
     "timezone": "browser",
@@ -753,20 +389,20 @@ dash = {
     "panels": panels,
     "time": {"from": "now-3h", "to": "now"},
     "timepicker": {},
-    "graphTooltip": 1
+    "graphTooltip": 1,
+    "fiscalYearStartMonth": 0,
+    "liveNow": False,
+    "weekStart": ""
 }
 
-# Delete old dashboards
-for uid in ["rwa-ops-professional", "rwa-monitoring"]:
+for uid in ["rwa-ops-v2", "rwa-ops-professional", "rwa-monitoring"]:
     dr = requests.delete(f"{GRAFANA}/api/dashboards/uid/{uid}", auth=AUTH, timeout=10)
     print(f"Delete {uid}: HTTP {dr.status_code}")
 
-# Save JSON artifact
 with open("deployment/monitoring/grafana_dashboard.json", "w") as f:
     json.dump(dash, f, indent=2)
 print(f"Saved JSON ({len(panels)} panels)")
 
-# Deploy
 r = requests.post(
     f"{GRAFANA}/api/dashboards/db",
     json={"dashboard": dash, "overwrite": True, "folderId": 0},
