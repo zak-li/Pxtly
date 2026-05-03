@@ -1,0 +1,77 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /var/lib/promtail/positions.yaml
+
+clients:
+  - url: http://localhost:3100/loki/api/v1/push
+
+scrape_configs:
+  # RWA platform application logs
+  - job_name: rwa
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: rwa
+          host: hypx
+          __path__: /home/zakaria/rwa-platform/logs/*.log
+    pipeline_stages:
+      - match:
+          selector: '{job="rwa"}'
+          stages:
+            - regex:
+                source: filename
+                expression: '/(?P<service>[^/]+)\.log$'
+            - labels:
+                service:
+      - regex:
+          expression: '^(?P<level>DEBUG|INFO|WARNING|WARN|ERROR|CRITICAL|FATAL|TRACE)\b'
+      - labels:
+          level:
+
+  # Systemd journal
+  - job_name: journal
+    journal:
+      max_age: 12h
+      labels:
+        job: systemd
+        host: hypx
+      path: /var/log/journal
+    relabel_configs:
+      - source_labels: ['__journal__systemd_unit']
+        target_label: unit
+      - source_labels: ['__journal_priority_keyword']
+        target_label: level
+
+  # Docker container logs
+  - job_name: docker
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: docker
+          host: hypx
+          __path__: /var/lib/docker/containers/*/*-json.log
+    pipeline_stages:
+      - json:
+          expressions:
+            output: log
+            stream: stream
+            timestamp: time
+            attrs: attrs
+      - json:
+          source: attrs
+          expressions:
+            tag:
+      - regex:
+          source: filename
+          expression: '/var/lib/docker/containers/(?P<container_id>[^/]+)/'
+      - labels:
+          stream:
+          container_id:
+      - timestamp:
+          source: timestamp
+          format: RFC3339Nano
+      - output:
+          source: output
