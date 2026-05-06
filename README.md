@@ -68,8 +68,8 @@ Every transaction produces an on-chain audit entry. An off-chain integrity check
 **Step 1: Clone and configure**
 
 ```bash
-git clone https://github.com/zak-li/Fvbrixon.git
-cd Fvbrixon
+git clone https://github.com/zak-li/fvbrixon.git
+cd fvbrixon
 cp .env.example .env
 ```
 
@@ -186,7 +186,7 @@ Pass the returned token as `Authorization: Bearer <token>` on all subsequent req
 ## Project Structure
 
 ```
-Fvbrixon/
+fvbrixon/
 ├── backend/
 │   ├── main.py                 # FastAPI app, middleware, metrics
 │   ├── config.py               # Settings and secrets
