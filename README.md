@@ -8,7 +8,7 @@
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python"></a>
   <a href="https://hyperledger-fabric.readthedocs.io/"><img src="https://img.shields.io/badge/Hyperledger_Fabric-2.5-2F3134.svg" alt="Fabric"></a>
   <a href="https://go.dev/"><img src="https://img.shields.io/badge/Go-1.21+-00ADD8.svg" alt="Go"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue.svg" alt="License"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-BUSL%201.1-blue.svg" alt="License"></a>
 </p>
 
 <br>
@@ -236,4 +236,4 @@ Custom metrics exposed at `/metrics`:
 
 ## License
 
-This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+This project is licensed under the [Business Source License 1.1](LICENSE).
