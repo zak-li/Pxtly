@@ -19,7 +19,7 @@ class TransactionResponse(BaseModel):
     from_owner_id: UUID | None = None
     to_owner_id: UUID | None = None
 
-    amount: Decimal
+    amount: Decimal | None = None
     settlement_date: datetime | None = None
 
     endorsing_orgs: list[str] | None = None

@@ -37,7 +37,11 @@ class KYCVerifier:
         if not record:
             raise ValueError(f"Aucun dossier KYC trouvé pour l'utilisateur {user_id}")
 
-        if record.expires_at < now:
+        expires_at = record.expires_at
+        if expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=UTC)
+
+        if expires_at < now:
             return KYCResult(
                 approved=False, level=record.kyc_level, kyc_status=record.kyc_status,
                 expires_at=record.expires_at, reason=f"KYC expiré le {record.expires_at.date()}",
@@ -50,13 +54,13 @@ class KYCVerifier:
             return KYCResult(
                 approved=False, level=record.kyc_level, kyc_status=record.kyc_status,
                 expires_at=record.expires_at, reason=f"Niveau {record.kyc_level} insuffisant (requis: {required_level})",
-                needs_renewal=(record.expires_at < renewal_threshold),
+                needs_renewal=(expires_at < renewal_threshold),
             )
 
         return KYCResult(
             approved=True, level=record.kyc_level, kyc_status=record.kyc_status,
             expires_at=record.expires_at, reason="Score et niveau conformes.",
-            needs_renewal=(record.expires_at < renewal_threshold),
+            needs_renewal=(expires_at < renewal_threshold),
         )
 
     async def get_documents(self, user_id: UUID) -> list[KYCDocument]:

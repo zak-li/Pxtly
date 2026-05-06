@@ -8,6 +8,7 @@ from backend.features.auth import router as auth
 from backend.features.compliance import router as compliance
 from backend.features.events import router as events
 from backend.features.transactions import router as transactions
+from backend.features.tribunal import router as tribunal
 from backend.features.zkp import router as zkp
 
 api_router = APIRouter()
@@ -21,3 +22,4 @@ api_router.include_router(compliance.router, prefix="/compliance", tags=["AML / 
 api_router.include_router(agent.router, prefix="/agent", tags=["RAG Agent"])
 api_router.include_router(zkp.router, prefix="/zkp", tags=["ZKP zk-KYC"])
 api_router.include_router(events.router, prefix="/events", tags=["Live Events"])
+api_router.include_router(tribunal.router, prefix="/tribunal", tags=["Tribunal (Commit-Reveal Voting)"])

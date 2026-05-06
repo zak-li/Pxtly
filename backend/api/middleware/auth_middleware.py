@@ -11,13 +11,15 @@ from backend.core.security import decode_token
 
 logger = logging.getLogger(__name__)
 
-_PUBLIC_API_PATHS = frozenset({"/api/v1/auth/login"})
+_PUBLIC_API_PATHS = frozenset({"/api/v1/auth/login", "/api/v1/auth/refresh"})
+_EXCLUDED_PREFIXES = frozenset({"/docs", "/redoc", "/openapi", "/health", "/metrics"})
 _SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
 
 
 def _is_excluded(path: str) -> bool:
-    # DEV MODE: auth disabled
-    return True
+    if path in _PUBLIC_API_PATHS:
+        return True
+    return any(path.startswith(prefix) for prefix in _EXCLUDED_PREFIXES)
 
 
 def _unauthorized(message: str) -> JSONResponse:
@@ -62,8 +64,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         try:
             redis_gen = get_redis()
-            redis_conn = await redis_gen.__anext__()
             try:
+                redis_conn = await redis_gen.__anext__()
                 is_blacklisted = await redis_conn.get(f"blacklist:{token}")
                 payload = decode_token(token)
                 user_id = payload.get("sub")

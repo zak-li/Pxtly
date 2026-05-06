@@ -36,9 +36,9 @@ services:
       - .env
     environment:
       - ENVIRONMENT=production
-    depends_on:
-      api:
-        condition: service_healthy
+    # Celery needs Redis (broker) and Postgres (result backend / DB tasks).
+    # Both are expected to be running externally or added as services here.
+    # No dependency on `api` — the worker connects to the broker directly.
     networks:
       - rwa-network
     logging:

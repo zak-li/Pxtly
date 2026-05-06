@@ -1,7 +1,8 @@
 from collections.abc import Callable
+from uuid import UUID
 
 import grpc
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -60,15 +61,29 @@ def get_fabric() -> FabricClient:
     return _fabric_client_instance
 
 
-async def get_current_user(db: AsyncSession = Depends(get_db)) -> User:
-    # DEV MODE: auth disabled — returns first active user
-    stmt = select(User).where(User.is_active.is_(True)).limit(1)
+async def get_current_user(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+) -> User:
+    user_id_raw: str | None = getattr(request.state, "user_id", None)
+    if not user_id_raw:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    try:
+        user_id = UUID(user_id_raw)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token subject.")
+
+    stmt = select(User).where(User.id == user_id, User.is_active.is_(True))
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="No active users in database.",
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found or inactive.",
         )
     return user
 

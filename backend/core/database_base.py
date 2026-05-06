@@ -37,6 +37,6 @@ class TimestampMixin:
 class TimestampUpdateMixin(TimestampMixin):
     updated_at: Mapped[datetime] = mapped_column(
         server_default=text("now()"),
-        onupdate=lambda: datetime.now(UTC).replace(tzinfo=None),
+        onupdate=lambda: datetime.now(UTC),
         nullable=False,
     )

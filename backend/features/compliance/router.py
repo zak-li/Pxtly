@@ -182,7 +182,7 @@ async def approve_kyc(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dossier compliance introuvable.")
 
     now = datetime.now(UTC)
-    record.kyc_status = "VERIFIE"
+    record.kyc_status = "APPROUVE"
     record.kyc_level = body.level
     record.approved_by = current_user.id
     record.check_date = now

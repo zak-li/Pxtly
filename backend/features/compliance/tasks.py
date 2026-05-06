@@ -86,7 +86,8 @@ async def _do_aml_screening() -> dict:
             screened += 1
             try:
                 uid_obj = UUID(str(uid))
-                aml_result = await scorer.score(uid_obj, 0.0, uid_obj)
+                from uuid import UUID as _UUID
+                aml_result = await scorer.score(uid_obj, 0.0, _UUID(int=0))
                 if aml_result.sar_required:
                     sar_gen += 1
                     generate_sar.delay(

@@ -33,6 +33,17 @@ class SARReporter:
         self.settings = settings
         self.db = db
 
+    async def _resolve_compliance_officer(self, participant_id: uuid.UUID) -> uuid.UUID:
+        """Return the first active COMPLIANCE_OFFICER; fall back to participant if none exists."""
+        stmt = (
+            select(User.id)
+            .where(User.role == "COMPLIANCE_OFFICER", User.is_active.is_(True))
+            .limit(1)
+        )
+        result = await self.db.execute(stmt)
+        officer_id = result.scalar_one_or_none()
+        return officer_id if officer_id is not None else participant_id
+
     async def _resolve_org_code(self, participant_id: uuid.UUID) -> str:
         stmt = (
             select(Organization.org_code)
@@ -64,10 +75,12 @@ class SARReporter:
         rand_tail = secrets.token_hex(3)
         ref = f"TMA-{year}-{rand_tail}-{nnn_int:04d}-{org_code}"
 
+        reporting_officer = await self._resolve_compliance_officer(participant_id)
+
         report = SARReportORM(
             sar_ref=ref,
             reported_user_id=participant_id,
-            reporting_officer=participant_id,
+            reporting_officer=reporting_officer,
             transaction_id=tx_id,
             reason_code=reason_code,
             reason_description=reason_code,

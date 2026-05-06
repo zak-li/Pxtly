@@ -116,12 +116,15 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     except Exception as exc:
         logger.error(f"PostgreSQL connection failed: {exc}")
 
+    redis_gen = get_redis()
     try:
-        redis_conn = await anext(get_redis())
+        redis_conn = await redis_gen.__anext__()
         await redis_conn.ping()
         logger.info("Redis connection verified.")
     except Exception as exc:
         logger.error(f"Redis connection failed: {exc}")
+    finally:
+        await redis_gen.aclose()
 
     try:
         await get_fabric().connect()
@@ -241,14 +244,17 @@ async def check_health_deep(request: Request) -> JSONResponse:
         checks["postgres"] = "error"
         overall_ok = False
 
+    redis_gen = get_redis()
     try:
-        redis_conn = await anext(get_redis())
+        redis_conn = await redis_gen.__anext__()
         await redis_conn.ping()
         checks["redis"] = "ok"
     except Exception:
         logger.exception("health: redis check failed")
         checks["redis"] = "error"
         overall_ok = False
+    finally:
+        await redis_gen.aclose()
 
     try:
         await get_fabric().connect()

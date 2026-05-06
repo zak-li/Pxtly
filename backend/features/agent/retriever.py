@@ -78,7 +78,6 @@ async def get_platform_stats(db: AsyncSession) -> dict:
             result = await db.execute(text(query))
             rows = result.fetchall()
             if rows:
-                result.keys() if hasattr(result, "keys") else []
                 stats[key] = [dict(zip(result.keys(), row, strict=False)) for row in rows]
             else:
                 stats[key] = []

@@ -90,21 +90,19 @@ class FraudDetector:
 
         return results
 
-    async def detect_layering(self, min_hops: int = 3, time_window_hours: int = 24) -> list[dict[str, str | int | float]]:
-        """
-        Detect layering: funds passing through 3+ intermediaries within a time window,
-        where the final recipient is unrelated to the original sender.
-        """
+    async def detect_layering(self, min_hops: int = 3) -> list[dict[str, str | int | float]]:
+        """Detect layering: funds passing through min_hops+ intermediaries."""
         if not self._driver:
             return []
 
-        query = """
-        MATCH path = (source:Actor)-[r:TRANSFER*$min_hops..6]->(sink:Actor)
+        safe_min_hops = max(2, min(min_hops, 6))
+        query = f"""
+        MATCH path = (source:Actor)-[r:TRANSFER*{safe_min_hops}..6]->(sink:Actor)
         WHERE source <> sink
         WITH source, sink, path,
              [rel in relationships(path) | rel.amount] as amounts,
              [rel in relationships(path) | rel.timestamp] as timestamps
-        WHERE size(amounts) >= $min_hops
+        WHERE size(amounts) >= {safe_min_hops}
         WITH source, sink, path, amounts, timestamps,
              reduce(diff = 0, i in range(0, size(amounts)-2) |
                  diff + (amounts[i] - amounts[i+1])) AS amountDrift

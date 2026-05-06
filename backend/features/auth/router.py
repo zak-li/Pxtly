@@ -47,13 +47,7 @@ async def login_access_token(
     result = await db.execute(stmt)
     user = result.scalar_one_or_none()
 
-    if not user or not verify_password(request.password, user.hashed_password):
-        if user:
-            user.failed_login_count = (user.failed_login_count or 0) + 1
-            if user.failed_login_count >= MAX_FAILED_ATTEMPTS:
-                user.locked_until = datetime.now(UTC) + timedelta(minutes=LOCKOUT_DURATION_MINUTES)
-                logger.warning(f"Compte verrouillé pour {user.email} après {user.failed_login_count} tentatives")
-            await db.commit()
+    if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Email ou mot de passe incorrect",
@@ -64,6 +58,18 @@ async def login_access_token(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"Compte verrouillé jusqu'à {user.locked_until}",
+        )
+
+    if not verify_password(request.password, user.hashed_password):
+        user.failed_login_count = (user.failed_login_count or 0) + 1
+        if user.failed_login_count >= MAX_FAILED_ATTEMPTS:
+            user.locked_until = datetime.now(UTC) + timedelta(minutes=LOCKOUT_DURATION_MINUTES)
+            logger.warning(f"Compte verrouillé pour {user.email} après {user.failed_login_count} tentatives")
+        await db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Email ou mot de passe incorrect",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
     if user.mfa_enabled and user.mfa_secret:

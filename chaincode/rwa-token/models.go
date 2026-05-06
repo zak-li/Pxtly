@@ -32,7 +32,6 @@ type ProvenanceRecord struct {
 	ToOwner       string    `json:"toOwner"`
 	Amount        float64   `json:"amount"`
 	Justification string    `json:"justification"`
-	BlockNumber   uint64    `json:"blockNumber"`
 }
 
 type FinancialAsset struct {
@@ -59,9 +58,3 @@ type FinancialAsset struct {
 	Provenance     []ProvenanceRecord `json:"provenance"`
 }
 
-type TransferRequest struct {
-	AssetID       string  `json:"assetID"`
-	ToOwner       string  `json:"toOwner"`
-	Price         float64 `json:"price"`
-	Justification string  `json:"justification"`
-}

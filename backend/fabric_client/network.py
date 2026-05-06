@@ -36,9 +36,15 @@ class FabricClient:
         self._network_config: dict[str, dict[str, str | dict[str, str]]] = {}
         self._peers: list[dict[str, str]] = []
 
-        self.crypto_base = os.path.expanduser("~/rwa-platform/crypto-config")
-        self.fabric_cfg = os.path.expanduser("~/go/src/github.com/hyperledger/fabric-samples/config")
-        self.peer_bin = os.path.expanduser("~/go/src/github.com/hyperledger/fabric-samples/bin/peer")
+        self.crypto_base = os.environ.get(
+            "FABRIC_CRYPTO_CONFIG", os.path.expanduser("~/rwa-platform/crypto-config")
+        )
+        self.fabric_cfg = os.environ.get(
+            "FABRIC_CFG_PATH_BASE", os.path.expanduser("~/go/src/github.com/hyperledger/fabric-samples/config")
+        )
+        self.peer_bin = os.environ.get(
+            "FABRIC_PEER_BIN", os.path.expanduser("~/go/src/github.com/hyperledger/fabric-samples/bin/peer")
+        )
         self.orderer_ca = f"{self.crypto_base}/ordererOrganizations/finance-trust.com/orderers/orderer.finance-trust.com/msp/tlscacerts/tlsca.finance-trust.com-cert.pem"
 
     _FORBIDDEN_PATTERN = __import__("re").compile(
@@ -189,7 +195,7 @@ class FabricClient:
                     return json.loads(p_str.replace('\\"', '"'))
                 if '{' in line:
                     return json.loads(line)
-            return {"status": 200, "message": "Transaction submitted successfully."}
+            return None
         except (json.JSONDecodeError, IndexError, ValueError) as exc:
             logger.error(f"submit_transaction: impossible de parser la réponse Fabric: {exc}")
             raise FabricEndorsementError(f"Réponse Fabric illisible: {stdout[:200]}") from exc

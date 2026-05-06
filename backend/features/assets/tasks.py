@@ -13,15 +13,16 @@ from backend.dependencies import get_fabric
 async def _log_audit_result(task_name: str, payload: dict) -> None:
     async with AsyncSessionLocal() as session:
         stmt = text("""
-            INSERT INTO audit_logs (action, details, created_at)
-            VALUES (:action, :details, now())
+            INSERT INTO audit_logs
+                (endpoint, http_method, ip_address, response_code, duration_ms, request_body)
+            VALUES (:endpoint, 'CELERY', '127.0.0.1', 200, 0, :body::jsonb)
         """)
-        await session.execute(stmt, {"action": task_name, "details": json.dumps(payload)})
+        await session.execute(stmt, {"endpoint": task_name, "body": json.dumps(payload)})
         await session.commit()
 
 async def _do_sync_fabric_state(asset_id: str) -> dict:
     client = get_fabric()
-    raw_state = await client.evaluate_transaction("GetAsset", asset_id, identity_label="admin-bnp")
+    raw_state = await client.evaluate_transaction("GetAsset", asset_id, identity_label="Admin@bnpparibas")
     if not isinstance(raw_state, dict):
         return {"asset_id": asset_id, "synced": False, "changes": []}
 

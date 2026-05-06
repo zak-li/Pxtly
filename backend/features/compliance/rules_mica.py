@@ -1,6 +1,5 @@
 import logging
 from dataclasses import dataclass
-from datetime import UTC, datetime
 from typing import Literal
 from uuid import UUID
 
@@ -8,7 +7,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.config import Settings
 from backend.constants import MICA_IDENTIFICATION_THRESHOLD
-from backend.core.redis_client import get_redis
 from backend.features.transactions.models import NetworkEvent
 
 logger = logging.getLogger(__name__)
@@ -48,17 +46,6 @@ class MiCAChecker:
                     description="Absence structurelle ISIN ou LEI identifiée (non conforme).",
                     blocking=False,
                 ))
-
-        if len(violations) > 0 and any(v.blocking for v in violations):
-            year = datetime.now(UTC).year
-            try:
-                redis_gen = get_redis()
-                redis_conn = await redis_gen.__anext__()
-                counter = await redis_conn.incr(f"mica:alert_counter:{year}")
-                await redis_gen.aclose()
-            except Exception:
-                counter = 1
-            alert_ref = f"TMA-{year}-{counter:03d}-MICA"
 
         compliant = not any(v.blocking for v in violations)
 

@@ -62,18 +62,3 @@ func verifyRole(ctx contractapi.TransactionContextInterface, functionName string
 		msp, functionName, strings.Join(allowed, ", "))
 }
 
-func verifyRoleAny(ctx contractapi.TransactionContextInterface, msps ...string) error {
-	msp, err := getClientMSP(ctx)
-	if err != nil {
-		return fmt.Errorf("verifyRoleAny: %w", err)
-	}
-
-	for _, allowed := range msps {
-		if strings.EqualFold(msp, allowed) {
-			return nil
-		}
-	}
-
-	return fmt.Errorf("accès refusé: MSP '%s' non autorisé (requis: %s)",
-		msp, strings.Join(msps, " | "))
-}

@@ -15,13 +15,23 @@ from __future__ import annotations
 
 import functools
 
-# helib_ckks is the compiled pybind11 module produced by helib_ckks.cpp.
-# Import error is intentional here: if the .so/.pyd is missing the caller
-# gets a clear ImportError rather than a silent runtime crash.
-from backend.features.fhe.helib_ckks import HElibCKKSSession
+try:
+    from backend.features.fhe.helib_ckks import HElibCKKSSession as _HElibCKKSSession
+    _fhe_available = True
+except ImportError:
+    _HElibCKKSSession = None  # type: ignore[assignment,misc]
+    _fhe_available = False
 
 
 @functools.lru_cache(maxsize=1)
-def get_session() -> HElibCKKSSession:
-    """Return the process-wide HElib CKKS session (lazy, cached)."""
-    return HElibCKKSSession()
+def get_session():  # type: ignore[return]
+    """Return the process-wide HElib CKKS session (lazy, cached).
+
+    Raises RuntimeError if the native extension has not been compiled.
+    """
+    if not _fhe_available:
+        raise RuntimeError(
+            "HElib CKKS native extension not available. "
+            "Build it first: cd backend/features/fhe && python setup.py build_ext --inplace"
+        )
+    return _HElibCKKSSession()
