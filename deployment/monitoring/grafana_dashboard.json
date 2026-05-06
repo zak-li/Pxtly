@@ -1,6 +1,6 @@
 {
   "uid": "rwa-ops-hub",
-  "title": "Quant-ix Health",
+  "title": "Quant-ix - Overview",
   "tags": ["rwa", "blockchain", "compliance", "production"],
   "timezone": "browser",
   "refresh": "30s",
