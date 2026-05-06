@@ -30,13 +30,13 @@ Quant-ix is an institutional platform for tokenizing Real World Assets on a perm
 
 ## Features
 
-**Blockchain.** Two-organization Fabric network (BNPParibas and AMFRegulateur), each with a dedicated peer and CouchDB state database. The Go chaincode runs as CCaaS and enforces a dual-endorsement policy on all state-changing transactions. Assets move through a `ACTIVE`, `FROZEN`, `REDEEMED` lifecycle recorded immutably on-chain, and Fabric events are streamed live via gRPC with automatic reconnection.
+The Fabric network runs two organizations, BNPParibas and AMFRegulateur, each with a dedicated peer and CouchDB state database. The Go chaincode runs as CCaaS and enforces a dual-endorsement policy on all state-changing transactions. Assets move through an `ACTIVE`, `FROZEN`, `REDEEMED` lifecycle recorded immutably on-chain, and Fabric events are streamed live via gRPC with automatic reconnection.
 
-**Compliance and identity.** AML screening runs against a signed sanctions manifest verified with Ed25519. The MiCA rules engine checks exposure limits, asset-class restrictions, and reporting thresholds. ZK-KYC generates Merkle-based proofs so identity can be verified without exposing raw credentials. An FHE fraud scorer evaluates risk on encrypted data. KYC expiry and counterparty concentration are tracked continuously.
+Compliance is built into every layer. AML screening runs against a signed sanctions manifest verified with Ed25519. The MiCA rules engine checks exposure limits, asset-class restrictions, and reporting thresholds. ZK-KYC generates Merkle-based proofs so identity can be verified without exposing raw credentials. An FHE fraud scorer evaluates risk on encrypted data, and KYC expiry with counterparty concentration is tracked continuously.
 
-**API and security.** Quant-ix exposes a FastAPI REST API and a gRPC server in parallel. Authentication is JWT-based with configurable TTL. Secrets are stored as `SecretStr` via pydantic-settings and never appear in logs. Private keys for Fabric identities live in HashiCorp Vault. Every response carries six security headers and requests go through rate limiting and host filtering.
+Quant-ix exposes a FastAPI REST API and a gRPC server in parallel. Authentication is JWT-based with configurable TTL. Secrets are stored as `SecretStr` via pydantic-settings and never appear in logs. Private keys for Fabric identities live in HashiCorp Vault, and every response carries six security headers with rate limiting and host filtering.
 
-**Audit and reporting.** Every transaction produces an on-chain audit entry. An off-chain integrity checker verifies hashes independently. PDF audit reports are generated asynchronously via Celery. The RAG agent answers regulatory questions by querying a ChromaDB vector store with Groq LLM.
+Every transaction produces an on-chain audit entry. An off-chain integrity checker verifies hashes independently, PDF audit reports are generated asynchronously via Celery, and the RAG agent answers regulatory questions by querying a ChromaDB vector store with Groq LLM.
 
 ## Requirements
 
@@ -65,7 +65,7 @@ Quant-ix is an institutional platform for tokenizing Real World Assets on a perm
 
 ## Quick Start
 
-**Step 1 — Clone and configure**
+**Step 1: Clone and configure**
 
 ```bash
 git clone https://github.com/hackerXcore/Quant-ix.git
@@ -75,7 +75,7 @@ cp .env.example .env
 
 Open `.env` and fill in at minimum `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, and the Fabric variables.
 
-**Step 2 — Install dependencies**
+**Step 2: Install dependencies**
 
 ```bash
 python -m venv .venv
@@ -83,7 +83,7 @@ source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-**Step 3 — Start the Fabric network**
+**Step 3: Start the Fabric network**
 
 ```bash
 cd network
@@ -93,7 +93,7 @@ cd network
 ./scripts/enroll-users.sh
 ```
 
-**Step 4 — Start the API and worker**
+**Step 4: Start the API and worker**
 
 ```bash
 uvicorn backend.main:app --host 0.0.0.0 --port 8000 --workers 1
@@ -102,7 +102,7 @@ celery -A backend.celery_app worker --loglevel=info -Q celery,compliance,reports
 
 The API is live at `http://localhost:8000`. Interactive docs are at `/docs` (Swagger UI) or `/redoc`.
 
-**Step 5 — Authenticate**
+**Step 5: Authenticate**
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/auth/login \
