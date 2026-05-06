@@ -15,7 +15,7 @@ class FabricSettings(BaseSettings):
     redis_url: str
     secret_key: str
 
-    vault_addr: str = Field(default="http://10.10.10.150:8200")
+    vault_addr: str = Field(default="http://127.0.0.1:8200")
     vault_token: str = Field(...)
 
     groq_api_key: str = Field(default="")

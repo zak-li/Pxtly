@@ -5,7 +5,7 @@
 <br>
 
 <p align="center">
-  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python"></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.12+-blue.svg" alt="Python"></a>
   <a href="https://hyperledger-fabric.readthedocs.io/"><img src="https://img.shields.io/badge/Hyperledger_Fabric-2.5-2F3134.svg" alt="Fabric"></a>
   <a href="https://go.dev/"><img src="https://img.shields.io/badge/Go-1.21+-00ADD8.svg" alt="Go"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-BUSL%201.1-blue.svg" alt="License"></a>
@@ -118,27 +118,32 @@ Pass the returned token as `Authorization: Bearer <token>` on all subsequent req
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/api/v1/auth/register` | Register a new user |
 | POST | `/api/v1/auth/login` | Obtain JWT token |
 | POST | `/api/v1/auth/refresh` | Refresh access token |
+| POST | `/api/v1/auth/logout` | Revoke session |
+| GET | `/api/v1/auth/me` | Current user profile |
 
 **Assets**
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/api/v1/assets` | Issue a new tokenized asset |
+| POST | `/api/v1/assets/tokenize` | Tokenize a new real-world asset |
 | GET | `/api/v1/assets` | List assets with filtering |
 | GET | `/api/v1/assets/{id}` | Get asset by ID |
-| PUT | `/api/v1/assets/{id}/transfer` | Transfer ownership |
-| PUT | `/api/v1/assets/{id}/freeze` | Freeze (compliance hold) |
-| PUT | `/api/v1/assets/{id}/redeem` | Redeem and retire |
+| POST | `/api/v1/assets/transfer` | Transfer ownership |
+| POST | `/api/v1/assets/freeze` | Freeze asset (compliance hold) |
+| POST | `/api/v1/assets/unfreeze` | Unfreeze asset |
+| GET | `/api/v1/assets/{id}/history` | On-chain provenance history |
+| POST | `/api/v1/assets/{id}/valuate` | Submit asset valuation |
 
 **Compliance and KYC**
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/api/v1/compliance/screen` | AML sanctions screening |
-| GET | `/api/v1/compliance/kyc/{entity_id}` | KYC status and expiry |
+| GET | `/api/v1/compliance/{user_id}` | Compliance status for a user |
+| GET | `/api/v1/compliance/alerts/active` | Active compliance alerts |
+| POST | `/api/v1/compliance/screening/run` | Run AML sanctions screening |
+| POST | `/api/v1/compliance/kyc/submit` | Submit KYC documents |
 | POST | `/api/v1/zkp/prove` | Issue ZK-KYC proof |
 | POST | `/api/v1/zkp/verify` | Verify a ZK-KYC proof |
 
@@ -146,11 +151,14 @@ Pass the returned token as `Authorization: Bearer <token>` on all subsequent req
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/api/v1/audit/trail` | On-chain audit trail |
-| GET | `/api/v1/audit/integrity` | Off-chain hash integrity check |
-| POST | `/api/v1/audit/report` | Generate PDF report (async) |
+| GET | `/api/v1/audit/` | List audit log entries |
+| GET | `/api/v1/audit/asset/{id}` | On-chain provenance trail for an asset |
+| POST | `/api/v1/audit/report/generate/{id}` | Generate PDF audit report (async) |
+| GET | `/api/v1/audit/report/status/{task_id}` | Check report generation status |
+| POST | `/api/v1/audit/fraud/scan` | Trigger Neo4j fraud graph scan |
 | GET | `/api/v1/transactions` | Ledger transaction history |
-| GET | `/api/v1/events` | Live Fabric event stream (SSE) |
+| GET | `/api/v1/transactions/stats/summary` | Transaction statistics summary |
+| GET | `/api/v1/events/stream` | Live Fabric event stream (SSE) |
 | POST | `/api/v1/agent/query` | RAG query over regulatory knowledge base |
 | GET | `/metrics` | Prometheus metrics |
 
@@ -167,7 +175,7 @@ Pass the returned token as `Authorization: Bearer <token>` on all subsequent req
 | `FABRIC_CONNECTION_PROFILE` | Path to `connection_profile.yaml` |
 | `FABRIC_CHANNEL` | Fabric channel name |
 | `FABRIC_CHAINCODE` | Chaincode name |
-| `VAULT_ADDR` | HashiCorp Vault address |
+| `VAULT_ADDR` | HashiCorp Vault address (e.g. `http://127.0.0.1:8200`) |
 | `VAULT_TOKEN` | Vault authentication token |
 
 **Optional**
