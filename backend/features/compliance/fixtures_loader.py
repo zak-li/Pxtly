@@ -101,7 +101,7 @@ def _read_fixtures() -> dict[str, Any]:
         return _cached_data or {}
 
     try:
-        data = json.loads(raw.decode("utf-8"))
+        data = json.loads(raw.decode("utf-8-sig"))
         if not isinstance(data, dict):
             data = {}
     except (json.JSONDecodeError, UnicodeDecodeError):

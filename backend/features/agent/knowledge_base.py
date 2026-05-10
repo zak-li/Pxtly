@@ -149,7 +149,7 @@ KNOWLEDGE_CHUNKS: list[dict[str, str]] = [
         "category": "security",
         "title": "Sécurité — HashiCorp Vault",
         "content": (
-            "Les clés privées Fabric (Admin@bank01, Admin@amf-regulateur) sont stockées "
+            "Les clés privées Fabric (admin@bank01, admin@amf-regulateur) sont stockées "
             "dans HashiCorp Vault (moteur KV v2, mount point rwa-fabric). "
             "Les clés ne sont jamais conservées en mémoire au-delà de l'opération de signature. "
             "La mémoire est effacée via ctypes après chaque utilisation (zero-memory). "

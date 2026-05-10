@@ -164,26 +164,14 @@ async def test_mica_art68_triggered_above_1000_eur(
     async_session: AsyncSession, test_org, test_user_thomas,
 ):
     checker = MiCAChecker(settings, async_session)
-    with patch("backend.features.compliance.rules_mica.get_redis") as mock_redis:
-        mock_gen = AsyncMock()
-        mock_conn = AsyncMock()
-        mock_gen.__anext__ = AsyncMock(return_value=mock_conn)
-        mock_gen.aclose = AsyncMock()
-        mock_redis.return_value = mock_gen
-        result = await checker.check(1001.0, THOMAS_USER_ID, "RWA-OBL-BNP-2025-001", "OBLIGATION")
+    result = await checker.check(1001.0, THOMAS_USER_ID, "RWA-OBL-BNP-2025-001", "OBLIGATION")
     assert result.identification_required is True
 
 async def test_mica_art68_not_triggered_below_1000_eur(
     async_session: AsyncSession, test_org, test_user_thomas,
 ):
     checker = MiCAChecker(settings, async_session)
-    with patch("backend.features.compliance.rules_mica.get_redis") as mock_redis:
-        mock_gen = AsyncMock()
-        mock_conn = AsyncMock()
-        mock_gen.__anext__ = AsyncMock(return_value=mock_conn)
-        mock_gen.aclose = AsyncMock()
-        mock_redis.return_value = mock_gen
-        result = await checker.check(999.0, THOMAS_USER_ID, "RWA-OBL-BNP-2025-001", "OBLIGATION")
+    result = await checker.check(999.0, THOMAS_USER_ID, "RWA-OBL-BNP-2025-001", "OBLIGATION")
     assert result.identification_required is False
     assert result.compliant is True
 
@@ -191,13 +179,7 @@ async def test_mica_art76_missing_isin_produces_non_blocking_violation(
     async_session: AsyncSession, test_org, test_user_thomas,
 ):
     checker = MiCAChecker(settings, async_session)
-    with patch("backend.features.compliance.rules_mica.get_redis") as mock_redis:
-        mock_gen = AsyncMock()
-        mock_conn = AsyncMock()
-        mock_gen.__anext__ = AsyncMock(return_value=mock_conn)
-        mock_gen.aclose = AsyncMock()
-        mock_redis.return_value = mock_gen
-        result = await checker.check(500.0, THOMAS_USER_ID, "INVALID-NO-RWA", "OBLIGATION")
+    result = await checker.check(500.0, THOMAS_USER_ID, "INVALID-NO-RWA", "OBLIGATION")
     has_76 = any(v.article == "ART76" for v in result.violations)
     assert has_76 is True
     assert all(v.blocking is False for v in result.violations)

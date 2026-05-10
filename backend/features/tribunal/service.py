@@ -81,7 +81,13 @@ class TribunalService:
         if record.revealed_vote is not None:
             raise TribunalError("Vote has already been revealed")
 
-        await self._get_active_session(record.session_id, expected_status="REVEAL")
+        sess = (
+            await self.db.execute(select(TribunalSession).where(TribunalSession.id == record.session_id))
+        ).scalar_one_or_none()
+        if sess is None:
+            raise TribunalError("Tribunal session does not exist")
+        if sess.status not in ("COMMIT", "REVEAL"):
+            raise TribunalError(f"Session is in status {sess.status}; reveal is not allowed")
 
         expected_hash = compute_commit_hash(vote, salt)
         if record.commit_hash != expected_hash:

@@ -27,7 +27,7 @@ class HistoryEntry:
     timestamp: datetime | None
 
 class AuditTrail:
-    def __init__(self, fabric_client: FabricClient, identity_label: str = "Admin@bank01") -> None:
+    def __init__(self, fabric_client: FabricClient, identity_label: str = "admin@bank01") -> None:
         self.fabric_client = fabric_client
         self.identity_label = identity_label
 

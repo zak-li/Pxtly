@@ -1,7 +1,7 @@
 ﻿<br>
 
 <p align="center">
-  <img src="assets/vector/logo-monochrome.svg" alt="RegX" width="380">
+  <img src="assets/vector/logo-monochrome.svg" alt="RegX" width="300">
 </p>
 
 <br>
@@ -34,7 +34,7 @@ RegX is an institutional platform for tokenizing Real World Assets on a permissi
 
 The Fabric network runs two organizations, BANK01 and REG01, each with a dedicated peer and CouchDB state database. The Go chaincode runs as CCaaS and enforces a dual-endorsement policy on all state-changing transactions. Assets move through an `ACTIVE`, `FROZEN`, `REDEEMED` lifecycle recorded immutably on-chain, and Fabric events are streamed live via gRPC with automatic reconnection.
 
-Compliance is built into every layer. AML screening runs against a signed sanctions manifest verified with Ed25519. The MiCA rules engine checks exposure limits, asset-class restrictions, and reporting thresholds. ZK-KYC generates Merkle-based proofs so identity can be verified without exposing raw credentials. An FHE fraud scorer evaluates risk on encrypted data, and KYC expiry with counterparty concentration is tracked continuously.
+The platform embeds compliance directly into transaction execution and asset lifecycle management. Sanctions screening is backed by Ed25519-authenticated manifests, while the MiCA enforcement layer validates exposure boundaries, restricted asset classes, and supervisory reporting requirements. zk-KYC workflows enable cryptographic identity attestation through Merkle proofs without exposing underlying credentials. Encrypted fraud analytics powered by Fully Homomorphic Encryption evaluate AML risk in confidential datasets, with persistent monitoring of KYC validity and systemic concentration exposure.
 
 RegX exposes a FastAPI REST API and a gRPC server in parallel. Authentication is JWT-based with configurable TTL. Secrets are stored as `SecretStr` via pydantic-settings and never appear in logs. Private keys for Fabric identities live in HashiCorp Vault, and every response carries six security headers with rate limiting and host filtering.
 

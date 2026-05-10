@@ -37,23 +37,36 @@ class MockAsyncSession:
                 return MockScalars(self.data)
                 
         stmt_str = str(stmt)
-        
-        # Extremely hacky parsing of the WHERE clause for testing
+        params = stmt.compile().params
+
         if "tribunal_votes" in stmt_str:
-            target_id = None
-            if "tribunal_votes.id =" in stmt_str:
-                # Extract the bound parameter value. In SQLAlchemy 2.0 with this mock, 
-                # stmt.compile().params might be better, but we can also just cheat:
-                # Since we know the id is passed to where(), let's extract it from the where criteria
-                where_clause = stmt.whereclause
-                if where_clause is not None:
-                    target_id = where_clause.right.value
-                    
-            if target_id:
-                return MockResult([v for v in self.storage["TribunalVote"] if v.id == target_id])
-            return MockResult(self.storage["TribunalVote"])
+            votes = self.storage["TribunalVote"]
+
+            # Filter by vote id (reveal_vote lookup)
+            if "vote_id" in params or any(k.startswith("id") for k in params):
+                vid = params.get("id_1") or params.get("id")
+                if vid:
+                    return MockResult([v for v in votes if v.id == vid])
+
+            # Filter by session_id + auditor_id (double-vote guard in commit_vote)
+            sid = params.get("session_id_1") or params.get("session_id")
+            aid = params.get("auditor_id_1") or params.get("auditor_id")
+            if sid and aid:
+                return MockResult([v for v in votes if v.session_id == sid and v.auditor_id == aid])
+
+            # Filter by session_id only (tally_and_slash)
+            if sid:
+                return MockResult([v for v in votes if v.session_id == sid])
+
+            return MockResult(votes)
+
         elif "tribunal_sessions" in stmt_str:
-            return MockResult(self.storage["TribunalSession"])
+            sid = params.get("id_1") or params.get("id")
+            sessions = self.storage["TribunalSession"]
+            if sid:
+                return MockResult([s for s in sessions if s.id == sid])
+            return MockResult(sessions)
+
         return MockResult([])
 
 @pytest.mark.asyncio
@@ -65,8 +78,14 @@ async def test_tribunal_game_theory_slashing():
     service = TribunalService(db)
     
     # Create Session
+    import datetime as _dt
     from backend.features.tribunal.models import TribunalSession
-    session = TribunalSession(id=uuid.uuid4(), asset_id=uuid.uuid4(), reason="Suspicious AML Volume")
+    session = TribunalSession(
+        id=uuid.uuid4(),
+        asset_id=uuid.uuid4(),
+        reason="Suspicious AML Volume",
+        expires_at=_dt.datetime.now(_dt.timezone.utc) + _dt.timedelta(hours=1),
+    )
     db.add(session)
     
     # 5 Auditors (4 Honest, 1 Malicious/Deviating)
@@ -117,10 +136,21 @@ async def test_tribunal_game_theory_slashing():
 @pytest.mark.asyncio
 async def test_tribunal_invalid_reveal():
     """Test that a malicious auditor cannot change their vote during reveal."""
+    import datetime as _dt
+    from backend.features.tribunal.models import TribunalSession
+
     db = MockAsyncSession()
     service = TribunalService(db)
-    
+
     session_id = uuid.uuid4()
+    session = TribunalSession(
+        id=session_id,
+        asset_id=uuid.uuid4(),
+        reason="Test invalid reveal",
+        expires_at=_dt.datetime.now(_dt.timezone.utc) + _dt.timedelta(hours=1),
+    )
+    db.add(session)
+
     a_id = uuid.uuid4()
     
     original_vote = "FRAUD"

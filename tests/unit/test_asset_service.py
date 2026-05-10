@@ -30,7 +30,7 @@ async def test_tokenize_creates_asset_and_calls_fabric(
 
     with patch("backend.features.assets.service.get_fabric", return_value=mock_fabric_client):
         with patch("backend.features.assets.service.get_redis", side_effect=Exception("skip redis")):
-            result = await tokenize(request, "Admin@bank01", async_session)
+            result = await tokenize(request, "admin@bank01", async_session)
 
     assert result.asset_id == "RWA-OBL-TEST-2026-001"
     assert result.fabric_tx_id == "abc123def456"
@@ -59,7 +59,7 @@ async def test_tokenize_raises_if_asset_already_exists(
 
     with patch("backend.features.assets.service.get_fabric", return_value=mock_fabric_client):
         with pytest.raises(AssetAlreadyExistsError) as exc_info:
-            await tokenize(request, "Admin@bank01", async_session)
+            await tokenize(request, "admin@bank01", async_session)
 
     assert "RWA-OBL-TEST-2026-002" in str(exc_info.value)
 
@@ -109,7 +109,7 @@ async def test_transfer_updates_owner_to_pierre_moreau(
 
     with patch("backend.features.assets.service.get_fabric", return_value=mock_fabric_client):
         with patch("backend.features.assets.service.full_check", return_value=(False, None, None)):
-            result = await transfer(request, "Admin@bank01", async_session)
+            result = await transfer(request, "admin@bank01", async_session)
 
     assert result.current_value == Decimal("24739375")
     assert result.fabric_tx_id == "XFER_TX_001"
@@ -158,7 +158,7 @@ async def test_transfer_blocked_on_frozen_asset_returns_frozen_error(
     with patch("backend.features.assets.service.get_fabric", return_value=mock_fabric_client):
         with patch("backend.features.assets.service.full_check", return_value=(False, None, None)):
             with pytest.raises(AssetFrozenError) as exc_info:
-                await transfer(request, "Admin@bank01", async_session)
+                await transfer(request, "admin@bank01", async_session)
 
     assert "AMF-INV-2026-001" in str(exc_info.value)
 
@@ -193,7 +193,7 @@ async def test_freeze_sets_status_gele_in_fabric_and_postgres(
     )
 
     with patch("backend.features.assets.service.get_fabric", return_value=mock_fabric_client):
-        result = await freeze(request, "Admin@amf-regulateur", async_session)
+        result = await freeze(request, "admin@amf-regulateur", async_session)
 
     assert result.status == "GELE"
     mock_fabric_client.submit_transaction.assert_called_once()

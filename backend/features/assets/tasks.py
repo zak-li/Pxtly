@@ -22,7 +22,7 @@ async def _log_audit_result(task_name: str, payload: dict) -> None:
 
 async def _do_sync_fabric_state(asset_id: str) -> dict:
     client = get_fabric()
-    raw_state = await client.evaluate_transaction("GetAsset", asset_id, identity_label="Admin@bank01")
+    raw_state = await client.evaluate_transaction("GetAsset", asset_id, identity_label="admin@bank01")
     if not isinstance(raw_state, dict):
         return {"asset_id": asset_id, "synced": False, "changes": []}
 

@@ -61,3 +61,9 @@ tests/fixtures/crypto_config_mock/
 
 # Local deploy scripts (contain credentials)
 scripts/_deploy_*.py
+
+# Grafana customization scripts (contain VM credentials — never commit)
+grafana_scripts/
+
+# Node dependencies (grafana scripts)
+node_modules/

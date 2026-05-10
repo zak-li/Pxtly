@@ -4,7 +4,7 @@ import uuid
 from datetime import UTC, datetime
 from typing import ClassVar
 
-from sqlalchemy import MetaData, text
+from sqlalchemy import TIMESTAMP, MetaData, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
@@ -21,7 +21,8 @@ metadata = MetaData(naming_convention=convention)
 class Base(DeclarativeBase):
     metadata = metadata
     type_annotation_map: ClassVar[dict] = {
-        uuid.UUID: UUID(as_uuid=True)
+        uuid.UUID: UUID(as_uuid=True),
+        datetime: TIMESTAMP(timezone=True),
     }
 
 class UUIDMixin:
@@ -31,11 +32,12 @@ class UUIDMixin:
 
 class TimestampMixin:
     created_at: Mapped[datetime] = mapped_column(
-        server_default=text("now()"), nullable=False
+        TIMESTAMP(timezone=True), server_default=text("now()"), nullable=False
     )
 
 class TimestampUpdateMixin(TimestampMixin):
     updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP(timezone=True),
         server_default=text("now()"),
         onupdate=lambda: datetime.now(UTC),
         nullable=False,

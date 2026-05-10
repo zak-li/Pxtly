@@ -25,6 +25,12 @@ class TribunalSession(Base):
     created_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), server_default="now()")
     expires_at: Mapped[datetime] = mapped_column(TIMESTAMP(timezone=True), nullable=False)
 
+    def __init__(self, **kwargs: object) -> None:
+        kwargs.setdefault("status", "COMMIT")
+        if "id" not in kwargs:
+            kwargs["id"] = uuid.uuid4()
+        super().__init__(**kwargs)
+
 class TribunalVote(Base):
     __tablename__ = "tribunal_votes"
 

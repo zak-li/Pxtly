@@ -30,10 +30,10 @@ async def main():
             tx_id="185861c04e4744c0c10f07ac82011b1534fe3a7642507db322172ab39fa2ad43",
             timestamp=datetime.now(timezone.utc),
             actor_msp="BANK01MSP",
-            actor_dn="CN=Admin@bank01.finance-trust.com,OU=admin",
+            actor_dn="CN=admin@bank01.finance-trust.com,OU=admin",
             action="TOKENISE",
             from_owner="",
-            to_owner="CN=Admin@bank01.finance-trust.com,OU=admin",
+            to_owner="CN=admin@bank01.finance-trust.com,OU=admin",
             amount=50000000.0,
             justification="Tokenisation OAT emission primaire",
             block_number=1,
@@ -42,9 +42,9 @@ async def main():
             tx_id="7a4508a19663ea42115d16ef010048636c3b0670c62a0706731a006a9afe4611",
             timestamp=datetime.now(timezone.utc),
             actor_msp="BANK01MSP",
-            actor_dn="CN=Admin@bank01.finance-trust.com,OU=admin",
+            actor_dn="CN=admin@bank01.finance-trust.com,OU=admin",
             action="TRANSFERE",
-            from_owner="CN=Admin@bank01.finance-trust.com,OU=admin",
+            from_owner="CN=admin@bank01.finance-trust.com,OU=admin",
             to_owner="CN=pierre.moreau,OU=AXA-IM",
             amount=24739375.0,
             justification="Cession bloc Inv01 portefeuille ESG",
@@ -56,7 +56,7 @@ async def main():
     integrity = checker.check(asset_id, provenance)
     
     gen = ReportGenerator()
-    generated_by = "Admin@amf-regulateur.finance-trust.com"
+    generated_by = "admin@amf-regulateur.finance-trust.com"
     
     tex_content = gen._build_tex(asset_id, asset_state, provenance, integrity, generated_by, "--- TEX SOURCE CODE ---")
     
