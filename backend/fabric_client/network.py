@@ -2,6 +2,7 @@
 import json
 import logging
 import os
+from typing import ClassVar
 
 import yaml
 
@@ -97,7 +98,7 @@ class FabricClient:
     # Per-org overrides: set FABRIC_BANK01_MSPID / FABRIC_BANK01_DOMAIN / FABRIC_BANK01_ADMIN /
     # FABRIC_AMF_MSPID / FABRIC_AMF_DOMAIN / FABRIC_AMF_ADMIN in the environment to bridge legacy
     # Fabric network names (e.g. BNPParibasMSP) without touching the running channel config.
-    _ORG_DEFAULTS: dict[str, dict[str, str]] = {
+    _ORG_DEFAULTS: ClassVar[dict[str, dict[str, str]]] = {
         "bank01": {
             "msp_id":    "BANK01MSP",
             "domain":    "bank01.finance-trust.com",

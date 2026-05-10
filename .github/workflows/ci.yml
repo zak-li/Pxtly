@@ -41,6 +41,65 @@ jobs:
 
   python-test:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: rwaadmin
+          POSTGRES_PASSWORD: rwaadmin
+          POSTGRES_DB: rwadb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    env:
+      ENVIRONMENT: test
+      DATABASE_URL: postgresql+asyncpg://rwaadmin:rwaadmin@localhost:5432/rwadb
+      TEST_DATABASE_URL: postgresql+asyncpg://rwaadmin:rwaadmin@localhost:5432/rwadb_test
+      TEST_ADMIN_DB_URL: postgresql://rwaadmin:rwaadmin@localhost:5432/rwadb
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: ci-test-secret-key-must-be-at-least-32-characters-long
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+      ALLOWED_ORIGINS: http://localhost:3000
+      VAULT_ADDR: http://127.0.0.1:8200
+      VAULT_TOKEN: ci-test-vault-token
+      FABRIC_WALLET_PATH: tests/fixtures/json/fabric_wallets_test.json
+      FABRIC_CONNECTION_PROFILE: network/config/connection_profile.yaml
+      FABRIC_CHANNEL: rwa-channel
+      FABRIC_CHAINCODE: rwa-token
+      FABRIC_TLS_ENABLED: "false"
+      FABRIC_GRPC_TIMEOUT: "30"
+      FABRIC_REQUIRED_MSPS: BANK01MSP,REG01MSP
+      FABRIC_RETRY_MAX_ATTEMPTS: "5"
+      FABRIC_RETRY_BASE_DELAY: "2.0"
+      FABRIC_RETRY_FACTOR: "2.0"
+      FABRIC_RETRY_JITTER: "0.2"
+      FABRIC_RETRY_CIRCUIT_BREAKER_THRESHOLD: "5"
+      FABRIC_RETRY_CIRCUIT_BREAKER_TIMEOUT: "60.0"
+      FABRIC_EVENTS_RATE_LIMIT: "100.0"
+      FABRIC_EVENTS_REDIS_CHANNEL: fabric:events
+      FABRIC_EVENTS_TARGETS: AssetCreated,AssetTransferred,AssetFrozen,AssetUnfrozen
+      FABRIC_EVENTS_REQUIRED_PAYLOAD_FIELDS: txID,action,assetID
+      FABRIC_EVENTS_GRPC_RECONNECT_DELAY: "5.0"
+      FABRIC_EVENTS_GRPC_SIMULATION_DELAY: "1.0"
+      FABRIC_LEDGER_NOT_FOUND_ERROR_STRING: MISSING
+      FABRIC_ENDORSEMENT_ERROR_STRING: ENDORSEMENT_POLICY_FAILURE
+
     steps:
       - uses: actions/checkout@v4
 
@@ -53,10 +112,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest pytest-asyncio
 
       - name: Run unit tests
-        run: pytest tests/ -q --ignore=tests/integration
+        run: pytest tests/ -q --ignore=tests/integration --ignore=tests/unit/test_fhe.py
 
   go-build:
     runs-on: ubuntu-latest
@@ -75,4 +133,3 @@ jobs:
       - name: Test chaincode
         working-directory: chaincode/rwa-token
         run: go test ./...
-

@@ -1,4 +1,5 @@
-﻿import uuid
+import os
+import uuid
 import json
 import asyncpg
 from datetime import datetime, timedelta, timezone
@@ -16,7 +17,7 @@ from sqlalchemy import text
 from backend.core.celery_app import celery_app
 
 from backend.main import app
-from backend.config import Settings
+from backend.config import Settings, settings
 from backend.core.database_base import Base
 from backend.dependencies import get_db, get_fabric
 from backend.core.redis_client import get_redis
@@ -31,8 +32,19 @@ from backend.features.audit.integrity_checker import IntegrityChecker, Integrity
 from backend.features.auth.models import User, Organization
 from backend.features.compliance.models import ComplianceRecord
 
-TEST_DATABASE_URL = "postgresql+asyncpg://rwaadmin:r0wTEPX08zRu5@10.10.10.150:5432/rwadb_test"
-ADMIN_DB_URL = "postgresql://rwaadmin:r0wTEPX08zRu5@10.10.10.150:5432/rwadb"
+# Derive test DB URLs from the configured DATABASE_URL so the same conftest
+# works locally (via .env) and in CI (via workflow env vars).
+# CI overrides via TEST_DATABASE_URL / TEST_ADMIN_DB_URL take precedence.
+import re as _re
+_db_url = str(settings.database_url)
+TEST_DATABASE_URL = (
+    os.environ.get("TEST_DATABASE_URL")
+    or _re.sub(r"/([^/?]+)(\?.*)?$", "/rwadb_test", _db_url)
+)
+ADMIN_DB_URL = (
+    os.environ.get("TEST_ADMIN_DB_URL")
+    or TEST_DATABASE_URL.replace("+asyncpg", "").replace("/rwadb_test", "/rwadb")
+)
 
 BNP_ORG_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
 AMF_ORG_ID = uuid.UUID("00000000-0000-0000-0000-000000000002")
