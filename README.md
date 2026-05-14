@@ -1,7 +1,11 @@
 ﻿<br>
 
 <p align="center">
-  <img src="assets/vector/logo-monochrome.svg" alt="RegX" width="300">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/vector/logo-monochrome.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/vector/logo-light-monochrome.svg">
+    <img src="assets/vector/logo-monochrome.svg" alt="RegX" width="300">
+  </picture>
 </p>
 
 <br>
