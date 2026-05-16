@@ -7,7 +7,7 @@ from backend.features.audit.report_generator import ReportGenerator
 
 async def test_integrity_checker_3_real_records_all_valid(sample_provenance):
     checker = IntegrityChecker()
-    report = checker.check("RWA-OBL-BNP-2025-001", sample_provenance)
+    report = checker.check("RWA-OBL-BANK01-2025-001", sample_provenance)
     assert report.valid is True
     assert report.total_records == 3
     assert report.tampered_count == 0
@@ -17,8 +17,8 @@ async def test_integrity_checker_detects_tampered_amount(sample_provenance):
     tampered = replace(sample_provenance[1], amount=99999999.0)
     records = [sample_provenance[0], tampered, sample_provenance[2]]
     checker = IntegrityChecker()
-    report_original = checker.check("RWA-OBL-BNP-2025-001", sample_provenance)
-    report_tampered = checker.check("RWA-OBL-BNP-2025-001", records)
+    report_original = checker.check("RWA-OBL-BANK01-2025-001", sample_provenance)
+    report_tampered = checker.check("RWA-OBL-BANK01-2025-001", records)
     original_hash = report_original.records[1].computed_hash
     tampered_hash = report_tampered.records[1].computed_hash
     assert original_hash != tampered_hash
@@ -29,7 +29,7 @@ async def test_integrity_checker_detects_wrong_action_order(sample_provenance):
     wrong_second = replace(sample_provenance[0], action="TOKENISE")
     records = [wrong_first, wrong_second, sample_provenance[1]]
     checker = IntegrityChecker()
-    report = checker.check("RWA-OBL-BNP-2025-001", records)
+    report = checker.check("RWA-OBL-BANK01-2025-001", records)
     assert report.valid is False
     has_action_issue = any(
         "action" in field.lower()
@@ -43,7 +43,7 @@ async def test_integrity_checker_rejects_unknown_action(sample_provenance):
     hacked = replace(sample_provenance[0], action="HACK")
     records = [hacked, sample_provenance[1], sample_provenance[2]]
     checker = IntegrityChecker()
-    report = checker.check("RWA-OBL-BNP-2025-001", records)
+    report = checker.check("RWA-OBL-BANK01-2025-001", records)
     assert report.valid is False
     has_unknown = any(
         "HACK" in field
@@ -55,7 +55,7 @@ async def test_integrity_checker_rejects_unknown_action(sample_provenance):
 async def test_report_generator_returns_pdf_bytes(sample_provenance, sample_integrity_report):
     gen = ReportGenerator()
     asset_state = {
-        "asset_name": "OAT BNP 3.75% 2030",
+        "asset_name": "OAT BANK01 3.75% 2030",
         "isin": "FR0014004L86",
         "issuer_lei": "R0MUWSFPU8MPRO8K5P83",
         "nominal_value": 50000000,
@@ -80,7 +80,7 @@ async def test_report_generator_returns_pdf_bytes(sample_provenance, sample_inte
                 with patch("os.path.getsize", return_value=100):
                     with patch("shutil.rmtree"):
                         pdf = await gen.generate(
-                            "RWA-OBL-BNP-2025-001", asset_state,
+                            "RWA-OBL-BANK01-2025-001", asset_state,
                             sample_provenance, sample_integrity_report,
                             "sophie.lambert@amf.fr",
                         )
@@ -90,7 +90,7 @@ async def test_report_generator_returns_pdf_bytes(sample_provenance, sample_inte
 async def test_report_generator_raises_if_pdflatex_missing(sample_provenance, sample_integrity_report):
     gen = ReportGenerator()
     asset_state = {
-        "asset_name": "OAT BNP 3.75% 2030",
+        "asset_name": "OAT BANK01 3.75% 2030",
         "isin": "FR0014004L86",
         "issuer_lei": "R0MUWSFPU8MPRO8K5P83",
         "nominal_value": 50000000,
@@ -104,7 +104,7 @@ async def test_report_generator_raises_if_pdflatex_missing(sample_provenance, sa
         with patch("shutil.rmtree"):
             with pytest.raises(FileNotFoundError, match="pdflatex"):
                 await gen.generate(
-                    "RWA-OBL-BNP-2025-001", asset_state,
+                    "RWA-OBL-BANK01-2025-001", asset_state,
                     sample_provenance, sample_integrity_report,
                     "sophie.lambert@amf.fr",
                 )
@@ -112,7 +112,7 @@ async def test_report_generator_raises_if_pdflatex_missing(sample_provenance, sa
 async def test_report_generator_raises_on_compilation_failure(sample_provenance, sample_integrity_report):
     gen = ReportGenerator()
     asset_state = {
-        "asset_name": "OAT BNP 3.75% 2030",
+        "asset_name": "OAT BANK01 3.75% 2030",
         "isin": "FR0014004L86",
         "issuer_lei": "R0MUWSFPU8MPRO8K5P83",
         "nominal_value": 50000000,
@@ -130,7 +130,7 @@ async def test_report_generator_raises_on_compilation_failure(sample_provenance,
         with patch("shutil.rmtree"):
             with pytest.raises(RuntimeError, match="pdflatex"):
                 await gen.generate(
-                    "RWA-OBL-BNP-2025-001", asset_state,
+                    "RWA-OBL-BANK01-2025-001", asset_state,
                     sample_provenance, sample_integrity_report,
                     "sophie.lambert@amf.fr",
                 )

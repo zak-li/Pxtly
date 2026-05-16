@@ -1,10 +1,10 @@
 ﻿[
   {
-    "assetID": "RWA-OBL-BNP-2025-001",
+    "assetID": "RWA-OBL-BANK01-2025-001",
     "isin": "FR0014004L86",
     "figi": "BBG00ZV3FXK4",
     "assetType": "OBLIGATION",
-    "assetName": "OAT 3.75% 25 Mars 2030 BNP Emission Primaire",
+    "assetName": "OAT 3.75% 25 Mars 2030 BANK01 Emission Primaire",
     "issuerMSP": "BANK01MSP",
     "issuerLEI": "R0MUWSFPU8MPRO8K5P83",
     "currentOwner": "x509 CN=thomas.martin OU=Capital-Markets O=BANK01MSP L=Paris C=FR",
@@ -43,7 +43,7 @@
     ]
   },
   {
-    "assetID": "RWA-OBL-SG-2025-002",
+    "assetID": "RWA-OBL-BANK02-2025-002",
     "isin": "FR0014007NK8",
     "figi": "BBG010MNPQ23",
     "assetType": "OBLIGATION",
@@ -92,7 +92,7 @@
         "amount": 25000000.00,
         "price": 24739375.00,
         "justification": "Cession bloc 25M SG Green Bond Acquisition Inv01 portefeuille ESG",
-        "clearingRef": "EUTXR-2025-SG-AXA-00341",
+        "clearingRef": "EUTXR-2025-BANK02-CUST01-00341",
         "settlementDate": "2025-02-15",
         "endorsingOrgs": ["BANK02MSP", "INV01MSP", "REG01MSP"],
         "blockNumber": 1801
@@ -100,7 +100,7 @@
     ]
   },
   {
-    "assetID": "RWA-DRV-BNP-2025-006",
+    "assetID": "RWA-DRV-BANK01-2025-006",
     "isin": "FR0000RWA006",
     "assetType": "DERIVE",
     "assetName": "IRS EUR 5Y Fixed 3.45% vs EURIBOR 6M Swap Taux",
@@ -114,7 +114,7 @@
     "frozenAt": "2025-03-10 16:48:30",
     "frozenBy": "x509 CN=sophie.lambert OU=Finance-Numerique O=REG01MSP L=Paris C=FR",
     "frozenReason": "Investigation MIFID II art.69 Anomalie reporting transaction derive",
-    "regulatoryRef": "AMF-INV-2025-DRV-00041",
+    "regulatoryRef": "REG01-INV-2025-DRV-00041",
     "issuanceDate": "2025-02-01",
     "maturityDate": "2030-02-01",
     "swapDetails": {
@@ -125,7 +125,7 @@
       "businessDayConvention": "MODIFIED_FOLLOWING",
       "paymentFrequency": "SEMI_ANNUEL",
       "clearingHouse": "LCH Clearnet",
-      "tradeUTI": "UTI-BNP-SG-20250201-0001",
+      "tradeUTI": "UTI-BANK01-BANK02-20250201-0001",
       "pv01": -8420,
       "dv01": -8420
     },
@@ -135,7 +135,7 @@
         "timestamp": "2025-02-01 09:00:00",
         "actorMSP": "BANK01MSP",
         "action": "TOKENISE",
-        "justification": "Tokenisation IRS 5Y BNP-NatWest Gestion risque taux portefeuille obligataire",
+        "justification": "Tokenisation IRS 5Y BANK01-Bank 04 Gestion risque taux portefeuille obligataire",
         "blockNumber": 1701
       },
       {
@@ -145,7 +145,7 @@
         "action": "TRANSFERE",
         "fromOwner": "x509 CN=alexandre.leroy OU=Fixed-Income O=BANK02MSP",
         "toOwner": "x509 CN=james.wilson OU=Rates-Credit O=MKT01MSP",
-        "justification": "Acquisition IRS NatWest couverture risque taux portefeuille rates",
+        "justification": "Acquisition IRS Bank 04 couverture risque taux portefeuille rates",
         "blockNumber": 1832
       },
       {
@@ -154,7 +154,7 @@
         "actorMSP": "REG01MSP",
         "action": "GELE",
         "justification": "Gel preventif Investigation MIFID II art.69 Anomalie reporting transaction derive",
-        "regulatoryRef": "AMF-INV-2025-DRV-00041",
+        "regulatoryRef": "REG01-INV-2025-DRV-00041",
         "blockNumber": 1836
       }
     ]

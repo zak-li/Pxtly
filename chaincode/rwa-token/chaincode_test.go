@@ -26,9 +26,9 @@ func TestTokenizeAsset(t *testing.T) {
 
 func TestTransferBlockedOnFrozenAsset(t *testing.T) {
 	asset := &FinancialAsset{
-		AssetID:       "RWA-OBL-BNP-2025-001",
+		AssetID:       "RWA-OBL-BANK01-2025-001",
 		Status:        StatusGele,
-		RegulatoryRef: "AMF-INV-2026-001",
+		RegulatoryRef: "REG01-INV-2026-001",
 	}
 	assetJSON, err := json.Marshal(asset)
 	assert.NoError(t, err)
@@ -38,7 +38,7 @@ func TestTransferBlockedOnFrozenAsset(t *testing.T) {
 	err = json.Unmarshal(assetJSON, &decoded)
 	assert.NoError(t, err)
 	assert.Equal(t, StatusGele, decoded.Status)
-	assert.Equal(t, "AMF-INV-2026-001", decoded.RegulatoryRef)
+	assert.Equal(t, "REG01-INV-2026-001", decoded.RegulatoryRef)
 }
 
 func TestProvenanceRecord(t *testing.T) {

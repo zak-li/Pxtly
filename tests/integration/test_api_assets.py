@@ -5,7 +5,7 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.features.assets.models import Asset
-from tests.conftest import BNP_ORG_ID, THOMAS_USER_ID
+from tests.conftest import BANK01_ORG_ID, THOMAS_USER_ID
 
 async def test_post_tokenize_with_emetteur_token_returns_201(
     test_client: AsyncClient, token_thomas_martin: str,
@@ -77,7 +77,7 @@ async def test_post_freeze_with_regulateur_token_returns_200(
         isin="FR0014004L86",
         asset_type="OBLIGATION",
         asset_name="Freeze API Test",
-        issuer_org_id=BNP_ORG_ID,
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("20000000"),
         current_value=Decimal("20000000"),
@@ -91,7 +91,7 @@ async def test_post_freeze_with_regulateur_token_returns_200(
     payload = {
         "asset_id": "RWA-OBL-FREEZE-API-001",
         "reason": "Investigation MIFID II art.69 reglementaire test",
-        "regulatory_ref": "AMF-INV-2026-001",
+        "regulatory_ref": "REG01-INV-2026-001",
     }
     resp = await test_client.post(
         "/api/v1/assets/freeze",
@@ -106,9 +106,9 @@ async def test_post_freeze_with_emetteur_token_returns_403(
     async_session: AsyncSession, test_org, test_user_thomas,
 ):
     payload = {
-        "asset_id": "RWA-OBL-BNP-2025-001",
+        "asset_id": "RWA-OBL-BANK01-2025-001",
         "reason": "Emetteur tentative gel non autorisee test",
-        "regulatory_ref": "AMF-INV-2026-001",
+        "regulatory_ref": "REG01-INV-2026-001",
     }
     resp = await test_client.post(
         "/api/v1/assets/freeze",
@@ -122,11 +122,11 @@ async def test_post_transfer_on_frozen_asset_returns_409(
     async_session: AsyncSession, test_org, test_user_thomas,
 ):
     asset = Asset(
-        asset_id="RWA-OBL-BNP-2025-001",
+        asset_id="RWA-OBL-BANK01-2025-001",
         isin="FR0014004L86",
         asset_type="OBLIGATION",
-        asset_name="OAT BNP Frozen",
-        issuer_org_id=BNP_ORG_ID,
+        asset_name="OAT BANK01 Frozen",
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("50000000"),
         current_value=Decimal("50000000"),
@@ -138,7 +138,7 @@ async def test_post_transfer_on_frozen_asset_returns_409(
     await async_session.flush()
 
     payload = {
-        "asset_id": "RWA-OBL-BNP-2025-001",
+        "asset_id": "RWA-OBL-BANK01-2025-001",
         "to_owner": "sophie.lambert@amf.fr",
         "price": 24739375,
         "justification": "Tentative transfert actif gele test integration",
@@ -149,19 +149,19 @@ async def test_post_transfer_on_frozen_asset_returns_409(
         headers={"Authorization": f"Bearer {token_thomas_martin}"},
     )
     assert resp.status_code == 409
-    assert "AMF-INV-2026-001" in resp.json().get("message", "")
+    assert "REG01-INV-2026-001" in resp.json().get("message", "")
 
 async def test_get_asset_returns_all_fields(
     test_client: AsyncClient, token_thomas_martin: str,
     async_session: AsyncSession, test_org, test_user_thomas,
 ):
     resp = await test_client.get(
-        "/api/v1/assets/RWA-OBL-BNP-2025-001",
+        "/api/v1/assets/RWA-OBL-BANK01-2025-001",
         headers={"Authorization": f"Bearer {token_thomas_martin}"},
     )
     assert resp.status_code == 200
     body = resp.json()
-    assert body["asset_id"] == "RWA-OBL-BNP-2025-001"
+    assert body["asset_id"] == "RWA-OBL-BANK01-2025-001"
     assert "isin" in body
     assert "status" in body
 
@@ -181,7 +181,7 @@ async def test_get_history_returns_3_ordered_provenance_records(
     async_session: AsyncSession, test_org, test_user_thomas,
 ):
     resp = await test_client.get(
-        "/api/v1/assets/RWA-OBL-BNP-2025-001/history",
+        "/api/v1/assets/RWA-OBL-BANK01-2025-001/history",
         headers={"Authorization": f"Bearer {token_thomas_martin}"},
     )
     assert resp.status_code == 200
@@ -201,4 +201,4 @@ async def test_get_assets_filter_status_actif_excludes_frozen(
     assert resp.status_code == 200
     body = resp.json()
     frozen_ids = [a["asset_id"] for a in body if a.get("status") == "GELE"]
-    assert "RWA-OBL-BNP-2025-001" not in frozen_ids
+    assert "RWA-OBL-BANK01-2025-001" not in frozen_ids

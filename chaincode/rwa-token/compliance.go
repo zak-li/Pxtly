@@ -11,7 +11,7 @@ import (
 var assetIDPattern = regexp.MustCompile(`^RWA-[A-Z]{2,12}-[A-Z]{2,6}-[0-9]{4}-[0-9]{3}$`)
 
 // RegulatoryRef convention: <AUTHORITY 2-6 letters>-<CATEGORY>-<YEAR>-<SERIAL>.
-// Examples: AMF-INV-2026-001, ESMA-MICA-2026-042. Letters/digits/dashes only.
+// Examples: REG01-INV-2026-001, ESMA-MICA-2026-042. Letters/digits/dashes only.
 var regulatoryRefPattern = regexp.MustCompile(`^[A-Z]{2,6}-[A-Z0-9]{2,8}-[0-9]{4}-[A-Z0-9]{3,8}$`)
 
 // ISO 4217 currencies accepted by the platform. Restricting to a small,

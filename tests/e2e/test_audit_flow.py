@@ -16,7 +16,7 @@ async def test_generate_audit_report_pdf_latex(
     mock_audit_trail = AsyncMock()
     mock_audit_trail.get_provenance = AsyncMock(return_value=sample_provenance)
     mock_audit_trail.get_asset_state = AsyncMock(return_value={
-        "asset_name": "OAT BNP 3.75% 2030",
+        "asset_name": "OAT BANK01 3.75% 2030",
         "isin": "FR0014004L86",
         "issuer_lei": "R0MUWSFPU8MPRO8K5P83",
         "nominal_value": 50000000,
@@ -29,7 +29,7 @@ async def test_generate_audit_report_pdf_latex(
 
     with patch("asyncio.create_subprocess_exec", return_value=mock_process):
         checker = IntegrityChecker()
-        report = checker.check("RWA-OBL-BNP-2025-001", sample_provenance)
+        report = checker.check("RWA-OBL-BANK01-2025-001", sample_provenance)
 
     assert report.valid is True
     assert report.total_records == 3
@@ -39,7 +39,7 @@ async def test_integrity_report_detects_tampered_record(sample_provenance):
     records = [sample_provenance[0], tampered, sample_provenance[2]]
 
     checker = IntegrityChecker()
-    report_original = checker.check("RWA-OBL-BNP-2025-001", sample_provenance)
-    report_tampered = checker.check("RWA-OBL-BNP-2025-001", records)
+    report_original = checker.check("RWA-OBL-BANK01-2025-001", sample_provenance)
+    report_tampered = checker.check("RWA-OBL-BANK01-2025-001", records)
 
     assert report_original.records[1].computed_hash != report_tampered.records[1].computed_hash

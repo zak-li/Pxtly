@@ -49,13 +49,13 @@ async def test_detect_circular_flow_returns_results(detector_with_driver):
     _make_session_cm(mock_session, mock_driver)
 
     mock_session.run.return_value = AsyncIteratorMock([
-        _make_mock_record({"SuspiciousActor": "CN=actor1,OU=BNP", "CycleLength": 3, "TotalVolume": 5000000.0}),
+        _make_mock_record({"SuspiciousActor": "CN=actor1,OU=BANK01", "CycleLength": 3, "TotalVolume": 5000000.0}),
     ])
 
     results = await detector.detect_circular_flow(depth=4)
 
     assert len(results) == 1
-    assert results[0]["actor_dn"] == "CN=actor1,OU=BNP"
+    assert results[0]["actor_dn"] == "CN=actor1,OU=BANK01"
     assert results[0]["cycle_length"] == 3
     assert results[0]["total_volume"] == 5000000.0
     assert results[0]["pattern"] == "CIRCULAR_FLOW"
@@ -74,8 +74,8 @@ async def test_detect_smurfing_returns_results(detector_with_driver):
     _make_session_cm(mock_session, mock_driver)
 
     mock_session.run.return_value = AsyncIteratorMock([
-        _make_mock_record({"SmurfCore": "CN=smurf1,OU=BNP", "num_transfers": 8, "avg_amount": 12000.0}),
-        _make_mock_record({"SmurfCore": "CN=smurf2,OU=AMF", "num_transfers": 12, "avg_amount": 8500.0}),
+        _make_mock_record({"SmurfCore": "CN=smurf1,OU=BANK01", "num_transfers": 8, "avg_amount": 12000.0}),
+        _make_mock_record({"SmurfCore": "CN=smurf2,OU=REG01", "num_transfers": 12, "avg_amount": 8500.0}),
     ])
 
     results = await detector.detect_smurfing()
@@ -93,7 +93,7 @@ async def test_detect_layering_returns_results(detector_with_driver):
 
     mock_session.run.return_value = AsyncIteratorMock([
         _make_mock_record({
-            "OriginalSender": "CN=sender,OU=BNP",
+            "OriginalSender": "CN=sender,OU=BANK01",
             "FinalRecipient": "CN=sink,OU=OFFSHORE",
             "LayerCount": 5,
             "InitialAmount": 1000000.0,

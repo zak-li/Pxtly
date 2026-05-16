@@ -28,7 +28,7 @@ BASE_URL = os.environ.get("API_URL", "http://localhost:8000")
 THOMAS_EMAIL = os.environ.get("SIM_USER_EMAIL", "thomas.martin@bank01.com")
 THOMAS_PASSWORD = os.environ.get("SIM_USER_PASSWORD", "")
 THOMAS_USER_ID = os.environ.get("SIM_USER_ID", "a0000001-0001-0001-0001-000000000001")
-BNP_ORG_ID = os.environ.get("SIM_ORG_ID", "a1b2c3d4-0001-0001-0001-000000000001")
+BANK01_ORG_ID = os.environ.get("SIM_ORG_ID", "a1b2c3d4-0001-0001-0001-000000000001")
 
 ASSET_TYPES = ["OBLIGATION", "OPCVM", "IMMOBILIER", "DERIVE", "MATIERE_PREMIERE", "PRIVATE_EQUITY"]
 ASSET_PREFIXES = {
@@ -43,7 +43,7 @@ ASSET_NAMES = {
     "OBLIGATION": ["OAT 3.75% 2030", "BTP 4.0% 2028", "BUND 2.5% 2031", "Gilt 4.25% 2032"],
     "OPCVM": ["MSCI World Tracker", "CAC 40 ETF", "Euro Corporate Bond Fund"],
     "IMMOBILIER": ["Tour Montparnasse SCPI", "Immeuble La Defense", "Portfolio Logistique"],
-    "DERIVE": ["OAT Future Dec 2025", "EUR/USD 3M Forward", "CDS BNP 5Y"],
+    "DERIVE": ["OAT Future Dec 2025", "EUR/USD 3M Forward", "CDS BANK01 5Y"],
     "MATIERE_PREMIERE": ["Gold Bullion Token", "Crude Oil WTI Q4", "Wheat Index Fund"],
     "PRIVATE_EQUITY": ["LBO Tech Fund III", "Growth Capital SCPI", "Infra Debt 2026"],
 }
@@ -182,7 +182,7 @@ async def freeze_asset(client: httpx.AsyncClient, headers: dict, asset_id: str) 
             json={
                 "asset_id": asset_id,
                 "reason": "Simulation regulatory freeze — AML screening triggered",
-                "regulatory_ref": f"AMF-AML-{date.today().year}-{random.randint(100, 999)}",
+                "regulatory_ref": f"REG01-AML-{date.today().year}-{random.randint(100, 999)}",
             },
             headers=headers, timeout=15,
         )

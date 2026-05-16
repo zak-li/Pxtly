@@ -46,8 +46,8 @@ ADMIN_DB_URL = (
     or TEST_DATABASE_URL.replace("+asyncpg", "").replace("/rwadb_test", "/rwadb")
 )
 
-BNP_ORG_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
-AMF_ORG_ID = uuid.UUID("00000000-0000-0000-0000-000000000002")
+BANK01_ORG_ID = uuid.UUID("00000000-0000-0000-0000-000000000001")
+REG01_ORG_ID = uuid.UUID("00000000-0000-0000-0000-000000000002")
 NATWEST_ORG_ID = uuid.UUID("00000000-0000-0000-0000-000000000003")
 
 THOMAS_USER_ID = uuid.UUID("10000000-0000-0000-0000-000000000001")
@@ -157,17 +157,17 @@ def mock_fabric_client() -> AsyncMock:
                 "asset_type": "OBLIGATION",
                 "asset_name": "Mocked Asset",
                 "issuer_lei": "R0MUWSFPU8MPRO8K5P83",
-                "issuer_org_id": str(BNP_ORG_ID),
+                "issuer_org_id": str(BANK01_ORG_ID),
                 "current_owner_id": str(THOMAS_USER_ID),
                 "nominal_value": 50000000,
                 "current_value": 50000000,
                 "currency": "EUR",
-                "status": "ACTIF" if target_id != "RWA-OBL-BNP-2025-001" else "GELE",
+                "status": "ACTIF" if target_id != "RWA-OBL-BANK01-2025-001" else "GELE",
                 "issuance_date": "2025-01-15",
-                "regulatory_ref": "AMF-INV-2026-001",
+                "regulatory_ref": "REG01-INV-2026-001",
                 "fabric_tx_id": REAL_TX_1,
             }
-        if function == "GetProvenanceTrail" and args and args[0] == "RWA-OBL-BNP-2025-001":
+        if function == "GetProvenanceTrail" and args and args[0] == "RWA-OBL-BANK01-2025-001":
             return [
                 {
                     "txID": REAL_TX_1,
@@ -188,7 +188,7 @@ def mock_fabric_client() -> AsyncMock:
                     "actorDN": "CN=admin@bank01.finance-trust.com,OU=admin",
                     "action": "TRANSFERE",
                     "fromOwner": "CN=admin@bank01.finance-trust.com,OU=admin",
-                    "toOwner": "CN=pierre.moreau,OU=AXA-IM",
+                    "toOwner": "CN=pierre.moreau,OU=Cust 01",
                     "amount": 24739375,
                     "justification": "Cession bloc Inv01 portefeuille ESG",
                     "blockNumber": 0,
@@ -197,7 +197,7 @@ def mock_fabric_client() -> AsyncMock:
                     "txID": REAL_TX_3,
                     "timestamp": "2026-03-20T11:43:28.950803855Z",
                     "actorMSP": "REG01MSP",
-                    "actorDN": "CN=admin@amf-regulateur.finance-trust.com,OU=admin",
+                    "actorDN": "CN=admin@reg01-regulateur.finance-trust.com,OU=admin",
                     "action": "GELE",
                     "fromOwner": "",
                     "toOwner": "",
@@ -222,10 +222,10 @@ def mock_fabric_client() -> AsyncMock:
                 "txID": "MOCK_FREEZE_TX",
                 "blockNumber": 2,
                 "status": "GELE",
-                "regulatory_ref": "AMF-INV-2026-001",
+                "regulatory_ref": "REG01-INV-2026-001",
             }
-        if function == "TransferAsset" and args and args[0] == "RWA-OBL-BNP-2025-001":
-            raise AssetFrozenError("RWA-OBL-BNP-2025-001", "AMF-INV-2026-001")
+        if function == "TransferAsset" and args and args[0] == "RWA-OBL-BANK01-2025-001":
+            raise AssetFrozenError("RWA-OBL-BANK01-2025-001", "REG01-INV-2026-001")
         return {}
 
     client.evaluate_transaction.side_effect = mock_evaluate
@@ -269,13 +269,13 @@ async def test_client(
 @pytest.fixture
 async def test_org(async_session: AsyncSession) -> Organization:
     org = Organization(
-        id=BNP_ORG_ID,
-        org_code="BNP",
+        id=BANK01_ORG_ID,
+        org_code="BANK01",
         legal_name="Bank01 SA",
         short_name="Bank01",
         org_type="BANQUE",
         lei="R0MUWSFPU8MPRO8K5P83",
-        bic_swift="BNPAFRPP",
+        bic_swift="BANK01FRPP",
         msp_id="BANK01MSP",
         country_code="FR",
         jurisdiction="EU",
@@ -288,10 +288,10 @@ async def test_org(async_session: AsyncSession) -> Organization:
 @pytest.fixture
 async def test_amf_org(async_session: AsyncSession) -> Organization:
     org = Organization(
-        id=AMF_ORG_ID,
-        org_code="AMF",
+        id=REG01_ORG_ID,
+        org_code="REG01",
         legal_name="Autorité des Marchés Financiers",
-        short_name="AMF",
+        short_name="REG01",
         org_type="REGULATEUR",
         lei="96950066U5XAAIRCPA78",
         msp_id="REG01MSP",
@@ -308,7 +308,7 @@ async def test_user_thomas(async_session: AsyncSession, test_org: Organization) 
     from backend.core.security import hash_password
     user = User(
         id=THOMAS_USER_ID,
-        org_id=BNP_ORG_ID,
+        org_id=BANK01_ORG_ID,
         email="thomas.martin@bank01.fr",
         hashed_password=hash_password("Passw0rd!"),
         first_name="Thomas",
@@ -337,7 +337,7 @@ async def test_user_sophie(async_session: AsyncSession, test_amf_org: Organizati
     from backend.core.security import hash_password
     user = User(
         id=SOPHIE_USER_ID,
-        org_id=AMF_ORG_ID,
+        org_id=REG01_ORG_ID,
         email="sophie.lambert@amf.fr",
         hashed_password=hash_password("Passw0rd!"),
         first_name="Sophie",
@@ -364,13 +364,13 @@ async def test_user_sophie(async_session: AsyncSession, test_amf_org: Organizati
 @pytest.fixture
 def token_thomas_martin(monkeypatch_session) -> str:
     monkeypatch_session.setenv("SECRET_KEY", Settings().secret_key)
-    payload = {"sub": str(THOMAS_USER_ID), "role": "EMETTEUR", "org_id": str(BNP_ORG_ID)}
+    payload = {"sub": str(THOMAS_USER_ID), "role": "EMETTEUR", "org_id": str(BANK01_ORG_ID)}
     return create_access_token(payload, expires_delta=timedelta(hours=24))
 
 @pytest.fixture
 def token_sophie_lambert(monkeypatch_session) -> str:
     monkeypatch_session.setenv("SECRET_KEY", Settings().secret_key)
-    payload = {"sub": str(SOPHIE_USER_ID), "role": "REGULATEUR", "org_id": str(AMF_ORG_ID)}
+    payload = {"sub": str(SOPHIE_USER_ID), "role": "REGULATEUR", "org_id": str(REG01_ORG_ID)}
     return create_access_token(payload, expires_delta=timedelta(hours=24))
 
 @pytest.fixture
@@ -382,7 +382,7 @@ def token_james_wilson(monkeypatch_session) -> str:
 @pytest.fixture
 def token_expired(monkeypatch_session) -> str:
     monkeypatch_session.setenv("SECRET_KEY", Settings().secret_key)
-    payload = {"sub": str(THOMAS_USER_ID), "role": "EMETTEUR", "org_id": str(BNP_ORG_ID)}
+    payload = {"sub": str(THOMAS_USER_ID), "role": "EMETTEUR", "org_id": str(BANK01_ORG_ID)}
     return create_access_token(payload, expires_delta=timedelta(hours=-1))
 
 @pytest.fixture
@@ -408,7 +408,7 @@ def sample_provenance() -> list[ProvenanceRecord]:
             actor_dn="CN=admin@bank01.finance-trust.com,OU=admin",
             action="TRANSFERE",
             from_owner="CN=admin@bank01.finance-trust.com,OU=admin",
-            to_owner="CN=pierre.moreau,OU=AXA-IM",
+            to_owner="CN=pierre.moreau,OU=Cust 01",
             amount=24739375.0,
             justification="Cession bloc Inv01 portefeuille ESG",
             block_number=0,
@@ -417,7 +417,7 @@ def sample_provenance() -> list[ProvenanceRecord]:
             tx_id=REAL_TX_3,
             timestamp=_base_ts + timedelta(hours=13),
             actor_msp="REG01MSP",
-            actor_dn="CN=admin@amf-regulateur.finance-trust.com,OU=admin",
+            actor_dn="CN=admin@reg01-regulateur.finance-trust.com,OU=admin",
             action="GELE",
             from_owner="",
             to_owner="",
@@ -430,7 +430,7 @@ def sample_provenance() -> list[ProvenanceRecord]:
 @pytest.fixture
 def sample_integrity_report(sample_provenance: list[ProvenanceRecord]) -> IntegrityReport:
     checker = IntegrityChecker()
-    return checker.check("RWA-OBL-BNP-2025-001", sample_provenance)
+    return checker.check("RWA-OBL-BANK01-2025-001", sample_provenance)
 
 @pytest.fixture(scope="session", autouse=True)
 def sample_compliance_data() -> None:

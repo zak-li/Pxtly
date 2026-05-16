@@ -45,15 +45,15 @@ async def test_kyc_james_wilson_expired_after_20260228(
     james_id = JAMES_USER_ID
     from backend.features.auth.models import Organization, User
     from backend.core.security import hash_password
-    natwest = Organization(
+    bank04 = Organization(
         id=uuid.UUID("00000000-0000-0000-0000-000000000003"),
-        org_code="NW", legal_name="NatWest", org_type="BANQUE",
+        org_code="NW", legal_name="Bank 04", org_type="BANQUE",
         msp_id="MKT01MSP", is_active=True,
     )
-    async_session.add(natwest)
+    async_session.add(bank04)
     await async_session.flush()
     james = User(
-        id=james_id, org_id=natwest.id, email="james.wilson@natwest.com",
+        id=james_id, org_id=bank04.id, email="james.wilson@bank04.com",
         hashed_password=hash_password("Passw0rd!"), role="TRADER", is_active=True,
     )
     async_session.add(james)
@@ -79,12 +79,12 @@ async def test_kyc_james_wilson_needs_renewal_flag(
     james_id = JAMES_USER_ID
     from backend.features.auth.models import Organization, User
     try:
-        natwest = Organization(
+        bank04 = Organization(
             id=uuid.UUID("00000000-0000-0000-0000-000000000003"),
-            org_code="NW2", legal_name="NatWest2", org_type="BANQUE",
-            msp_id="NatWestMSP2", is_active=True,
+            org_code="BANK042", legal_name="Bank04", org_type="BANQUE",
+            msp_id="BANK04MSP2", is_active=True,
         )
-        async_session.add(natwest)
+        async_session.add(bank04)
         await async_session.flush()
     except Exception:
         pass
@@ -92,7 +92,7 @@ async def test_kyc_james_wilson_needs_renewal_flag(
     try:
         james = User(
             id=james_id, org_id=uuid.UUID("00000000-0000-0000-0000-000000000003"),
-            email="james2@natwest.com", hashed_password="$2b$12$fakehash",
+            email="james2@bank04.com", hashed_password="$2b$12$fakehash",
             role="TRADER", is_active=True,
         )
         async_session.add(james)
@@ -164,14 +164,14 @@ async def test_mica_art68_triggered_above_1000_eur(
     async_session: AsyncSession, test_org, test_user_thomas,
 ):
     checker = MiCAChecker(settings, async_session)
-    result = await checker.check(1001.0, THOMAS_USER_ID, "RWA-OBL-BNP-2025-001", "OBLIGATION")
+    result = await checker.check(1001.0, THOMAS_USER_ID, "RWA-OBL-BANK01-2025-001", "OBLIGATION")
     assert result.identification_required is True
 
 async def test_mica_art68_not_triggered_below_1000_eur(
     async_session: AsyncSession, test_org, test_user_thomas,
 ):
     checker = MiCAChecker(settings, async_session)
-    result = await checker.check(999.0, THOMAS_USER_ID, "RWA-OBL-BNP-2025-001", "OBLIGATION")
+    result = await checker.check(999.0, THOMAS_USER_ID, "RWA-OBL-BANK01-2025-001", "OBLIGATION")
     assert result.identification_required is False
     assert result.compliant is True
 

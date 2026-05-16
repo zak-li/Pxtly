@@ -4,9 +4,9 @@
     "key_path": "tests/fixtures/crypto_config_mock/peerOrganizations/bank01.finance-trust.com/users/admin@bank01.finance-trust.com/msp/keystore/priv_sk",
     "msp_id": "BANK01MSP"
   },
-  "admin@amf-regulateur": {
-    "cert_path": "tests/fixtures/crypto_config_mock/peerOrganizations/amf-regulateur.finance-trust.com/users/admin@amf-regulateur.finance-trust.com/msp/signcerts/cert.pem",
-    "key_path": "tests/fixtures/crypto_config_mock/peerOrganizations/amf-regulateur.finance-trust.com/users/admin@amf-regulateur.finance-trust.com/msp/keystore/priv_sk",
+  "admin@reg01-regulateur": {
+    "cert_path": "tests/fixtures/crypto_config_mock/peerOrganizations/reg01-regulateur.finance-trust.com/users/admin@reg01-regulateur.finance-trust.com/msp/signcerts/cert.pem",
+    "key_path": "tests/fixtures/crypto_config_mock/peerOrganizations/reg01-regulateur.finance-trust.com/users/admin@reg01-regulateur.finance-trust.com/msp/keystore/priv_sk",
     "msp_id": "REG01MSP"
   }
 }

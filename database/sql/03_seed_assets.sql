@@ -1,7 +1,7 @@
 ﻿INSERT INTO assets (id, asset_id, isin, figi, asset_type, asset_name, issuer_org_id, current_owner_id, nominal_value, current_value, currency, status, issuance_date, maturity_date, coupon_rate, coupon_frequency, rating_moodys, rating_sp, rating_fitch, underlying_asset, fabric_tx_id, fabric_block_number, last_valuation_date, total_transfers, metadata) VALUES
 ('a5000001-0001-0001-0001-000000000001',
- 'RWA-OBL-BNP-2025-001', 'FR0014004L86', 'BBG00ZV3FXK4',
- 'OBLIGATION', 'OAT 3.75% 25 Mars 2030 — BNP Emission Primaire',
+ 'RWA-OBL-BANK01-2025-001', 'FR0014004L86', 'BBG00ZV3FXK4',
+ 'OBLIGATION', 'OAT 3.75% 25 Mars 2030 — BANK01 Emission Primaire',
  'a1b2c3d4-0001-0001-0001-000000000001',
  'a0000001-0001-0001-0001-000000000001',
  50000000.0000, 49812500.0000, 'EUR', 'ACTIF',
@@ -13,7 +13,7 @@
  '{"settlement_system": "Euroclear France", "minimum_denomination": 100000, "total_outstanding": 50000000, "paying_agent": "Bank01 Securities Services", "listing_market": "Euronext Paris", "accrued_interest": 468750.00, "mifid_classification": "COMPLEX_PRODUCT", "sfdr_article": "ARTICLE_8"}'
 ),
 ('a5000002-0002-0002-0002-000000000002',
- 'RWA-OBL-SG-2025-002', 'FR0014007NK8', 'BBG010MNPQ23',
+ 'RWA-OBL-BANK02-2025-002', 'FR0014007NK8', 'BBG010MNPQ23',
  'OBLIGATION', 'SG Green Bond 2.875% Juin 2028 — Sustainable Finance',
  'a1b2c3d4-0002-0002-0002-000000000002',
  'a0000005-0005-0005-0005-000000000005',
@@ -26,7 +26,7 @@
  '{"green_bond_framework": "SG Green Bond Framework 2024", "use_of_proceeds": ["energie_renouvelable", "batiments_verts", "transport_propre"], "external_reviewer": "Vigeo Eiris", "climate_bonds_certified": true, "settlement_system": "Euroclear France", "listing_market": "Euronext Paris Segment Green"}'
 ),
 ('a5000003-0003-0003-0003-000000000003',
- 'RWA-OPCVM-AXA-2025-003', 'LU0012348560', 'BBG003VXHCH2',
+ 'RWA-OPCVM-CUST01-2025-003', 'LU0012348560', 'BBG003VXHCH2',
  'OPCVM', 'Inv01 Optimal Income A EUR Acc — SICAV Luxembourg',
  'a1b2c3d4-0003-0003-0003-000000000003',
  'a0000005-0005-0005-0005-000000000005',
@@ -39,7 +39,7 @@
  '{"nav_per_share": 124.56, "total_shares": 1000000, "management_fee_bps": 75, "performance_fee_pct": 10, "high_water_mark": 118.90, "benchmark": "MSCI World 50% Bloomberg Aggregate 50%", "domicile": "Luxembourg", "depositary": "Bank01 Securities Services", "srri": 4}'
 ),
 ('a5000004-0004-0004-0004-000000000004',
- 'RWA-IMM-BNP-2025-004', 'FR0000RWA004', NULL,
+ 'RWA-IMM-BANK01-2025-004', 'FR0000RWA004', NULL,
  'IMMOBILIER', 'Tour Majunga La Defense — Token Immobilier Commercial',
  'a1b2c3d4-0001-0001-0001-000000000001',
  'a0000005-0005-0005-0005-000000000005',
@@ -52,7 +52,7 @@
  '{"surface_m2": 72000, "floors": 40, "year_built": 2014, "occupancy_rate": 0.94, "anchor_tenant": "Unibail-Rodamco-Westfield", "lease_expiry": "2033-12-31", "environmental_rating": "BREEAM Excellent", "hqe_certification": true, "valuation_firm": "CBRE Valuation Advisory", "total_tokens": 280000, "token_price_eur": 1000}'
 ),
 ('a5000005-0005-0005-0005-000000000005',
- 'RWA-PVEQ-SG-2025-005', 'FR0000RWA005', NULL,
+ 'RWA-PVEQ-BANK02-2025-005', 'FR0000RWA005', NULL,
  'PRIVATE_EQUITY', 'SG Infrastructure Fund III — Part A Tokenisee',
  'a1b2c3d4-0002-0002-0002-000000000002',
  'a0000003-0003-0003-0003-000000000003',
@@ -65,7 +65,7 @@
  '{"fund_vintage": 2024, "target_irr_pct": 12.5, "dpi": 0.0, "rvpi": 1.075, "tvpi": 1.075, "called_capital_pct": 45.0, "committed_capital": 100000000, "portfolio_companies": ["EolienFrance SAS", "SolarPark Iberia SA", "BioGaz Est SASU"], "gp_name": "Bank02 Capital Partners", "lp_count": 23, "min_commitment": 1000000}'
 ),
 ('a5000006-0006-0006-0006-000000000006',
- 'RWA-DRV-BNP-2025-006', 'FR0000RWA006', NULL,
+ 'RWA-DRV-BANK01-2025-006', 'FR0000RWA006', NULL,
  'DERIVE', 'IRS EUR 5Y Fixed 3.45% vs EURIBOR 6M — Swap Taux',
  'a1b2c3d4-0001-0001-0001-000000000001',
  'a0000009-0009-0009-0009-000000000009',
@@ -75,10 +75,10 @@
  'Interest Rate Swap — Jambe fixe 3.45% / Jambe variable EURIBOR 6M',
  'f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0',
  1701, '2025-03-15', 1,
- '{"notional": 20000000, "fixed_rate": 3.45, "floating_index": "EURIBOR_6M", "spread_bps": 0, "day_count": "ACT/360", "business_day_convention": "MODIFIED_FOLLOWING", "mtm_eur": -216000, "pv01": -8420, "clearing_house": "LCH Clearnet", "trade_id": "UTI-BNP-SG-20250201-0001", "frozen_reason": "Investigation MIFID II art.69"}'
+ '{"notional": 20000000, "fixed_rate": 3.45, "floating_index": "EURIBOR_6M", "spread_bps": 0, "day_count": "ACT/360", "business_day_convention": "MODIFIED_FOLLOWING", "mtm_eur": -216000, "pv01": -8420, "clearing_house": "LCH Clearnet", "trade_id": "UTI-BANK01-BANK02-20250201-0001", "frozen_reason": "Investigation MIFID II art.69"}'
 ),
 ('a5000007-0007-0007-0007-000000000007',
- 'RWA-MAT-AXA-2025-007', 'XS2345678901', 'BBG00RWAMAT7',
+ 'RWA-MAT-CUST01-2025-007', 'XS2345678901', 'BBG00RWAMAT7',
  'MATIERE_PREMIERE', 'Gold Bullion ETC — LBMA 999.9 Fine Gold Tokenise',
  'a1b2c3d4-0003-0003-0003-000000000003',
  'a0000008-0008-0008-0008-000000000008',

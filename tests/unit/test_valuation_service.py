@@ -31,7 +31,7 @@ async def seed_valuation_asset(async_session: AsyncSession) -> str:
         id=a_id,
         asset_id=asset_id,
         asset_type="OBLIGATION",
-        asset_name="Obligation BNP",
+        asset_name="Obligation BANK01",
         issuer_org_id=org_id,
         current_owner_id=user_id,
         nominal_value=Decimal("100"),

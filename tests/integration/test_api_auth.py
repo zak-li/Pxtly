@@ -1,7 +1,7 @@
 ﻿from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from tests.conftest import BNP_ORG_ID, THOMAS_USER_ID
+from tests.conftest import BANK01_ORG_ID, THOMAS_USER_ID
 
 async def test_login_thomas_martin_returns_valid_jwt(
     test_client: AsyncClient,
@@ -86,7 +86,7 @@ async def test_regulateur_can_access_freeze_endpoint(
         isin="FR0014004L86",
         asset_type="OBLIGATION",
         asset_name="Auth Freeze Test",
-        issuer_org_id=BNP_ORG_ID,
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("10000000"),
         current_value=Decimal("10000000"),
@@ -100,7 +100,7 @@ async def test_regulateur_can_access_freeze_endpoint(
     payload = {
         "asset_id": "RWA-OBL-AUTHFR-001",
         "reason": "Test regulateur authorization freeze check",
-        "regulatory_ref": "AMF-INV-2026-001",
+        "regulatory_ref": "REG01-INV-2026-001",
     }
     resp = await test_client.post(
         "/api/v1/assets/freeze",
@@ -113,9 +113,9 @@ async def test_trader_cannot_access_freeze_endpoint(
     test_client: AsyncClient, token_james_wilson: str,
 ):
     payload = {
-        "asset_id": "RWA-OBL-BNP-2025-001",
+        "asset_id": "RWA-OBL-BANK01-2025-001",
         "reason": "Trader tentative gel non autorise test",
-        "regulatory_ref": "AMF-INV-2026-001",
+        "regulatory_ref": "REG01-INV-2026-001",
     }
     resp = await test_client.post(
         "/api/v1/assets/freeze",

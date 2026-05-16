@@ -96,8 +96,8 @@ class FabricClient:
         pass
 
     # Per-org overrides: set FABRIC_BANK01_MSPID / FABRIC_BANK01_DOMAIN / FABRIC_BANK01_ADMIN /
-    # FABRIC_AMF_MSPID / FABRIC_AMF_DOMAIN / FABRIC_AMF_ADMIN in the environment to bridge legacy
-    # Fabric network names (e.g. BNPParibasMSP) without touching the running channel config.
+    # FABRIC_REG01_MSPID / FABRIC_REG01_DOMAIN / FABRIC_REG01_ADMIN in the environment to bridge
+    # legacy Fabric network names (e.g. BANK01MSP) without touching the running channel config.
     _ORG_DEFAULTS: ClassVar[dict[str, dict[str, str]]] = {
         "bank01": {
             "msp_id":    "BANK01MSP",
@@ -105,17 +105,17 @@ class FabricClient:
             "admin":     "admin@bank01.finance-trust.com",
             "peer_port": "7051",
         },
-        "amf": {
+        "reg01": {
             "msp_id":    "REG01MSP",
-            "domain":    "amf-regulateur.finance-trust.com",
-            "admin":     "admin@amf-regulateur.finance-trust.com",
+            "domain":    "reg01-regulateur.finance-trust.com",
+            "admin":     "admin@reg01-regulateur.finance-trust.com",
             "peer_port": "7091",
         },
     }
 
     def _org_cfg(self, key: str) -> dict[str, str]:
         d = self._ORG_DEFAULTS[key]
-        pfx = "FABRIC_BANK01_" if key == "bank01" else "FABRIC_AMF_"
+        pfx = "FABRIC_BANK01_" if key == "bank01" else "FABRIC_REG01_"
         return {
             "msp_id":    os.environ.get(f"{pfx}MSPID",     d["msp_id"]),
             "domain":    os.environ.get(f"{pfx}DOMAIN",    d["domain"]),
@@ -129,8 +129,8 @@ class FabricClient:
 
         if "bank01" in identity_label.lower():
             cfg = self._org_cfg("bank01")
-        elif "amf" in identity_label.lower() or "reg01" in identity_label.lower():
-            cfg = self._org_cfg("amf")
+        elif "reg01" in identity_label.lower():
+            cfg = self._org_cfg("reg01")
         else:
             raise ValueError(f"Unknown identity mapping {identity_label}")
 

@@ -7,14 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.core.security import create_access_token, hash_password
 from backend.features.auth.models import Organization, User
-from tests.conftest import BNP_ORG_ID, THOMAS_USER_ID
+from tests.conftest import BANK01_ORG_ID, THOMAS_USER_ID
 
 
 @pytest.fixture
 async def test_user_mfa(async_session: AsyncSession, test_org: Organization) -> User:
     user = User(
         id=THOMAS_USER_ID,
-        org_id=BNP_ORG_ID,
+        org_id=BANK01_ORG_ID,
         email="thomas.mfa@bank01.fr",
         hashed_password=hash_password("Passw0rd!"),
         first_name="Thomas",
@@ -32,7 +32,7 @@ async def test_user_mfa(async_session: AsyncSession, test_org: Organization) -> 
 
 @pytest.fixture
 def token_mfa_user() -> str:
-    payload = {"sub": str(THOMAS_USER_ID), "role": "EMETTEUR", "org_id": str(BNP_ORG_ID)}
+    payload = {"sub": str(THOMAS_USER_ID), "role": "EMETTEUR", "org_id": str(BANK01_ORG_ID)}
     return create_access_token(payload, expires_delta=timedelta(hours=24))
 
 
@@ -56,7 +56,7 @@ async def test_mfa_setup_fails_if_already_enabled(
 ):
     user = User(
         id=uuid.UUID("20000000-0000-0000-0000-000000000099"),
-        org_id=BNP_ORG_ID,
+        org_id=BANK01_ORG_ID,
         email="already.mfa@bank01.fr",
         hashed_password=hash_password("Passw0rd!"),
         role="EMETTEUR",
@@ -68,7 +68,7 @@ async def test_mfa_setup_fails_if_already_enabled(
     await async_session.flush()
 
     token = create_access_token(
-        {"sub": str(user.id), "role": "EMETTEUR", "org_id": str(BNP_ORG_ID)},
+        {"sub": str(user.id), "role": "EMETTEUR", "org_id": str(BANK01_ORG_ID)},
         expires_delta=timedelta(hours=1),
     )
     response = await test_client.post(
@@ -84,7 +84,7 @@ async def test_mfa_enable_with_valid_code(
     secret = pyotp.random_base32()
     user = User(
         id=uuid.UUID("20000000-0000-0000-0000-000000000010"),
-        org_id=BNP_ORG_ID,
+        org_id=BANK01_ORG_ID,
         email="enable.mfa@bank01.fr",
         hashed_password=hash_password("Passw0rd!"),
         role="EMETTEUR",
@@ -96,7 +96,7 @@ async def test_mfa_enable_with_valid_code(
     await async_session.flush()
 
     token = create_access_token(
-        {"sub": str(user.id), "role": "EMETTEUR", "org_id": str(BNP_ORG_ID)},
+        {"sub": str(user.id), "role": "EMETTEUR", "org_id": str(BANK01_ORG_ID)},
         expires_delta=timedelta(hours=1),
     )
     totp = pyotp.TOTP(secret)
@@ -115,7 +115,7 @@ async def test_mfa_enable_with_invalid_code(
     secret = pyotp.random_base32()
     user = User(
         id=uuid.UUID("20000000-0000-0000-0000-000000000011"),
-        org_id=BNP_ORG_ID,
+        org_id=BANK01_ORG_ID,
         email="invalid.mfa@bank01.fr",
         hashed_password=hash_password("Passw0rd!"),
         role="EMETTEUR",
@@ -127,7 +127,7 @@ async def test_mfa_enable_with_invalid_code(
     await async_session.flush()
 
     token = create_access_token(
-        {"sub": str(user.id), "role": "EMETTEUR", "org_id": str(BNP_ORG_ID)},
+        {"sub": str(user.id), "role": "EMETTEUR", "org_id": str(BANK01_ORG_ID)},
         expires_delta=timedelta(hours=1),
     )
     response = await test_client.post(
@@ -144,7 +144,7 @@ async def test_login_returns_mfa_required_flag_when_mfa_enabled(
     secret = pyotp.random_base32()
     user = User(
         id=uuid.UUID("20000000-0000-0000-0000-000000000020"),
-        org_id=BNP_ORG_ID,
+        org_id=BANK01_ORG_ID,
         email="mfa.login@bank01.fr",
         hashed_password=hash_password("Passw0rd!"),
         role="EMETTEUR",
@@ -171,7 +171,7 @@ async def test_login_with_valid_mfa_code_succeeds(
     secret = pyotp.random_base32()
     user = User(
         id=uuid.UUID("20000000-0000-0000-0000-000000000021"),
-        org_id=BNP_ORG_ID,
+        org_id=BANK01_ORG_ID,
         email="mfa.fulllogin@bank01.fr",
         hashed_password=hash_password("Passw0rd!"),
         role="EMETTEUR",
@@ -203,7 +203,7 @@ async def test_login_with_invalid_mfa_code_returns_401(
     secret = pyotp.random_base32()
     user = User(
         id=uuid.UUID("20000000-0000-0000-0000-000000000022"),
-        org_id=BNP_ORG_ID,
+        org_id=BANK01_ORG_ID,
         email="mfa.badcode@bank01.fr",
         hashed_password=hash_password("Passw0rd!"),
         role="EMETTEUR",
@@ -231,7 +231,7 @@ async def test_mfa_disable_with_valid_code(
     secret = pyotp.random_base32()
     user = User(
         id=uuid.UUID("20000000-0000-0000-0000-000000000030"),
-        org_id=BNP_ORG_ID,
+        org_id=BANK01_ORG_ID,
         email="disable.mfa@bank01.fr",
         hashed_password=hash_password("Passw0rd!"),
         role="EMETTEUR",
@@ -243,7 +243,7 @@ async def test_mfa_disable_with_valid_code(
     await async_session.flush()
 
     token = create_access_token(
-        {"sub": str(user.id), "role": "EMETTEUR", "org_id": str(BNP_ORG_ID)},
+        {"sub": str(user.id), "role": "EMETTEUR", "org_id": str(BANK01_ORG_ID)},
         expires_delta=timedelta(hours=1),
     )
     totp = pyotp.TOTP(secret)

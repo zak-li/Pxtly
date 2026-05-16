@@ -10,7 +10,7 @@
       "organization": "BANK01MSP",
       "locality": "Paris",
       "country": "FR",
-      "cert_serial": "SN-BNP-PEER-A1B2C3D4E5F6",
+      "cert_serial": "SN-BANK01-PEER-A1B2C3D4E5F6",
       "cert_issued": "2025-01-10",
       "cert_expires": "2026-01-10",
       "attributes": {
@@ -31,7 +31,7 @@
       "organization": "BANK01MSP",
       "locality": "Paris",
       "country": "FR",
-      "cert_serial": "SN-BNP-PEER-B2C3D4E5F6A1",
+      "cert_serial": "SN-BANK01-PEER-B2C3D4E5F6A1",
       "cert_issued": "2025-01-10",
       "cert_expires": "2026-01-10",
       "attributes": {
@@ -43,7 +43,7 @@
       }
     },
     {
-      "identity_label": "alexandre.leroy@socgen.com",
+      "identity_label": "alexandre.leroy@bank02.regx.demo",
       "mspId": "BANK02MSP",
       "type": "X.509",
       "version": 1,
@@ -64,7 +64,7 @@
       }
     },
     {
-      "identity_label": "isabelle.fontaine@socgen.com",
+      "identity_label": "isabelle.fontaine@bank02.regx.demo",
       "mspId": "BANK02MSP",
       "type": "X.509",
       "version": 1,
@@ -84,7 +84,7 @@
       }
     },
     {
-      "identity_label": "pierre.moreau@axa-im.com",
+      "identity_label": "pierre.moreau@cust01.regx.demo",
       "mspId": "INV01MSP",
       "type": "X.509",
       "version": 1,
@@ -93,7 +93,7 @@
       "organization": "INV01MSP",
       "locality": "Paris",
       "country": "FR",
-      "cert_serial": "SN-AXA-PEER-E5F6A1B2C3D4",
+      "cert_serial": "SN-CUST01-PEER-E5F6A1B2C3D4",
       "cert_issued": "2025-03-01",
       "cert_expires": "2026-03-01",
       "attributes": {
@@ -104,7 +104,7 @@
       }
     },
     {
-      "identity_label": "sophie.lambert@amf-france.org",
+      "identity_label": "sophie.lambert@reg01.regx.demo",
       "mspId": "REG01MSP",
       "type": "X.509",
       "version": 1,
@@ -113,7 +113,7 @@
       "organization": "REG01MSP",
       "locality": "Paris",
       "country": "FR",
-      "cert_serial": "SN-AMF-PEER-F6A1B2C3D4E5",
+      "cert_serial": "SN-REG01-PEER-F6A1B2C3D4E5",
       "cert_issued": "2025-01-05",
       "cert_expires": "2026-01-05",
       "attributes": {
@@ -122,11 +122,11 @@
         "can_freeze": "true",
         "can_audit_all": "true",
         "can_degel": "true",
-        "authority_ref": "AMF-HABILITATION-2025-011"
+        "authority_ref": "REG01-HABILITATION-2025-011"
       }
     },
     {
-      "identity_label": "marc.bernard@amf-france.org",
+      "identity_label": "marc.bernard@reg01.regx.demo",
       "mspId": "REG01MSP",
       "type": "X.509",
       "version": 1,
@@ -135,7 +135,7 @@
       "organization": "REG01MSP",
       "locality": "Paris",
       "country": "FR",
-      "cert_serial": "SN-AMF-PEER-A1B2C3D4E5F7",
+      "cert_serial": "SN-REG01-PEER-A1B2C3D4E5F7",
       "cert_issued": "2025-01-05",
       "cert_expires": "2026-01-05",
       "attributes": {
@@ -143,7 +143,7 @@
         "department": "Audit et Controle DeFi",
         "can_audit_all": "true",
         "can_freeze": "false",
-        "authority_ref": "AMF-HABILITATION-2025-008"
+        "authority_ref": "REG01-HABILITATION-2025-008"
       }
     },
     {
@@ -189,7 +189,7 @@
       }
     },
     {
-      "identity_label": "francois.pichon@banque-france.fr",
+      "identity_label": "francois.pichon@reg02.regx.demo",
       "mspId": "CBK01MSP",
       "type": "X.509",
       "version": 1,
@@ -224,8 +224,8 @@
     },
     {
       "mspId": "BANK02MSP",
-      "ca_name": "ca-socgen",
-      "ca_host": "ca.socgen.finance-trust.com",
+      "ca_name": "ca-bank02",
+      "ca_host": "ca.bank02.finance-trust.com",
       "ca_port": 7064,
       "tls_enabled": true,
       "admin_user": "admin",
@@ -233,12 +233,12 @@
     },
     {
       "mspId": "REG01MSP",
-      "ca_name": "ca-amf-regulateur",
-      "ca_host": "ca.amf-regulateur.finance-trust.com",
+      "ca_name": "ca-reg01-regulateur",
+      "ca_host": "ca.reg01-regulateur.finance-trust.com",
       "ca_port": 7094,
       "tls_enabled": true,
       "admin_user": "admin",
-      "admin_department": "DSI AMF"
+      "admin_department": "DSI REG01"
     },
     {
       "mspId": "CBK01MSP",

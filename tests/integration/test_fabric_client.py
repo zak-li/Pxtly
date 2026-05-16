@@ -51,7 +51,7 @@ async def test_evaluate_transaction_calls_peer_chaincode_query():
 
 async def test_submit_raises_asset_frozen_error_on_stderr_match():
     mock_process = AsyncMock()
-    mock_process.communicate = AsyncMock(return_value=(b"", "Asset gel\u00e9 ref: AMF-INV-2026-001".encode("utf-8")))
+    mock_process.communicate = AsyncMock(return_value=(b"", "Asset gel\u00e9 ref: REG01-INV-2026-001".encode("utf-8")))
     mock_process.returncode = 1
 
     settings = MagicMock()
@@ -65,9 +65,9 @@ async def test_submit_raises_asset_frozen_error_on_stderr_match():
 
     with patch("asyncio.create_subprocess_exec", return_value=mock_process):
         with pytest.raises(AssetFrozenError) as exc_info:
-            await client.submit_transaction.__wrapped__(client, "TransferAsset", "RWA-OBL-BNP-2025-001", identity_label="admin-bnp")
+            await client.submit_transaction.__wrapped__(client, "TransferAsset", "RWA-OBL-BANK01-2025-001", identity_label="admin-bnp")
 
-    assert "AMF-INV-2026-001" in exc_info.value.regulatory_ref
+    assert "REG01-INV-2026-001" in exc_info.value.regulatory_ref
 
 async def test_evaluate_raises_asset_not_found_on_stderr_match():
     mock_process = AsyncMock()

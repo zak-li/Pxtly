@@ -39,9 +39,9 @@ def simulate_tribunal():
     
     # 1. Setup Auditors
     auditors = [
-        Auditor("AMF (Regulator)", 100.0),
+        Auditor("REG01 (Regulator)", 100.0),
         Auditor("Bank01", 100.0),
-        Auditor("Société Générale", 100.0),
+        Auditor("Bank 02", 100.0),
         Auditor("Crédit Agricole", 100.0, is_malicious=True), # The deviator
         Auditor("BPCE", 100.0)
     ]

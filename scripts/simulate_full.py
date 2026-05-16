@@ -84,14 +84,14 @@ ASSET_NAMES = {
     "OBLIGATION":       ["OAT 3.75% 2030", "BTP 4.0% 2028", "BUND 2.5% 2031", "Gilt 4.25% 2032"],
     "OPCVM":            ["MSCI World Tracker", "CAC 40 ETF", "Euro Corporate Bond Fund"],
     "IMMOBILIER":       ["Tour Montparnasse SCPI", "La Defense Plaza", "Logistique Portfolio"],
-    "DERIVE":           ["OAT Future Dec 2026", "EUR/USD 3M Forward", "CDS BNP 5Y"],
+    "DERIVE":           ["OAT Future Dec 2026", "EUR/USD 3M Forward", "CDS BANK01 5Y"],
     "MATIERE_PREMIERE": ["Gold Bullion Token", "Crude Oil WTI Q4", "Wheat Index Fund"],
     "PRIVATE_EQUITY":   ["LBO Tech Fund III", "Growth Capital SCPI", "Infra Debt 2027"],
 }
 
 AGENT_QUESTIONS = [
     "Quelles sont les obligations MiCA pour un émetteur d'EMT ?",
-    "Comment fonctionne le seuil de reporting AMF pour un transfert > 10M EUR ?",
+    "Comment fonctionne le seuil de reporting REG01 pour un transfert > 10M EUR ?",
     "Quel est le délai légal pour signaler une suspicion de blanchiment ?",
     "Quelles sont les exigences de couverture en capital pour un CASP ?",
     "Différence entre token utilitaire et security token sous MiCA ?",
@@ -610,7 +610,7 @@ async def phase_freeze(
             json_body={
                 "asset_id": asset_id,
                 "reason": "Full-sim regulatory freeze (AML threshold)",
-                "regulatory_ref": f"AMF-AML-{date.today().year}-{random.randint(100, 999)}",
+                "regulatory_ref": f"REG01-AML-{date.today().year}-{random.randint(100, 999)}",
             },
             accept_codes=(200, 201, 409),
         )
@@ -623,7 +623,7 @@ async def phase_freeze(
             json_body={
                 "asset_id": asset_id,
                 "reason": "Full-sim screening cleared",
-                "regulatory_ref": f"AMF-CLR-{date.today().year}-{random.randint(100, 999)}",
+                "regulatory_ref": f"REG01-CLR-{date.today().year}-{random.randint(100, 999)}",
             },
             accept_codes=(200, 201, 409),
         )

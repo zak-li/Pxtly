@@ -11,7 +11,7 @@ from backend.exceptions import AssetFrozenError
 from backend.features.assets.models import Asset
 from backend.features.auth.models import User
 from backend.features.assets.schemas import FreezeRequest, TransferRequest
-from tests.conftest import BNP_ORG_ID, AMF_ORG_ID, THOMAS_USER_ID
+from tests.conftest import BANK01_ORG_ID, REG01_ORG_ID, THOMAS_USER_ID
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ async def seeded_asset(async_session: AsyncSession, test_org, test_user_thomas) 
         isin="FR0014004L99",
         asset_type="OBLIGATION",
         asset_name="OAT SAGA Test",
-        issuer_org_id=BNP_ORG_ID,
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("1000000"),
         current_value=Decimal("1000000"),
@@ -41,7 +41,7 @@ async def seeded_frozen_asset(async_session: AsyncSession, test_org, test_user_t
         isin="FR0014004L88",
         asset_type="OBLIGATION",
         asset_name="OAT SAGA Frozen",
-        issuer_org_id=BNP_ORG_ID,
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("2000000"),
         current_value=Decimal("2000000"),
@@ -61,7 +61,7 @@ async def test_transfer_saga_compensation_on_db_failure(
 
     recipient = User(
         id=uuid.UUID("30000000-0000-0000-0000-000000000001"),
-        org_id=AMF_ORG_ID,
+        org_id=REG01_ORG_ID,
         email="recipient@amf.fr",
         hashed_password=hash_password("Passw0rd!"),
         role="TRADER",
@@ -103,9 +103,9 @@ async def test_freeze_saga_compensation_on_db_failure(
             request = FreezeRequest(
                 asset_id="RWA-OBL-SAGA-2026-001",
                 reason="Test regulatory freeze",
-                regulatory_ref="AMF-INV-2026-001",
+                regulatory_ref="REG01-INV-2026-001",
             )
-            await freeze(request, "admin@amf-regulateur", async_session)
+            await freeze(request, "admin@reg01-regulateur", async_session)
 
     submit_calls = mock_fabric_client.submit_transaction.call_args_list
     call_functions = [c[0][0] for c in submit_calls]
@@ -125,9 +125,9 @@ async def test_fabric_endorsement_error_propagates(
         request = FreezeRequest(
             asset_id="RWA-OBL-SAGA-2026-001",
             reason="Test error propagation",
-            regulatory_ref="AMF-INV-2026-002",
+            regulatory_ref="REG01-INV-2026-002",
         )
-        await freeze(request, "admin@amf-regulateur", async_session)
+        await freeze(request, "admin@reg01-regulateur", async_session)
 
 
 async def test_fabric_frozen_error_propagates_on_transfer(
@@ -136,11 +136,11 @@ async def test_fabric_frozen_error_propagates_on_transfer(
     from backend.features.assets.service import transfer
 
     frozen_asset = Asset(
-        asset_id="RWA-OBL-BNP-2025-001",
+        asset_id="RWA-OBL-BANK01-2025-001",
         isin="FR0014004L86",
         asset_type="OBLIGATION",
-        asset_name="OAT BNP 3.75% 2030",
-        issuer_org_id=BNP_ORG_ID,
+        asset_name="OAT BANK01 3.75% 2030",
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("50000000"),
         current_value=Decimal("50000000"),
@@ -153,7 +153,7 @@ async def test_fabric_frozen_error_propagates_on_transfer(
 
     recipient = User(
         id=uuid.UUID("30000000-0000-0000-0000-000000000002"),
-        org_id=AMF_ORG_ID,
+        org_id=REG01_ORG_ID,
         email="buyer.frozen@amf.fr",
         hashed_password=hash_password("Passw0rd!"),
         role="TRADER",
@@ -165,7 +165,7 @@ async def test_fabric_frozen_error_propagates_on_transfer(
     with patch("backend.features.assets.service.full_check", return_value=(False, "", "")):
         with pytest.raises(AssetFrozenError):
             request = TransferRequest(
-                asset_id="RWA-OBL-BNP-2025-001",
+                asset_id="RWA-OBL-BANK01-2025-001",
                 to_owner="buyer.frozen@amf.fr",
                 price=Decimal("49000000"),
                 justification="Transfer frozen asset",

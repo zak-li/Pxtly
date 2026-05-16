@@ -12,12 +12,12 @@ from backend.features.audit.report_generator import ReportGenerator
 async def main():
     print("Prepping dummy data for report...")
     
-    asset_id = "RWA-OBL-BNP-2025-001"
+    asset_id = "RWA-OBL-BANK01-2025-001"
     asset_state = {
         "asset_id": asset_id,
         "isin": "FR0014004L86",
         "asset_type": "OBLIGATION",
-        "asset_name": "OAT BNP 3.75% 2030",
+        "asset_name": "OAT BANK01 3.75% 2030",
         "issuer_lei": "R0MUWSFPU8MPRO8K5P83",
         "nominal_value": 50000000,
         "current_value": 50000000,
@@ -45,7 +45,7 @@ async def main():
             actor_dn="CN=admin@bank01.finance-trust.com,OU=admin",
             action="TRANSFERE",
             from_owner="CN=admin@bank01.finance-trust.com,OU=admin",
-            to_owner="CN=pierre.moreau,OU=AXA-IM",
+            to_owner="CN=pierre.moreau,OU=Cust 01",
             amount=24739375.0,
             justification="Cession bloc Inv01 portefeuille ESG",
             block_number=2,
@@ -56,7 +56,7 @@ async def main():
     integrity = checker.check(asset_id, provenance)
     
     gen = ReportGenerator()
-    generated_by = "admin@amf-regulateur.finance-trust.com"
+    generated_by = "admin@reg01-regulateur.finance-trust.com"
     
     tex_content = gen._build_tex(asset_id, asset_state, provenance, integrity, generated_by, "--- TEX SOURCE CODE ---")
     
@@ -68,7 +68,7 @@ async def main():
     print("Compiling PDF via ReportGenerator...")
     try:
         pdf_bytes = await gen.generate(asset_id, asset_state, provenance, integrity, generated_by)
-        pdf_path = os.path.join(os.path.dirname(__file__), "..", "audit_RWA-OBL-BNP-2025-001.pdf")
+        pdf_path = os.path.join(os.path.dirname(__file__), "..", "audit_RWA-OBL-BANK01-2025-001.pdf")
         with open(pdf_path, "wb") as f:
             f.write(pdf_bytes)
         print(f"PDF generated: {pdf_path}")

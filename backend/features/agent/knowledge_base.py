@@ -68,7 +68,7 @@ KNOWLEDGE_CHUNKS: list[dict[str, str]] = [
         "category": "assets",
         "title": "Statuts des actifs",
         "content": (
-            "Statuts possibles : ACTIF (actif négociable), GELE (gel réglementaire AMF, transfert interdit), "
+            "Statuts possibles : ACTIF (actif négociable), GELE (gel réglementaire REG01, transfert interdit), "
             "EN_EMISSION (phase primaire, pas encore négociable), REMBOURSE (actif arrivé à maturité). "
             "Le gel est initié uniquement par REG01MSP via FreezeAsset. "
             "Le dégel est effectué par UnfreezeAsset après autorisation réglementaire."
@@ -149,7 +149,7 @@ KNOWLEDGE_CHUNKS: list[dict[str, str]] = [
         "category": "security",
         "title": "Sécurité — HashiCorp Vault",
         "content": (
-            "Les clés privées Fabric (admin@bank01, admin@amf-regulateur) sont stockées "
+            "Les clés privées Fabric (admin@bank01, admin@reg01-regulateur) sont stockées "
             "dans HashiCorp Vault (moteur KV v2, mount point rwa-fabric). "
             "Les clés ne sont jamais conservées en mémoire au-delà de l'opération de signature. "
             "La mémoire est effacée via ctypes après chaque utilisation (zero-memory). "

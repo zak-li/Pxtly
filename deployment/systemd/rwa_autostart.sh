@@ -46,8 +46,8 @@ if [ -f "$COMPOSE_FILE" ]; then
     docker compose -f "$COMPOSE_FILE" up -d --remove-orphans
     sleep 8
     wait_port localhost 7050 "Fabric Orderer"  60
-    wait_port localhost 7051 "Peer BNP"        45
-    wait_port localhost 7091 "Peer AMF"        45
+    wait_port localhost 7051 "Peer BANK01"        45
+    wait_port localhost 7091 "Peer REG01"        45
     wait_port localhost 9999 "Chaincode CCaaS" 30
     log "Hyperledger Fabric: PRET"
 else

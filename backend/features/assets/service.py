@@ -108,7 +108,7 @@ async def transfer(
         raise AssetNotFoundException(request.asset_id)
 
     if asset.status == "GELE":
-        raise AssetFrozenError(asset.asset_id, "AMF-INV-2026-001")
+        raise AssetFrozenError(asset.asset_id, "REG01-INV-2026-001")
 
     original_owner_id = asset.current_owner_id
 

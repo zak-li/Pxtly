@@ -198,7 +198,7 @@ class FabricWallet:
 
         metadata = json.loads(wallet_path.read_text(encoding='utf-8'))
 
-        for target in ["Admin@bank01", "Admin@amf-regulateur"]:
+        for target in ["Admin@bank01", "Admin@reg01-regulateur"]:
             if target in metadata:
                 info = metadata[target]
                 if not isinstance(info, dict):

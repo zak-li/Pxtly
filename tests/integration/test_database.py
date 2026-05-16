@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.features.assets.models import Asset
 from backend.features.transactions.models import Transaction
-from tests.conftest import BNP_ORG_ID, THOMAS_USER_ID
+from tests.conftest import BANK01_ORG_ID, THOMAS_USER_ID
 
 async def test_trigger_flag_high_risk_on_6m_transaction(
     async_session: AsyncSession, test_org, test_user_thomas,
@@ -17,7 +17,7 @@ async def test_trigger_flag_high_risk_on_6m_transaction(
         isin="FR0014004L86",
         asset_type="OBLIGATION",
         asset_name="DB Flag Test 6M",
-        issuer_org_id=BNP_ORG_ID,
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("10000000"),
         current_value=Decimal("10000000"),
@@ -49,7 +49,7 @@ async def test_trigger_no_flag_on_4m_transaction(
         isin="FR0014004L86",
         asset_type="OBLIGATION",
         asset_name="DB Flag Test 4M",
-        issuer_org_id=BNP_ORG_ID,
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("10000000"),
         current_value=Decimal("10000000"),
@@ -81,7 +81,7 @@ async def test_trigger_update_asset_value_on_new_valuation(
         isin="FR0014004L86",
         asset_type="OBLIGATION",
         asset_name="Valuation Update Test",
-        issuer_org_id=BNP_ORG_ID,
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("50000000"),
         current_value=Decimal("50000000"),
@@ -105,7 +105,7 @@ async def test_view_asset_portfolio_returns_data(
         isin="FR0014004L86",
         asset_type="OBLIGATION",
         asset_name="Portfolio View Test",
-        issuer_org_id=BNP_ORG_ID,
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("10000000"),
         current_value=Decimal("10000000"),
@@ -149,11 +149,11 @@ async def test_function_get_full_audit_oat_bnp(
     async_session: AsyncSession, test_org, test_user_thomas,
 ):
     asset = Asset(
-        asset_id="RWA-OBL-BNP-2025-001",
+        asset_id="RWA-OBL-BANK01-2025-001",
         isin="FR0014004L86",
         asset_type="OBLIGATION",
-        asset_name="OAT BNP Audit",
-        issuer_org_id=BNP_ORG_ID,
+        asset_name="OAT BANK01 Audit",
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("50000000"),
         current_value=Decimal("50000000"),
@@ -166,7 +166,7 @@ async def test_function_get_full_audit_oat_bnp(
 
     result = await async_session.execute(
         text("SELECT asset_id, status FROM assets WHERE asset_id = :aid"),
-        {"aid": "RWA-OBL-BNP-2025-001"},
+        {"aid": "RWA-OBL-BANK01-2025-001"},
     )
     row = result.fetchone()
     assert row is not None
@@ -180,7 +180,7 @@ async def test_function_get_org_portfolio_summary_bnp(
         isin="FR0014004L86",
         asset_type="OBLIGATION",
         asset_name="Org Portfolio Test",
-        issuer_org_id=BNP_ORG_ID,
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("25000000"),
         current_value=Decimal("25000000"),
@@ -193,7 +193,7 @@ async def test_function_get_org_portfolio_summary_bnp(
 
     result = await async_session.execute(
         text("SELECT SUM(current_value) FROM assets WHERE issuer_org_id = :oid"),
-        {"oid": str(BNP_ORG_ID)},
+        {"oid": str(BANK01_ORG_ID)},
     )
     total = result.scalar()
     assert total is not None

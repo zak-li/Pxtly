@@ -10,5 +10,5 @@ organizations:
 peers:
   peer0.bank01.finance-trust.com:
     url: grpc://localhost:7051
-  peer0.amf-regulateur.finance-trust.com:
+  peer0.reg01-regulateur.finance-trust.com:
     url: grpc://localhost:7091

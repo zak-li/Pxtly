@@ -66,13 +66,13 @@
   ],
   "kyc_submissions": [
     {
-      "submission_id": "KYC-SUB-2025-BNP-TM-001",
+      "submission_id": "KYC-SUB-2025-BANK01-TM-001",
       "participant_ref": "a0000001-0001-0001-0001-000000000001",
       "participant_name": "Thomas Martin",
       "organisation": "Bank01",
       "submitted_at": "2025-03-01 09:00:00",
       "provider": "Acuris Risk Intelligence",
-      "provider_ref": "ARI-KYC-2025-BNP-TM-003841",
+      "provider_ref": "ARI-KYC-2025-BANK01-TM-003841",
       "kyc_level": 3,
       "identity": {
         "legal_name": "Thomas Jean-Pierre Martin",
@@ -199,7 +199,7 @@
       "submission_id": "KYC-SUB-2025-ATW-ZR-001",
       "participant_ref": "a0000011-0011-0011-0011-000000000011",
       "participant_name": "Zakaria Rahali",
-      "organisation": "Attijariwafa Bank",
+      "organisation": "Bank 03",
       "submitted_at": "2025-01-20 10:00:00",
       "provider": "LexisNexis Risk Solutions",
       "provider_ref": "LNRS-KYC-2025-ATW-ZR-000101",
@@ -235,13 +235,13 @@
         },
         {
           "type": "EMPLOYMENT_CONTRACT",
-          "issuer": "Attijariwafa Bank S.A.",
+          "issuer": "Bank 03 S.A.",
           "issue_date": "2022-07-01",
           "verified": true
         }
       ],
       "employer_verification": {
-        "employer": "Attijariwafa Bank S.A.",
+        "employer": "Bank 03 S.A.",
         "lei": "XKZZ2JZF41MRHTR1V493",
         "department": "Digital Assets & Tokenization",
         "position": "Head of Asset Tokenization",
@@ -261,13 +261,13 @@
       }
     },
     {
-      "submission_id": "KYC-SUB-2025-AMMC-AB-001",
+      "submission_id": "KYC-SUB-2025-REG03-AB-001",
       "participant_ref": "a0000012-0012-0012-0012-000000000012",
       "participant_name": "Aya Belakhouad",
-      "organisation": "AMMC",
+      "organisation": "REG03",
       "submitted_at": "2025-01-20 10:30:00",
       "provider": "Acuris Risk Intelligence",
-      "provider_ref": "ARI-KYC-2025-AMMC-AB-000201",
+      "provider_ref": "ARI-KYC-2025-REG03-AB-000201",
       "kyc_level": 3,
       "identity": {
         "legal_name": "Aya Belakhouad",
@@ -300,7 +300,7 @@
         },
         {
           "type": "REGULATORY_APPOINTMENT",
-          "issuer": "AMMC",
+          "issuer": "REG03",
           "issue_date": "2023-03-01",
           "verified": true
         }
@@ -328,7 +328,7 @@
       "submission_id": "KYC-SUB-2025-ATW-YA-001",
       "participant_ref": "a0000013-0013-0013-0013-000000000013",
       "participant_name": "Youssef Alami",
-      "organisation": "Attijariwafa Bank",
+      "organisation": "Bank 03",
       "submitted_at": "2025-01-20 11:00:00",
       "provider": "LexisNexis Risk Solutions",
       "provider_ref": "LNRS-KYC-2025-ATW-YA-000301",
@@ -364,13 +364,13 @@
         },
         {
           "type": "EMPLOYMENT_CONTRACT",
-          "issuer": "Attijariwafa Bank S.A.",
+          "issuer": "Bank 03 S.A.",
           "issue_date": "2021-01-15",
           "verified": true
         }
       ],
       "employer_verification": {
-        "employer": "Attijariwafa Bank S.A.",
+        "employer": "Bank 03 S.A.",
         "lei": "XKZZ2JZF41MRHTR1V493",
         "department": "Fixed Income & Sukuk Trading",
         "position": "Senior Sukuk Trader",
@@ -393,7 +393,7 @@
       "submission_id": "KYC-SUB-2025-ATW-FB-001",
       "participant_ref": "a0000014-0014-0014-0014-000000000014",
       "participant_name": "Fatima Zahra Benali",
-      "organisation": "Attijariwafa Bank",
+      "organisation": "Bank 03",
       "submitted_at": "2025-01-20 11:30:00",
       "provider": "Acuris Risk Intelligence",
       "provider_ref": "ARI-KYC-2025-ATW-FB-000401",
@@ -429,7 +429,7 @@
         }
       ],
       "employer_verification": {
-        "employer": "Attijariwafa Bank S.A.",
+        "employer": "Bank 03 S.A.",
         "lei": "XKZZ2JZF41MRHTR1V493",
         "department": "Conformite et LAB",
         "position": "AML Compliance Officer",
@@ -448,13 +448,13 @@
       }
     },
     {
-      "submission_id": "KYC-SUB-2025-AMMC-MT-001",
+      "submission_id": "KYC-SUB-2025-REG03-MT-001",
       "participant_ref": "a0000015-0015-0015-0015-000000000015",
       "participant_name": "Mehdi Tahiri",
-      "organisation": "AMMC",
+      "organisation": "REG03",
       "submitted_at": "2025-01-20 12:00:00",
       "provider": "Acuris Risk Intelligence",
-      "provider_ref": "ARI-KYC-2025-AMMC-MT-000501",
+      "provider_ref": "ARI-KYC-2025-REG03-MT-000501",
       "kyc_level": 2,
       "identity": {
         "legal_name": "Mehdi Tahiri",
@@ -508,7 +508,7 @@
   ],
   "aml_screenings": [
     {
-      "screening_id": "AML-SCR-2025-BNP-TM-003841",
+      "screening_id": "AML-SCR-2025-BANK01-TM-003841",
       "participant_ref": "a0000001-0001-0001-0001-000000000001",
       "participant_name": "Thomas Martin",
       "screened_at": "2025-03-01 10:00:00",
@@ -595,7 +595,7 @@
       "next_review_date": "2025-07-22"
     },
     {
-      "screening_id": "AML-SCR-2025-AMMC-AB-000201",
+      "screening_id": "AML-SCR-2025-REG03-AB-000201",
       "participant_ref": "a0000012-0012-0012-0012-000000000012",
       "participant_name": "Aya Belakhouad",
       "screened_at": "2025-01-22 10:30:00",
@@ -679,7 +679,7 @@
       "next_review_date": "2026-01-22"
     },
     {
-      "screening_id": "AML-SCR-2025-AMMC-MT-000501",
+      "screening_id": "AML-SCR-2025-REG03-MT-000501",
       "participant_ref": "a0000015-0015-0015-0015-000000000015",
       "participant_name": "Mehdi Tahiri",
       "screened_at": "2025-01-22 12:00:00",
@@ -709,10 +709,10 @@
   ],
   "transaction_monitoring_alerts": [
     {
-      "alert_id": "TMA-2025-003-BNP",
+      "alert_id": "TMA-2025-003-BANK01",
       "alert_type": "LARGE_TRANSACTION",
       "triggered_at": "2025-03-16 09:14:22",
-      "transaction_ref": "TXN-2025-BNP-00001",
+      "transaction_ref": "TXN-2025-BANK01-00001",
       "participant_ref": "a0000001-0001-0001-0001-000000000001",
       "participant_name": "Thomas Martin",
       "amount": 50000000.00,
@@ -721,25 +721,25 @@
       "rule_id": "RULE-LARGE-TX-001",
       "rule_description": "Alerte automatique transaction superieure a 10M EUR MiCA art.68 declaration obligatoire",
       "status": "REVIEWED_CLEARED",
-      "reviewed_by": "sophie.lambert@amf-france.org",
+      "reviewed_by": "sophie.lambert@reg01.regx.demo",
       "reviewed_at": "2025-03-16 11:00:00",
       "disposition": "FALSE_POSITIVE",
-      "notes": "Transaction institutionnelle conforme OAT emission primaire validee AMF"
+      "notes": "Transaction institutionnelle conforme OAT emission primaire validee REG01"
     },
     {
-      "alert_id": "TMA-2025-004-AMF",
+      "alert_id": "TMA-2025-004-REG01",
       "alert_type": "REGULATORY_FLAG",
       "triggered_at": "2025-03-10 16:48:30",
-      "transaction_ref": "TXN-2025-AMF-00001",
+      "transaction_ref": "TXN-2025-REG01-00001",
       "participant_ref": "a0000009-0009-0009-0009-000000000009",
       "participant_name": "Jamez Wilzon",
-      "asset_ref": "RWA-DRV-BNP-2025-006",
+      "asset_ref": "RWA-DRV-BANK01-2025-006",
       "rule_id": "RULE-EMIR-DERIV-002",
       "rule_description": "Anomalie EMIR reporting derive swap taux superieur a 1M EUR delai reporting T+1 depasse",
       "status": "OPEN_INVESTIGATION",
-      "assigned_to": "sophie.lambert@amf-france.org",
+      "assigned_to": "sophie.lambert@reg01.regx.demo",
       "regulatory_action": "ASSET_FREEZE",
-      "regulatory_ref": "AMF-INV-2025-DRV-00041",
+      "regulatory_ref": "REG01-INV-2025-DRV-00041",
       "notes": "Investigation en cours gel preventif actif jusqu a resolution"
     }
   ],

@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.features.assets.models import Asset
 from backend.features.auth.models import Organization, User
-from tests.conftest import BNP_ORG_ID, THOMAS_USER_ID
+from tests.conftest import BANK01_ORG_ID, THOMAS_USER_ID
 
 async def test_freeze_and_block_transfer_flow(
     test_client: AsyncClient,
@@ -22,7 +22,7 @@ async def test_freeze_and_block_transfer_flow(
         isin="FR0014004L86",
         asset_type="OBLIGATION",
         asset_name="E2E Freeze Flow Bond",
-        issuer_org_id=BNP_ORG_ID,
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("50000000"),
         current_value=Decimal("50000000"),
@@ -36,7 +36,7 @@ async def test_freeze_and_block_transfer_flow(
     freeze_payload = {
         "asset_id": "RWA-OBL-E2EFRZ-001",
         "reason": "Investigation compliance MIFID II test e2e",
-        "regulatory_ref": "AMF-TEST-2026-001",
+        "regulatory_ref": "REG01-TEST-2026-001",
     }
     resp_freeze = await test_client.post(
         "/api/v1/assets/freeze",
@@ -66,21 +66,21 @@ async def test_compliance_check_blocks_expired_kyc_james_wilson(
 ):
     from backend.core.security import hash_password
 
-    natwest = Organization(
+    bank04 = Organization(
         id=uuid.UUID("00000000-0000-0000-0000-000000000003"),
         org_code="NW3",
-        legal_name="NatWest E2E",
+        legal_name="Bank 04 E2E",
         org_type="BANQUE",
-        msp_id="NatWestE2EMSP",
+        msp_id="BANK04E2EMSP",
         is_active=True,
     )
-    async_session.add(natwest)
+    async_session.add(bank04)
     await async_session.flush()
 
     james = User(
         id=uuid.UUID("10000000-0000-0000-0000-000000000003"),
-        org_id=natwest.id,
-        email="james.e2e@natwest.com",
+        org_id=bank04.id,
+        email="james.e2e@bank04.com",
         hashed_password=hash_password("Passw0rd!"),
         role="TRADER",
         is_active=True,
@@ -103,16 +103,16 @@ async def test_compliance_check_blocks_expired_kyc_james_wilson(
     from backend.core.security import create_access_token
     from datetime import timedelta
     token_james = create_access_token(
-        {"sub": str(james.id), "role": "TRADER", "org_id": str(natwest.id)},
+        {"sub": str(james.id), "role": "TRADER", "org_id": str(bank04.id)},
         expires_delta=timedelta(hours=24),
     )
 
     asset = Asset(
-        asset_id="RWA-OBL-SG-2025-002",
+        asset_id="RWA-OBL-BANK02-2025-002",
         isin="FR0014005SG2",
         asset_type="OBLIGATION",
         asset_name="SG Green Bond 2.875%",
-        issuer_org_id=BNP_ORG_ID,
+        issuer_org_id=BANK01_ORG_ID,
         current_owner_id=THOMAS_USER_ID,
         nominal_value=Decimal("75000000"),
         current_value=Decimal("75000000"),
@@ -131,8 +131,8 @@ async def test_compliance_check_blocks_expired_kyc_james_wilson(
 
     with patch("backend.features.compliance.kyc.datetime", new=MockDatetime):
         transfer_payload = {
-            "asset_id": "RWA-OBL-SG-2025-002",
-            "to_owner": "james.e2e@natwest.com",
+            "asset_id": "RWA-OBL-BANK02-2025-002",
+            "to_owner": "james.e2e@bank04.com",
             "price": 10000000,
             "justification": "Tentative transfert trader KYC expire e2e",
         }
