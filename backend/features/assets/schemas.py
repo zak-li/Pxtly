@@ -12,7 +12,7 @@ REGULATORY_REF_MAX = 100
 class TokenizeRequest(BaseModel):
     model_config = ConfigDict(strict=False)
 
-    asset_id: str = Field(..., pattern=r"^RWA-[A-Z]{2,12}-[A-Z]{2,6}-\d{4}-\d{3}$")
+    asset_id: str = Field(..., pattern=r"^RWA-[A-Z]{2,12}-[A-Z0-9]{2,8}-\d{4}-\d{3}$")
     isin: str = Field(..., min_length=12, max_length=12, pattern=r"^[A-Z]{2}[A-Z0-9]{10}$")
     asset_type: Literal[
         "OBLIGATION", "OPCVM", "IMMOBILIER", "DERIVE", "MATIERE_PREMIERE", "PRIVATE_EQUITY", "INFRASTRUCTURE"
@@ -38,7 +38,7 @@ class FreezeRequest(BaseModel):
 
     asset_id: str = Field(..., min_length=5, max_length=100)
     reason: str = Field(..., min_length=10, max_length=JUSTIFICATION_MAX)
-    regulatory_ref: str = Field(..., max_length=REGULATORY_REF_MAX, pattern=r"^[A-Z]{2,6}-[A-Z]{2,4}-\d{4}-\d{3,}$")
+    regulatory_ref: str = Field(..., max_length=REGULATORY_REF_MAX, pattern=r"^[A-Z0-9]{2,8}-[A-Z]{2,4}-\d{4}-\d{3,}$")
 
 class UnfreezeRequest(BaseModel):
     model_config = ConfigDict(strict=False)

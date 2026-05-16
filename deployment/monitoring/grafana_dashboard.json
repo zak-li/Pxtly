@@ -183,10 +183,10 @@
       "type": "state-timeline",
       "datasource": { "type": "prometheus", "uid": "ffgx1hbr25a0wc" },
       "targets": [
-        { "expr": "up{job=\"fabric-peer-bnp\"}", "legendFormat": "Fabric BANK01",  "refId": "A", "instant": false, "range": true },
-        { "expr": "up{job=\"fabric-peer-amf\"}", "legendFormat": "Fabric REG01",  "refId": "B", "instant": false, "range": true },
-        { "expr": "up{job=\"couchdb-bnp\"}",     "legendFormat": "CouchDB BANK01", "refId": "C", "instant": false, "range": true },
-        { "expr": "up{job=\"couchdb-amf\"}",     "legendFormat": "CouchDB REG01", "refId": "D", "instant": false, "range": true }
+        { "expr": "up{job=\"fabric-peer-bank01\"}", "legendFormat": "Fabric BANK01",  "refId": "A", "instant": false, "range": true },
+        { "expr": "up{job=\"fabric-peer-reg01\"}", "legendFormat": "Fabric REG01",  "refId": "B", "instant": false, "range": true },
+        { "expr": "up{job=\"couchdb-bank01\"}",     "legendFormat": "CouchDB BANK01", "refId": "C", "instant": false, "range": true },
+        { "expr": "up{job=\"couchdb-reg01\"}",     "legendFormat": "CouchDB REG01", "refId": "D", "instant": false, "range": true }
       ],
       "gridPos": { "x": 12, "y": 11, "w": 12, "h": 7 },
       "options": {
@@ -393,10 +393,10 @@
       "type": "timeseries",
       "datasource": { "type": "prometheus", "uid": "ffgx1hbr25a0wc" },
       "targets": [
-        { "expr": "rate(couchdb_database_reads_total{job=\"couchdb-bnp\"}[2m])",  "legendFormat": "Reads BANK01",  "refId": "A", "instant": false, "range": true },
-        { "expr": "rate(couchdb_database_writes_total{job=\"couchdb-bnp\"}[2m])", "legendFormat": "Writes BANK01", "refId": "B", "instant": false, "range": true },
-        { "expr": "rate(couchdb_database_reads_total{job=\"couchdb-amf\"}[2m])",  "legendFormat": "Reads REG01",  "refId": "C", "instant": false, "range": true },
-        { "expr": "rate(couchdb_database_writes_total{job=\"couchdb-amf\"}[2m])", "legendFormat": "Writes REG01", "refId": "D", "instant": false, "range": true }
+        { "expr": "rate(couchdb_database_reads_total{job=\"couchdb-bank01\"}[2m])",  "legendFormat": "Reads BANK01",  "refId": "A", "instant": false, "range": true },
+        { "expr": "rate(couchdb_database_writes_total{job=\"couchdb-bank01\"}[2m])", "legendFormat": "Writes BANK01", "refId": "B", "instant": false, "range": true },
+        { "expr": "rate(couchdb_database_reads_total{job=\"couchdb-reg01\"}[2m])",  "legendFormat": "Reads REG01",  "refId": "C", "instant": false, "range": true },
+        { "expr": "rate(couchdb_database_writes_total{job=\"couchdb-reg01\"}[2m])", "legendFormat": "Writes REG01", "refId": "D", "instant": false, "range": true }
       ],
       "gridPos": { "x": 0, "y": 48, "w": 12, "h": 8 },
       "options": { "tooltip": { "mode": "multi", "sort": "desc" }, "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true } },
@@ -416,10 +416,10 @@
       "type": "timeseries",
       "datasource": { "type": "prometheus", "uid": "ffgx1hbr25a0wc" },
       "targets": [
-        { "expr": "rate(couchdb_httpd_requests_total{job=\"couchdb-bnp\"}[2m])",   "legendFormat": "HTTP BANK01",    "refId": "A", "instant": false, "range": true },
-        { "expr": "rate(couchdb_httpd_requests_total{job=\"couchdb-amf\"}[2m])",   "legendFormat": "HTTP REG01",    "refId": "B", "instant": false, "range": true },
-        { "expr": "rate(couchdb_document_inserts_total{job=\"couchdb-bnp\"}[2m])", "legendFormat": "Inserts BANK01", "refId": "C", "instant": false, "range": true },
-        { "expr": "rate(couchdb_document_inserts_total{job=\"couchdb-amf\"}[2m])", "legendFormat": "Inserts REG01", "refId": "D", "instant": false, "range": true }
+        { "expr": "rate(couchdb_httpd_requests_total{job=\"couchdb-bank01\"}[2m])",   "legendFormat": "HTTP BANK01",    "refId": "A", "instant": false, "range": true },
+        { "expr": "rate(couchdb_httpd_requests_total{job=\"couchdb-reg01\"}[2m])",   "legendFormat": "HTTP REG01",    "refId": "B", "instant": false, "range": true },
+        { "expr": "rate(couchdb_document_inserts_total{job=\"couchdb-bank01\"}[2m])", "legendFormat": "Inserts BANK01", "refId": "C", "instant": false, "range": true },
+        { "expr": "rate(couchdb_document_inserts_total{job=\"couchdb-reg01\"}[2m])", "legendFormat": "Inserts REG01", "refId": "D", "instant": false, "range": true }
       ],
       "gridPos": { "x": 12, "y": 48, "w": 12, "h": 8 },
       "options": { "tooltip": { "mode": "multi", "sort": "desc" }, "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true } },
