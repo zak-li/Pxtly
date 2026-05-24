@@ -1,67 +1,41 @@
-import base64
-import hashlib
-import logging
+"""Security utilities — Keycloak OIDC edition.
+
+All production authentication is delegated to Keycloak.
+This module re-exports the validate_token/extract_role functions and also
+provides lightweight test-only helpers so existing unit-test fixtures compile
+without a real Keycloak instance.
+"""
 from datetime import UTC, datetime, timedelta
+from uuid import uuid4
 
-import bcrypt
-from jose import JWTError, jwt
+from jose import jwt as _jose_jwt
 
-from backend.config import settings
+from backend.core.oidc import extract_role, validate_token
 
-logger = logging.getLogger(__name__)
+__all__ = ["validate_token", "extract_role", "create_access_token", "hash_password"]
 
-JWT_ISSUER = "rwa-platform"
-JWT_AUDIENCE = "rwa-platform-api"
+# Fixed signing key used exclusively by test fixtures.
+# Tests that need to call validate_token must patch it to decode with this key.
+_TEST_SIGNING_KEY = "ci-test-jwt-signing-key-at-least-32-chars-long!"
 
 
-def _prepare_password(password: str) -> bytes:
-    """SHA-256 + base64 the password before bcrypt to avoid silent 72-byte truncation."""
-    digest = hashlib.sha256(password.encode("utf-8")).digest()
-    return base64.b64encode(digest)
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+    """Create a HS256-signed JWT for use in unit-test fixtures only.
+
+    Production code validates RS256 tokens issued by Keycloak; this helper
+    exists so conftest.py fixtures can generate tokens without a live Keycloak.
+    """
+    payload = dict(data)
+    expire = datetime.now(UTC) + (expires_delta or timedelta(minutes=15))
+    payload.update({"exp": expire, "iat": datetime.now(UTC), "jti": str(uuid4())})
+    return _jose_jwt.encode(payload, _TEST_SIGNING_KEY, algorithm="HS256")
 
 
 def hash_password(password: str) -> str:
-    salt = bcrypt.gensalt(rounds=12)
-    hashed = bcrypt.hashpw(_prepare_password(password), salt)
-    return hashed.decode("utf-8")
+    """Stub retained for backward-compat with test fixtures.
 
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    try:
-        return bcrypt.checkpw(_prepare_password(plain_password), hashed_password.encode("utf-8"))
-    except ValueError as exc:
-        logger.warning(f"Password verification error (invalid hash format): {exc}")
-        return False
-    except Exception as exc:
-        logger.error(f"Unexpected error during password verification: {exc}")
-        return False
-
-
-def create_access_token(data: dict[str, str | int], expires_delta: timedelta | None = None) -> str:
-    allowed_keys = {"sub", "role", "org_id"}
-    filtered_data: dict[str, str | int] = {k: v for k, v in data.items() if k in allowed_keys}
-
-    now = datetime.now(UTC)
-    expire = now + (expires_delta or timedelta(minutes=settings.access_token_expire_minutes))
-
-    filtered_data["exp"] = int(expire.timestamp())
-    filtered_data["iat"] = int(now.timestamp())
-    filtered_data["nbf"] = int(now.timestamp())
-    filtered_data["iss"] = JWT_ISSUER
-    filtered_data["aud"] = JWT_AUDIENCE
-
-    return jwt.encode(filtered_data, settings.secret_key, algorithm=settings.algorithm)
-
-
-def decode_token(token: str) -> dict[str, str | int]:
-    try:
-        return jwt.decode(
-            token,
-            settings.secret_key,
-            algorithms=[settings.algorithm],
-            audience=JWT_AUDIENCE,
-            issuer=JWT_ISSUER,
-            options={"require": ["exp", "iat", "nbf", "sub", "iss", "aud"]},
-        )
-    except JWTError as exc:
-        raise ValueError("Invalid or expired token.") from exc
+    The production User model no longer stores hashed passwords (Keycloak owns
+    credentials). Tests that create User rows should omit the password entirely.
+    """
+    _ = password
+    return "$test$stub"

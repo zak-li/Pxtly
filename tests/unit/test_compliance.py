@@ -44,7 +44,6 @@ async def test_kyc_james_wilson_expired_after_20260228(
     async_session: AsyncSession, test_org, test_user_thomas,
 ):
     james_id = JAMES_USER_ID
-    from backend.core.security import hash_password
     from backend.features.auth.models import Organization, User
     bank04 = Organization(
         id=uuid.UUID("00000000-0000-0000-0000-000000000003"),
@@ -55,7 +54,7 @@ async def test_kyc_james_wilson_expired_after_20260228(
     await async_session.flush()
     james = User(
         id=james_id, org_id=bank04.id, email="james.wilson@bank04.com",
-        hashed_password=hash_password("Passw0rd!"), role="TRADER", is_active=True,
+        keycloak_sub="kc-sub-james-wilson-1", role="TRADER", is_active=True,
     )
     async_session.add(james)
     await async_session.flush()
@@ -93,7 +92,7 @@ async def test_kyc_james_wilson_needs_renewal_flag(
     try:
         james = User(
             id=james_id, org_id=uuid.UUID("00000000-0000-0000-0000-000000000003"),
-            email="james2@bank04.com", hashed_password="$2b$12$fakehash",
+            email="james2@bank04.com", keycloak_sub="kc-sub-james2-bank04",
             role="TRADER", is_active=True,
         )
         async_session.add(james)

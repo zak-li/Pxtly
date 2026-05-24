@@ -67,12 +67,11 @@ async def test_tokenize_raises_if_asset_already_exists(
 async def test_transfer_updates_owner_to_pierre_moreau(
     async_session: AsyncSession, test_org: Organization, test_user_thomas: User, mock_fabric_client: AsyncMock
 ):
-    from backend.core.security import hash_password
     pierre = User(
         id=uuid.UUID("20000000-0000-0000-0000-000000000001"),
         org_id=BANK01_ORG_ID,
         email="pierre.moreau@cust01.fr",
-        hashed_password=hash_password("Passw0rd!"),
+        keycloak_sub="kc-sub-pierre-moreau-1",
         first_name="Pierre",
         last_name="Moreau",
         role="TRADER",
@@ -118,12 +117,11 @@ async def test_transfer_updates_owner_to_pierre_moreau(
 async def test_transfer_blocked_on_frozen_asset_returns_frozen_error(
     async_session: AsyncSession, test_org: Organization, test_user_thomas: User, mock_fabric_client: AsyncMock
 ):
-    from backend.core.security import hash_password
     pierre = User(
         id=uuid.UUID("20000000-0000-0000-0000-000000000002"),
         org_id=BANK01_ORG_ID,
         email="pierre.moreau2@cust01.fr",
-        hashed_password=hash_password("Passw0rd!"),
+        keycloak_sub="kc-sub-pierre-moreau-2",
         role="TRADER",
         msp_id="INV01ManagersMSP",
         is_active=True,

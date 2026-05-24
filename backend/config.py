@@ -13,7 +13,6 @@ class FabricSettings(BaseSettings):
     fabric_tls_enabled: bool
     fabric_grpc_timeout: int
     redis_url: str
-    secret_key: str
 
     vault_addr: str = Field(default="https://127.0.0.1:8200")
     vault_token: SecretStr = Field(...)
@@ -45,26 +44,37 @@ class FabricSettings(BaseSettings):
         extra="ignore",
     )
 
-    @field_validator("secret_key")
-    @classmethod
-    def validate_secret_key_length(cls, v: str) -> str:
-        if len(v) < 32:
-            raise ValueError("SECRET_KEY must be at least 32 characters.")
-        return v
-
 
 class Settings(FabricSettings):
     database_url: str
-    algorithm: str = "HS256"
-    access_token_expire_minutes: int = 30
     allowed_origins: str
     log_level: str = "INFO"
 
-    # gRPC server
+    # ── Keycloak / OIDC ──────────────────────────────────────────────────────
+    keycloak_url: str = Field(
+        default="http://10.10.10.150:8080",
+        description="Base URL of the Keycloak server (no trailing slash)",
+    )
+    keycloak_realm: str = Field(default="rwa-platform")
+    keycloak_client_id: str = Field(default="rwa-api")
+    keycloak_client_secret: str = Field(...)
+    # Full URL the browser is redirected to after Keycloak authentication.
+    keycloak_callback_url: str = Field(
+        default="http://10.10.10.150:8000/api/v1/auth/callback"
+    )
+    # Set False only for dev with self-signed TLS
+    keycloak_verify_tls: bool = Field(default=False)
+
+    # ── gRPC server ──────────────────────────────────────────────────────────
     grpc_port: int = Field(default=50051)
-    grpc_server_cert: str = Field(default="")   # path to PEM cert (production)
-    grpc_server_key: str = Field(default="")    # path to PEM private key
-    grpc_ca_cert: str = Field(default="")       # path to CA cert for mTLS
+    grpc_server_cert: str = Field(default="")
+    grpc_server_key: str = Field(default="")
+    grpc_ca_cert: str = Field(default="")
+
+    @field_validator("keycloak_url")
+    @classmethod
+    def strip_trailing_slash(cls, v: str) -> str:
+        return v.rstrip("/")
 
     @model_validator(mode="after")
     def validate_production_security(self) -> "Settings":
@@ -73,6 +83,8 @@ class Settings(FabricSettings):
                 raise ValueError("TLS must be enabled in production.")
             if "localhost" in self.database_url:
                 raise ValueError("localhost database URL is not allowed in production.")
+            if not self.keycloak_verify_tls:
+                raise ValueError("KEYCLOAK_VERIFY_TLS must be true in production.")
         return self
 
 

@@ -1,3 +1,16 @@
+"""Authentication middleware — Keycloak OIDC edition.
+
+Validates the Keycloak access token on every protected request by:
+  1. Extracting the JWT from the Authorization: Bearer header or the rwa_session cookie.
+  2. Verifying the signature via the cached JWKS (RS256, issuer, audience).
+  3. Checking the token's jti against the Redis blacklist (for immediate logout).
+  4. Enforcing CSRF double-submit on mutating cookie-based requests.
+
+On success the decoded token payload is stored in request.state.token_payload
+and request.state.keycloak_sub is set to payload["sub"] for downstream use.
+"""
+from __future__ import annotations
+
 import logging
 from collections.abc import Awaitable, Callable
 
@@ -6,34 +19,47 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from backend.core.auth_cookies import CSRF_COOKIE, CSRF_HEADER, SESSION_COOKIE
+from backend.core.oidc import validate_token
 from backend.core.redis_client import get_redis
-from backend.core.security import decode_token
 
 logger = logging.getLogger(__name__)
 
-_PUBLIC_API_PATHS = frozenset({"/api/v1/auth/login", "/api/v1/auth/refresh"})
-_EXCLUDED_PREFIXES = frozenset({"/docs", "/redoc", "/openapi", "/health", "/metrics"})
-_SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})
+_PUBLIC_API_PATHS: frozenset[str] = frozenset(
+    {
+        "/api/v1/auth/login",
+        "/api/v1/auth/callback",
+        "/api/v1/auth/refresh",
+    }
+)
+_EXCLUDED_PREFIXES: frozenset[str] = frozenset(
+    {"/docs", "/redoc", "/openapi", "/health", "/metrics"}
+)
+_SAFE_METHODS: frozenset[str] = frozenset({"GET", "HEAD", "OPTIONS"})
 
 
-def _is_excluded(path: str) -> bool:
+def _is_public(path: str) -> bool:
     if path in _PUBLIC_API_PATHS:
         return True
-    return any(path.startswith(prefix) for prefix in _EXCLUDED_PREFIXES)
+    return any(path.startswith(p) for p in _EXCLUDED_PREFIXES)
 
 
 def _unauthorized(message: str) -> JSONResponse:
-    return JSONResponse(status_code=401, content={"error": "Unauthorized", "message": message})
+    return JSONResponse(
+        status_code=401, content={"error": "Unauthorized", "message": message}
+    )
 
 
 def _forbidden(message: str) -> JSONResponse:
-    return JSONResponse(status_code=403, content={"error": "Forbidden", "message": message})
+    return JSONResponse(
+        status_code=403, content={"error": "Forbidden", "message": message}
+    )
 
 
-def _extract_credentials(request: Request) -> tuple[str | None, bool]:
-    auth_header = request.headers.get("Authorization")
-    if auth_header and auth_header.startswith("Bearer "):
-        return auth_header.split(" ", 1)[1], False
+def _extract_token(request: Request) -> tuple[str | None, bool]:
+    """Return (token, from_cookie).  from_cookie drives CSRF enforcement."""
+    auth_header = request.headers.get("Authorization", "")
+    if auth_header.startswith("Bearer "):
+        return auth_header[7:], False
     cookie_token = request.cookies.get(SESSION_COOKIE)
     if cookie_token:
         return cookie_token, True
@@ -46,16 +72,17 @@ class AuthMiddleware(BaseHTTPMiddleware):
         request: Request,
         call_next: Callable[[Request], Awaitable[Response]],
     ) -> Response:
-        path = request.url.path
-        if _is_excluded(path):
+        if _is_public(request.url.path):
             return await call_next(request)
 
-        token, from_cookie = _extract_credentials(request)
+        token, from_cookie = _extract_token(request)
         if not token:
             return _unauthorized(
-                "Missing credentials. Use Authorization: Bearer <token> or the session cookie.",
+                "Missing credentials — provide Authorization: Bearer <token> "
+                "or the session cookie."
             )
 
+        # CSRF check for state-mutating cookie-based requests
         if from_cookie and request.method not in _SAFE_METHODS:
             csrf_cookie = request.cookies.get(CSRF_COOKIE)
             csrf_header = request.headers.get(CSRF_HEADER)
@@ -63,29 +90,36 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 return _forbidden("CSRF token missing or invalid.")
 
         try:
+            payload = await validate_token(token)
+
+            # Redis blacklist check using jti (short key, no full token stored)
+            jti: str = payload.get("jti", "")
+            keycloak_sub: str = payload.get("sub", "")
+
             redis_gen = get_redis()
             try:
-                redis_conn = await redis_gen.__anext__()
-                is_blacklisted = await redis_conn.get(f"blacklist:{token}")
-                payload = decode_token(token)
-                user_id = payload.get("sub")
+                redis = await redis_gen.__anext__()
+                blacklisted = await redis.get(f"oidc:blacklist:{jti}")
+                # Also check per-user session invalidation (covers all tokens pre-logout)
+                user_invalidated = await redis.get(f"oidc:invalidated:{keycloak_sub}")
                 iat = int(payload.get("iat", 0))
-                last_logout_raw = await redis_conn.get(f"token:invalidated:{user_id}")
-                if last_logout_raw and iat <= int(last_logout_raw):
-                    is_blacklisted = True
+                if user_invalidated and iat <= int(user_invalidated):
+                    blacklisted = True
             finally:
                 await redis_gen.aclose()
+
         except ValueError:
             return _unauthorized("Invalid or expired token.")
         except Exception:
-            logger.exception("Auth middleware: unexpected error validating token")
+            logger.exception("AuthMiddleware: unexpected error validating token")
             return JSONResponse(
                 status_code=500,
                 content={"error": "SystemFault", "message": "Internal authentication error."},
             )
 
-        if is_blacklisted:
+        if blacklisted:
             return _unauthorized("Token has been revoked. Please log in again.")
 
-        request.state.user_id = str(user_id)
+        request.state.keycloak_sub = keycloak_sub
+        request.state.token_payload = payload
         return await call_next(request)

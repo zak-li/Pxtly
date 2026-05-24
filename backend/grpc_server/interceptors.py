@@ -1,10 +1,10 @@
 """gRPC server interceptors.
 
-AuthInterceptor  — validates the JWT from the `authorization` metadata key,
-                   attaches the decoded payload to the ServicerContext so
-                   servicers can call ctx.user_payload.
-LoggingInterceptor — structured request/response logging mirroring the
-                     behaviour of the former RequestLoggerMiddleware.
+AuthInterceptor  — validates the Keycloak JWT from the `authorization` metadata key
+                   (Bearer scheme), attaches the decoded payload to the context so
+                   servicers can read ctx.user_payload["sub"] / ["rwa_role"].
+
+LoggingInterceptor — structured request/response logging.
 """
 from __future__ import annotations
 
@@ -16,22 +16,19 @@ from typing import Any
 import grpc
 import grpc.aio
 
-from backend.core.security import decode_token
+from backend.core.oidc import validate_token
 
 logger = logging.getLogger(__name__)
 
-# RPCs that do not require authentication (public endpoints).
-_PUBLIC_METHODS = frozenset({
-    "/rwa.auth.AuthService/Login",
-})
+# gRPC RPCs that do not require a token.
+_PUBLIC_METHODS: frozenset[str] = frozenset()
 
 
 class AuthInterceptor(grpc.aio.ServerInterceptor):
-    """Validates Bearer JWT from the `authorization` metadata key.
+    """Validates the Keycloak Bearer JWT from the `authorization` metadata key.
 
-    On success, injects `user_payload` into the servicer context via
-    context.user_payload so downstream servicers can read user.id / role.
-    On failure, aborts with UNAUTHENTICATED.
+    On success: injects `user_payload` into the context.
+    On failure: aborts with UNAUTHENTICATED.
     """
 
     async def intercept_service(
@@ -41,14 +38,12 @@ class AuthInterceptor(grpc.aio.ServerInterceptor):
     ) -> grpc.RpcMethodHandler:
         if handler_call_details.method in _PUBLIC_METHODS:
             return await continuation(handler_call_details)
-
         return _AuthHandler(await continuation(handler_call_details))
 
 
 class _AuthHandler(grpc.RpcMethodHandler):
     def __init__(self, handler: grpc.RpcMethodHandler) -> None:
         self._handler = handler
-        # Mirror all RpcMethodHandler attributes.
         self.request_streaming = handler.request_streaming
         self.response_streaming = handler.response_streaming
         self.request_deserializer = handler.request_deserializer
@@ -66,12 +61,11 @@ class _AuthHandler(grpc.RpcMethodHandler):
                 return
 
             try:
-                payload = decode_token(token)
+                payload = await validate_token(token)
             except ValueError as exc:
                 await context.abort(grpc.StatusCode.UNAUTHENTICATED, str(exc))
                 return
 
-            # Attach decoded payload so servicers can read it.
             context.user_payload = payload  # type: ignore[attr-defined]
             return await func(request_or_iterator, context)
 
@@ -98,14 +92,12 @@ class LoggingInterceptor(grpc.aio.ServerInterceptor):
             return handler
 
         method = handler_call_details.method
-
         original_func = (
             handler.unary_unary
             or handler.unary_stream
             or handler.stream_unary
             or handler.stream_stream
         )
-
         if original_func is None:
             return handler
 
@@ -114,14 +106,13 @@ class LoggingInterceptor(grpc.aio.ServerInterceptor):
             try:
                 result = await original_func(request_or_iterator, context)
                 elapsed = (time.perf_counter() - start) * 1000
-                logger.info(f"gRPC {method} OK {elapsed:.1f}ms")
+                logger.info("gRPC %s OK %.1fms", method, elapsed)
                 return result
             except Exception as exc:
                 elapsed = (time.perf_counter() - start) * 1000
-                logger.error(f"gRPC {method} ERROR {elapsed:.1f}ms — {exc}")
+                logger.error("gRPC %s ERROR %.1fms — %s", method, elapsed, exc)
                 raise
 
-        # Rebuild the handler with the wrapped function.
         if handler.unary_unary:
             return handler._replace(unary_unary=logged_func)  # type: ignore[attr-defined]
         if handler.unary_stream:

@@ -23,7 +23,7 @@ async def seed_valuation_asset(async_session: AsyncSession) -> str:
     user_id = uuid4()
     user = User(
         id=user_id, email=f"val-{uuid4()}@val.com", role="EMETTEUR",
-        hashed_password="pw", org_id=org_id, is_active=True
+        keycloak_sub=f"kc-sub-val-{user_id}", org_id=org_id, is_active=True
     )
     await async_session.merge(user)
 

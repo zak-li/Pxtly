@@ -19,11 +19,11 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool
 
-from backend.config import Settings, settings
+from backend.config import settings
 from backend.core.celery_app import celery_app
 from backend.core.database_base import Base
 from backend.core.redis_client import get_redis
-from backend.core.security import create_access_token
+from backend.core.security import _TEST_SIGNING_KEY, create_access_token
 from backend.dependencies import get_db, get_fabric
 from backend.exceptions import AssetFrozenError, AssetNotFoundException
 from backend.fabric_client.network import FabricClient
@@ -256,10 +256,22 @@ async def test_client(
     app.dependency_overrides[get_redis] = override_get_redis
     app.dependency_overrides[get_fabric] = override_get_fabric
 
+    from jose import jwt as _jose_jwt
+    from jose.exceptions import ExpiredSignatureError, JWTError
+
+    async def fake_validate_token(token: str) -> dict:
+        try:
+            return _jose_jwt.decode(token, _TEST_SIGNING_KEY, algorithms=["HS256"])
+        except ExpiredSignatureError as exc:
+            raise exc
+        except JWTError as exc:
+            raise exc
+
     transport = ASGITransport(app=app)
     with patch("backend.api.middleware.rate_limiter.get_redis", fake_get_redis):
-        async with AsyncClient(transport=transport, base_url="http://testserver") as client:
-            yield client
+        with patch("backend.api.middleware.auth_middleware.validate_token", fake_validate_token):
+            async with AsyncClient(transport=transport, base_url="http://testserver") as client:
+                yield client
 
     app.dependency_overrides.clear()
 
@@ -302,12 +314,11 @@ async def test_amf_org(async_session: AsyncSession) -> Organization:
 
 @pytest.fixture
 async def test_user_thomas(async_session: AsyncSession, test_org: Organization) -> User:
-    from backend.core.security import hash_password
     user = User(
         id=THOMAS_USER_ID,
         org_id=BANK01_ORG_ID,
         email="thomas.martin@bank01.fr",
-        hashed_password=hash_password("Passw0rd!"),
+        keycloak_sub="kc-sub-thomas-martin",
         first_name="Thomas",
         last_name="Martin",
         role="EMETTEUR",
@@ -331,12 +342,11 @@ async def test_user_thomas(async_session: AsyncSession, test_org: Organization) 
 
 @pytest.fixture
 async def test_user_sophie(async_session: AsyncSession, test_amf_org: Organization) -> User:
-    from backend.core.security import hash_password
     user = User(
         id=SOPHIE_USER_ID,
         org_id=REG01_ORG_ID,
         email="sophie.lambert@amf.fr",
-        hashed_password=hash_password("Passw0rd!"),
+        keycloak_sub="kc-sub-sophie-lambert",
         first_name="Sophie",
         last_name="Lambert",
         role="REGULATEUR",
@@ -359,27 +369,23 @@ async def test_user_sophie(async_session: AsyncSession, test_amf_org: Organizati
     return user
 
 @pytest.fixture
-def token_thomas_martin(monkeypatch_session) -> str:
-    monkeypatch_session.setenv("SECRET_KEY", Settings().secret_key)
-    payload = {"sub": str(THOMAS_USER_ID), "role": "EMETTEUR", "org_id": str(BANK01_ORG_ID)}
+def token_thomas_martin() -> str:
+    payload = {"sub": "kc-sub-thomas-martin", "email": "thomas.martin@bank01.fr", "rwa_role": "EMETTEUR"}
     return create_access_token(payload, expires_delta=timedelta(hours=24))
 
 @pytest.fixture
-def token_sophie_lambert(monkeypatch_session) -> str:
-    monkeypatch_session.setenv("SECRET_KEY", Settings().secret_key)
-    payload = {"sub": str(SOPHIE_USER_ID), "role": "REGULATEUR", "org_id": str(REG01_ORG_ID)}
+def token_sophie_lambert() -> str:
+    payload = {"sub": "kc-sub-sophie-lambert", "email": "sophie.lambert@amf.fr", "rwa_role": "REGULATEUR"}
     return create_access_token(payload, expires_delta=timedelta(hours=24))
 
 @pytest.fixture
-def token_james_wilson(monkeypatch_session) -> str:
-    monkeypatch_session.setenv("SECRET_KEY", Settings().secret_key)
-    payload = {"sub": str(JAMES_USER_ID), "role": "TRADER", "org_id": str(NATWEST_ORG_ID)}
+def token_james_wilson() -> str:
+    payload = {"sub": "kc-sub-james-wilson", "email": "james.wilson@natwest.com", "rwa_role": "TRADER"}
     return create_access_token(payload, expires_delta=timedelta(hours=24))
 
 @pytest.fixture
-def token_expired(monkeypatch_session) -> str:
-    monkeypatch_session.setenv("SECRET_KEY", Settings().secret_key)
-    payload = {"sub": str(THOMAS_USER_ID), "role": "EMETTEUR", "org_id": str(BANK01_ORG_ID)}
+def token_expired() -> str:
+    payload = {"sub": "kc-sub-thomas-martin", "email": "thomas.martin@bank01.fr", "rwa_role": "EMETTEUR"}
     return create_access_token(payload, expires_delta=timedelta(hours=-1))
 
 @pytest.fixture

@@ -6,7 +6,6 @@ from unittest.mock import patch
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.core.security import hash_password
 from backend.exceptions import AssetFrozenError
 from backend.features.assets.models import Asset
 from backend.features.assets.schemas import FreezeRequest, TransferRequest
@@ -63,7 +62,7 @@ async def test_transfer_saga_compensation_on_db_failure(
         id=uuid.UUID("30000000-0000-0000-0000-000000000001"),
         org_id=REG01_ORG_ID,
         email="recipient@amf.fr",
-        hashed_password=hash_password("Passw0rd!"),
+        keycloak_sub="kc-sub-recipient-amf-1",
         role="TRADER",
         is_active=True,
     )
@@ -155,7 +154,7 @@ async def test_fabric_frozen_error_propagates_on_transfer(
         id=uuid.UUID("30000000-0000-0000-0000-000000000002"),
         org_id=REG01_ORG_ID,
         email="buyer.frozen@amf.fr",
-        hashed_password=hash_password("Passw0rd!"),
+        keycloak_sub="kc-sub-buyer-frozen-2",
         role="TRADER",
         is_active=True,
     )
