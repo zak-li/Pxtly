@@ -29,9 +29,18 @@ services:
       KC_CACHE: local
       KC_HEALTH_ENABLED: "true"
       KC_METRICS_ENABLED: "true"
+      # Custom theme — set per-realm in the admin UI to make it the login theme.
+      # Disabling theme cache here so .ftl edits during dev are picked up live;
+      # flip back to true in real production after the theme has stabilised.
+      KC_SPI_THEME_STATIC_MAX_AGE: "-1"
+      KC_SPI_THEME_CACHE_THEMES: "false"
+      KC_SPI_THEME_CACHE_TEMPLATES: "false"
     volumes:
       - keycloak_data:/opt/keycloak/data
       - ./tls:/opt/keycloak/conf/tls:ro
+      # Mount the regx theme as a sibling of Keycloak's built-in themes so
+      # `parent=base` resolution still finds the bundled base/common assets.
+      - ./themes/regx:/opt/keycloak/themes/regx:ro
     ports:
       - "8443:8443"
     healthcheck:

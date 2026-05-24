@@ -9,6 +9,7 @@
 network/wallets/
 network/crypto-config/
 deployment/keycloak/tls/
+deployment/keycloak/themes/
 
 logs/
 *.log
@@ -38,6 +39,8 @@ Thumbs.db
 /tmp/rwa-reports/
 audit_report.pdf
 audit_report.tex
+
+templates/
 
 *.exe
 
