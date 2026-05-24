@@ -89,7 +89,15 @@ async def serve() -> None:
         logger.info(f"gRPC server starting (mTLS) on {listen_addr}")
     else:
         server.add_insecure_port(listen_addr)
-        logger.info(f"gRPC server starting (insecure) on {listen_addr}")
+        if settings.environment == "production":
+            logger.warning(
+                "gRPC server starting in INSECURE mode in production! "
+                "Set GRPC_SERVER_CERT, GRPC_SERVER_KEY, and GRPC_CA_CERT "
+                "to enable mTLS. Without mTLS, gRPC should NOT be exposed "
+                "outside the host."
+            )
+        else:
+            logger.info(f"gRPC server starting (insecure) on {listen_addr}")
 
     await server.start()
 

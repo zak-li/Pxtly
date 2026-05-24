@@ -6,6 +6,28 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [1.1.0] - 2026-05-24
+
+### Added
+- Keycloak OIDC authentication flow with PKCE, replacing the legacy email/password endpoints.
+- Read-only volume mounts in Docker Compose for secure injection of Hyperledger Fabric wallets and crypto configurations.
+- `Chaincode Duration` metrics panel added to the Grafana dashboard to track performance of FHE and ZK-KYC features.
+- Keycloak and Vault health tracking added to the core services monitoring dashboard.
+
+### Changed
+- Migrated primary deployment architecture from systemd to pure Docker Compose for better network isolation.
+- UFW firewall rules severely restricted to allow only LAN access for internal services and port 8443 for Keycloak.
+- Vault API communication re-routed through HTTP on the host (`10.10.10.150:8200`) instead of localhost HTTPS to fix connection drops.
+- Updated all integration and unit tests to reflect the new OIDC architecture and HElib CKKS API for FHE.
+- Redefined the `.env.example` and `README.md` to comprehensively document the new security constraints and startup configurations.
+
+### Security
+- Rotated and purged all hardcoded credentials (PostgreSQL, Redis, Neo4j, CouchDB) from configuration files, systemd units, and deployment scripts.
+- Added explicit warnings for insecure gRPC configurations in production environments.
+- Downgraded non-fatal backend startup errors to warnings to prevent false-positive alert triggers.
+
+---
+
 ## [1.0.0] - 2026-05-10
 
 ### Added

@@ -34,6 +34,11 @@ USER rwa
 
 EXPOSE 8000
 
+# Liveness probe — only checks that the process is alive and Postgres is
+# reachable.  For a readiness probe (Fabric, Vault, Neo4j), use:
+#   curl -f http://localhost:8000/health/deep
+# This distinction matters: orchestrators should NOT restart the container
+# when external dependencies are temporarily unavailable.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 

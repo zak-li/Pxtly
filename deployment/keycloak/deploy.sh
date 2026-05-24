@@ -22,14 +22,22 @@ ssh "${REMOTE_USER}@${REMOTE_HOST}" bash << 'ENDSSH'
   set -euo pipefail
   source /opt/rwa/keycloak/.env.keycloak
 
-  psql postgresql://rwaadmin:r0wTEPX08zRu5@10.10.10.150:5432/rwadb \
+  # Database credentials are read from the main project .env to avoid duplication.
+  # Ensure DATABASE_URL is set in /home/zakaria/rwa-platform/.env
+  DB_CONN=$(grep "^DATABASE_URL=" /home/zakaria/rwa-platform/.env | sed 's|postgresql+asyncpg://||' | sed 's|/[^/]*$||')
+  DB_USER=$(echo "$DB_CONN" | cut -d: -f1)
+  DB_PASS=$(echo "$DB_CONN" | cut -d: -f2 | cut -d@ -f1)
+  DB_HOST=$(echo "$DB_CONN" | cut -d@ -f2 | cut -d: -f1)
+  DB_PORT=$(echo "$DB_CONN" | cut -d: -f3)
+
+  PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d rwadb \
     -c "SELECT 1 FROM pg_database WHERE datname='keycloak_db'" | grep -q 1 \
-  || psql postgresql://rwaadmin:r0wTEPX08zRu5@10.10.10.150:5432/rwadb \
+  || PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d rwadb \
        -c "CREATE DATABASE keycloak_db;"
 
-  psql postgresql://rwaadmin:r0wTEPX08zRu5@10.10.10.150:5432/rwadb \
+  PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d rwadb \
     -c "SELECT 1 FROM pg_roles WHERE rolname='${KEYCLOAK_DB_USER}'" | grep -q 1 \
-  || psql postgresql://rwaadmin:r0wTEPX08zRu5@10.10.10.150:5432/rwadb \
+  || PGPASSWORD="$DB_PASS" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d rwadb \
        -c "CREATE USER ${KEYCLOAK_DB_USER} WITH PASSWORD '${KEYCLOAK_DB_PASSWORD}';
            GRANT ALL PRIVILEGES ON DATABASE keycloak_db TO ${KEYCLOAK_DB_USER};"
 ENDSSH
@@ -41,7 +49,8 @@ ssh "${REMOTE_USER}@${REMOTE_HOST}" bash << 'ENDSSH'
   docker compose --env-file .env.keycloak -f docker-compose.keycloak.yml up -d --wait
   echo "Keycloak started. Waiting for health check..."
   for i in $(seq 1 20); do
-    if curl -fso /dev/null http://localhost:8080/health/ready; then
+    # Keycloak runs HTTPS-only (port 8443); HTTP 8080 is disabled.
+    if curl -fso /dev/null --insecure https://localhost:8443/health/ready; then
       echo "Keycloak is healthy!"
       break
     fi
@@ -57,12 +66,12 @@ ssh "${REMOTE_USER}@${REMOTE_HOST}" bash << 'ENDSSH'
   source .env.keycloak
   pip3 install -q -r requirements-setup.txt
   python3 setup-realm.py \
-    --keycloak-url "http://localhost:8080" \
+    --keycloak-url "https://localhost:8443" \
     --admin-user  "${KEYCLOAK_ADMIN_USER}" \
     --admin-pass  "${KEYCLOAK_ADMIN_PASSWORD}"
 ENDSSH
 
 echo ""
 echo "==> Keycloak deployed and configured successfully!"
-echo "    Admin UI: http://10.10.10.150:8080/admin"
+echo "    Admin UI: https://10.10.10.150:8443/admin"
 echo "    HTTPS:    https://10.10.10.150:8443"

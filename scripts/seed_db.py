@@ -12,10 +12,7 @@ from pathlib import Path
 import asyncpg
 
 ROOT = Path(__file__).resolve().parent.parent
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+asyncpg://rwaadmin:r0wTEPX08zRu5@10.10.10.150:5432/rwadb",
-)
+DATABASE_URL = os.environ["DATABASE_URL"]  # Set via .env or environment — no hardcoded fallback
 # asyncpg uses plain postgres:// scheme
 PG_DSN = DATABASE_URL.replace("postgresql+asyncpg://", "postgresql://").replace(
     "postgresql://", "postgresql://"

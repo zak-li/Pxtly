@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Minimal Celery Prometheus exporter (port 9808)."""
 import logging
+import os
 import time
 
 import celery as celery_lib
 import redis as redis_lib
 from prometheus_client import Gauge, start_http_server
 
-BROKER = "redis://:XH6w3Iv114cLQq1Qw38I@127.0.0.1:6379/0"
+BROKER = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/0")
 QUEUES = ["celery", "compliance", "reports", "fabric_events"]
 PORT   = 9808
 INTERVAL = 15

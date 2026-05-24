@@ -75,3 +75,11 @@ scrape_configs:
           format: RFC3339Nano
       - output:
           source: output
+      - json:
+          source: output
+          expressions:
+            level: level
+            service: service
+      - labels:
+          level:
+          service:

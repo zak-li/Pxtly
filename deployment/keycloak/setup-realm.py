@@ -3,7 +3,7 @@
 
 Run once after first boot:
     python3 setup-realm.py \
-        --keycloak-url http://localhost:8080 \
+        --keycloak-url https://localhost:8443 \
         --admin-user admin \
         --admin-pass <password>
 """
@@ -251,7 +251,7 @@ def ensure_mappers(client: httpx.Client, client_uuid: str) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--keycloak-url", default="http://localhost:8080")
+    parser.add_argument("--keycloak-url", default="https://localhost:8443")
     parser.add_argument("--admin-user", default="admin")
     parser.add_argument("--admin-pass", required=True)
     args = parser.parse_args()

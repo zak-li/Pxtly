@@ -8,7 +8,7 @@ import hvac
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from prometheus_client import CONTENT_TYPE_LATEST, Counter, Gauge, Histogram, generate_latest
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy import text
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -21,33 +21,17 @@ from backend.api.v1.router import api_router
 from backend.config import settings
 from backend.core.database import AsyncSessionLocal, engine
 from backend.core.logging_config import setup_logging
+from backend.core.metrics import (
+    RWA_AML_SCORE,
+    RWA_ASSETS_BY_STATUS,
+    RWA_KYC_EXPIRING,
+)
 from backend.core.redis_client import get_redis
 from backend.dependencies import get_fabric
 from backend.exceptions import setup_global_exception_handlers
 from backend.fabric_client.events import FabricEventListener
 from backend.features.agent.groq_client import close_client as close_groq_client
 from backend.features.fraud_detection.neo4j_sync import get_neo4j_client
-
-RWA_TRANSACTIONS = Counter("rwa_transactions_total", "Transactions RWA", ["tx_type", "org", "status"])
-RWA_CHAINCODE_DURATION = Histogram(
-    "rwa_chaincode_duration_seconds", "Duree chaincode",
-    ["function", "status"],
-    buckets=[0.05, 0.1, 0.25, 0.5, 1, 2, 3, 5, 10],
-)
-RWA_ASSETS_BY_STATUS = Gauge("rwa_assets_by_status", "Actifs par statut", ["status"])
-RWA_KYC_EXPIRING = Gauge("rwa_kyc_expiring_count", "KYC expirant")
-RWA_AML_SCORE = Gauge("rwa_aml_score_avg", "AML score", ["risk_category"])
-RWA_COMPLIANCE_BLOCKS = Counter("rwa_compliance_blocks_total", "Compliance Blocks", ["blocked_by"])
-RWA_CELERY_TASKS = Counter("rwa_celery_tasks_total", "Taches Celery", ["task_name", "status"])
-
-# Initialise label combinations so they appear in /metrics from startup.
-# Circuit-breaker state is declared and labelled in backend/core/circuit_breaker.py
-# (and the legacy fabric_client retry decorator), so we no longer touch it here.
-RWA_COMPLIANCE_BLOCKS.labels(blocked_by="aml_screening").inc(0)
-RWA_COMPLIANCE_BLOCKS.labels(blocked_by="kyc_expired").inc(0)
-RWA_CELERY_TASKS.labels(task_name="generate_audit_report", status="success").inc(0)
-RWA_CELERY_TASKS.labels(task_name="generate_audit_report", status="failure").inc(0)
-RWA_CELERY_TASKS.labels(task_name="sync_fabric_events", status="success").inc(0)
 
 setup_logging(settings.log_level)
 logger = logging.getLogger(__name__)
@@ -110,43 +94,61 @@ _event_listener_instance: FabricEventListener | None = None
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Starting up RWA API.")
 
+    _startup_status: dict[str, str] = {}
+
     try:
         async with engine.begin() as conn:
             await conn.execute(text("SELECT 1"))
         logger.info("PostgreSQL connection verified.")
+        _startup_status["postgres"] = "ok"
     except Exception as exc:
         logger.error(f"PostgreSQL connection failed: {exc}")
+        _startup_status["postgres"] = "FAILED"
 
     redis_gen = get_redis()
     try:
         redis_conn = await redis_gen.__anext__()
-        await redis_conn.ping()
+        await redis_conn.ping()  # type: ignore
         logger.info("Redis connection verified.")
+        _startup_status["redis"] = "ok"
     except Exception as exc:
         logger.error(f"Redis connection failed: {exc}")
+        _startup_status["redis"] = "FAILED"
     finally:
         await redis_gen.aclose()
 
     try:
         await get_fabric().connect()
         logger.info("Hyperledger Fabric gRPC channel connected.")
+        _startup_status["fabric"] = "ok"
     except Exception as exc:
-        logger.error(f"Fabric connection failed: {exc}")
+        # Fabric may be unavailable if the network hasn't started yet —
+        # this is non-fatal; the circuit breaker will retry on first use.
+        logger.warning(f"Fabric connection deferred (non-fatal): {exc}")
+        _startup_status["fabric"] = "deferred"
 
     neo4j_client = get_neo4j_client()
     try:
         await neo4j_client.connect()
         logger.info("Neo4j graph database connected.")
+        _startup_status["neo4j"] = "ok"
     except Exception as exc:
-        logger.warning(f"Neo4j connection failed (non-blocking): {exc}")
+        logger.warning(f"Neo4j connection deferred (non-fatal): {exc}")
+        _startup_status["neo4j"] = "deferred"
 
     global _event_listener_instance
     _event_listener_instance = FabricEventListener(settings)
     try:
         await _event_listener_instance.start()
         logger.info("Fabric event listener started.")
+        _startup_status["events"] = "ok"
     except Exception as exc:
-        logger.error(f"Fabric event listener failed to start: {exc}")
+        logger.warning(f"Fabric event listener deferred (non-fatal): {exc}")
+        _startup_status["events"] = "deferred"
+
+    # Single summary line for quick operational assessment.
+    summary = " | ".join(f"{k}={v}" for k, v in _startup_status.items())
+    logger.info(f"Startup complete — {summary}")
 
     metrics_task = asyncio.create_task(metrics_updater(), name="metrics_updater")
 
@@ -273,7 +275,7 @@ async def check_health_deep(request: Request) -> JSONResponse:
     redis_gen = get_redis()
     try:
         redis_conn = await redis_gen.__anext__()
-        await redis_conn.ping()
+        await redis_conn.ping()  # type: ignore
         checks["redis"] = "ok"
     except Exception:
         logger.exception("health: redis check failed")

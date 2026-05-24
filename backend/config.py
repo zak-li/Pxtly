@@ -14,7 +14,7 @@ class FabricSettings(BaseSettings):
     fabric_grpc_timeout: int
     redis_url: str
 
-    vault_addr: str = Field(default="https://127.0.0.1:8200")
+    vault_addr: str = Field(default="http://10.10.10.150:8200")
     vault_token: SecretStr = Field(...)
 
     groq_api_key: str = Field(default="")
@@ -52,7 +52,7 @@ class Settings(FabricSettings):
 
     # ── Keycloak / OIDC ──────────────────────────────────────────────────────
     keycloak_url: str = Field(
-        default="http://10.10.10.150:8080",
+        default="https://10.10.10.150:8443",
         description="Base URL of the Keycloak server (no trailing slash)",
     )
     keycloak_realm: str = Field(default="rwa-platform")
@@ -60,7 +60,7 @@ class Settings(FabricSettings):
     keycloak_client_secret: str = Field(...)
     # Full URL the browser is redirected to after Keycloak authentication.
     keycloak_callback_url: str = Field(
-        default="http://10.10.10.150:8000/api/v1/auth/callback"
+        default="https://10.10.10.150:8443/api/v1/auth/callback"
     )
     # Set False only for dev (no TLS). In production prefer setting
     # keycloak_ca_cert_path to pin a custom CA when Keycloak uses a self-signed

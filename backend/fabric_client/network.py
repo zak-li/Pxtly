@@ -1,4 +1,4 @@
-﻿import asyncio
+import asyncio
 import json
 import logging
 import os
@@ -37,6 +37,10 @@ class FabricClient:
         self._network_config: dict[str, dict[str, str | dict[str, str]]] = {}
         self._peers: list[dict[str, str]] = []
 
+        # Fabric CLI paths — these must be available at runtime.
+        # In a Docker deployment, mount the peer binary and crypto material
+        # as volumes, or set FABRIC_PEER_BIN to a path inside the container.
+        # Example: -v /usr/local/bin/peer:/usr/local/bin/peer:ro
         self.crypto_base = os.environ.get(
             "FABRIC_CRYPTO_CONFIG", os.path.expanduser("~/rwa-platform/crypto-config")
         )
@@ -46,6 +50,15 @@ class FabricClient:
         self.peer_bin = os.environ.get(
             "FABRIC_PEER_BIN", os.path.expanduser("~/go/src/github.com/hyperledger/fabric-samples/bin/peer")
         )
+
+        # Warn at init if the peer binary is missing — better than a cryptic
+        # FileNotFoundError on the first transaction.
+        if not os.path.isfile(self.peer_bin):
+            logger.warning(
+                f"Fabric peer binary not found at {self.peer_bin}. "
+                "Set FABRIC_PEER_BIN or mount the binary into the container."
+            )
+
         self.orderer_ca = f"{self.crypto_base}/ordererOrganizations/finance-trust.com/orderers/orderer.finance-trust.com/msp/tlscacerts/tlsca.finance-trust.com-cert.pem"
 
     _FORBIDDEN_PATTERN = __import__("re").compile(
@@ -193,6 +206,12 @@ class FabricClient:
         *args: str,
         identity_label: str
     ) -> PayloadDict | list[PayloadDict | str | int | float | bool] | str | None:
+        import time
+
+        from backend.core.metrics import RWA_CHAINCODE_DURATION, RWA_TRANSACTIONS
+        start_time = time.perf_counter()
+        status = "success"
+
         self._sanitize_arguments(args)
 
         env = self._get_env_for_identity(identity_label)
@@ -212,7 +231,16 @@ class FabricClient:
 
         cmd.extend(["-c", json.dumps(payload), "--waitForEvent"])
 
-        stdout, stderr = await self._exec_cli(cmd, env)
+        try:
+            stdout, stderr = await self._exec_cli(cmd, env)
+        except Exception:
+            status = "error"
+            raise
+        finally:
+            RWA_CHAINCODE_DURATION.labels(function=function, status=status).observe(time.perf_counter() - start_time)
+            # Assuming org="BANK01" or parse from identity
+            org = "BANK01" if "BANK01" in identity_label else "REG01"
+            RWA_TRANSACTIONS.labels(tx_type="invoke", org=org, status=status).inc()
 
         try:
             lines = stdout.split('\n')
@@ -251,6 +279,12 @@ class FabricClient:
         *args: str,
         identity_label: str
     ) -> PayloadDict | list[PayloadDict | str | int | float | bool] | str | None:
+        import time
+
+        from backend.core.metrics import RWA_CHAINCODE_DURATION, RWA_TRANSACTIONS
+        start_time = time.perf_counter()
+        status = "success"
+
         self._sanitize_arguments(args)
 
         env = self._get_env_for_identity(identity_label)
@@ -263,7 +297,15 @@ class FabricClient:
             "-c", json.dumps(payload)
         ]
 
-        stdout, stderr = await self._exec_cli(cmd, env)
+        try:
+            stdout, stderr = await self._exec_cli(cmd, env)
+        except Exception:
+            status = "error"
+            raise
+        finally:
+            RWA_CHAINCODE_DURATION.labels(function=function, status=status).observe(time.perf_counter() - start_time)
+            org = "BANK01" if "BANK01" in identity_label else "REG01"
+            RWA_TRANSACTIONS.labels(tx_type="query", org=org, status=status).inc()
 
         try:
             return self._convert_keys(json.loads(stdout))

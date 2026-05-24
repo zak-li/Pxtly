@@ -44,7 +44,7 @@ The platform embeds compliance directly into transaction execution and asset lif
   <img src="assets/compliance-flow-v2.svg" alt="Compliance Flow" width="800">
 </p>
 
-RegX exposes a FastAPI REST API and a gRPC server in parallel. Authentication is JWT-based with configurable TTL. Secrets are stored as `SecretStr` via pydantic-settings and never appear in logs. Private keys for Fabric identities live in HashiCorp Vault, and every response carries six security headers with rate limiting and host filtering.
+RegX exposes a FastAPI REST API and a gRPC server in parallel. Authentication is OIDC-based via Keycloak with PKCE (authorization_code flow). Private keys for Fabric identities are stored in HashiCorp Vault (KV v2), and every response carries six security headers with rate limiting and host filtering.
 
 Every transaction produces an on-chain audit entry. An off-chain integrity checker verifies hashes independently, PDF audit reports are generated asynchronously via Celery, and the RAG agent answers regulatory questions by querying a ChromaDB vector store with Groq LLM.
 
@@ -69,9 +69,10 @@ Every transaction produces an on-chain audit entry. An off-chain integrity check
 | Hyperledger Fabric 2.5 | Permissioned blockchain |
 | PostgreSQL 14+ | Application database |
 | Redis 7+ | Cache and Celery broker |
-| HashiCorp Vault | Fabric identity key storage |
+| HashiCorp Vault | Fabric identity key storage (KV v2) |
+| Keycloak 24 | OIDC SSO / PKCE authentication |
 | Neo4j 5+ | Graph database for relationship analysis |
-| Docker + Compose | Peers, orderer, CouchDB containers |
+| Docker + Compose | Peers, orderer, CouchDB, Keycloak containers |
 
 ## Quick Start
 
@@ -83,7 +84,7 @@ cd regx
 cp .env.example .env
 ```
 
-Open `.env` and fill in at minimum `SECRET_KEY`, `DATABASE_URL`, `REDIS_URL`, and the Fabric variables.
+Open `.env` and fill in at minimum `DATABASE_URL`, `REDIS_URL`, the Fabric variables, and all `KEYCLOAK_*` variables.
 
 **Step 2: Install dependencies**
 
@@ -103,35 +104,55 @@ cd network
 ./scripts/enroll-users.sh
 ```
 
-**Step 4: Start the API and worker**
+**Step 4: Deploy Keycloak**
 
 ```bash
+cd deployment/keycloak
+cp .env.keycloak.example .env.keycloak   # fill in admin/DB credentials
+bash deploy.sh
+```
+
+The setup-realm.py script prints a `KEYCLOAK_CLIENT_SECRET` — copy it into your `.env`.
+
+**Step 5: Start the API and worker**
+
+```bash
+docker compose up -d              # API + Celery worker
+# Or without Docker:
 uvicorn backend.main:app --host 0.0.0.0 --port 8000 --workers 1
 celery -A backend.core.celery_app worker --loglevel=info -Q celery,compliance,reports,fabric_events
 ```
 
-The API is live at `http://localhost:8000`. Interactive docs are at `/docs` (Swagger UI) or `/redoc`.
+The API is live at `http://localhost:8000`.
 
-**Step 5: Authenticate**
+**Step 6: Authenticate**
 
-```bash
-curl -X POST http://localhost:8000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "admin", "password": "your-password"}'
+Authentication uses Keycloak OIDC with PKCE. Open in a browser:
+
+```
+http://localhost:8000/api/v1/auth/login
 ```
 
-Pass the returned token as `Authorization: Bearer <token>` on all subsequent requests.
+This redirects to Keycloak's login page. After authentication, the callback sets httpOnly session cookies and returns an access token.
+
+```bash
+# Use the access token for API calls:
+curl -H "Authorization: Bearer <token>" http://localhost:8000/api/v1/assets
+```
 
 ## API Reference
 
-**Authentication**
+**Authentication (OIDC/PKCE)**
 
 | Method | Endpoint | Description |
 |---|---|---|
-| POST | `/api/v1/auth/login` | Obtain JWT token |
-| POST | `/api/v1/auth/refresh` | Refresh access token |
-| POST | `/api/v1/auth/logout` | Revoke session |
+| GET | `/api/v1/auth/login` | Redirect to Keycloak login (PKCE) |
+| GET | `/api/v1/auth/callback` | OIDC callback (exchanges code for tokens) |
+| POST | `/api/v1/auth/refresh` | Refresh access token via cookie |
+| POST | `/api/v1/auth/logout` | Revoke session (clear cookies + Keycloak) |
 | GET | `/api/v1/auth/me` | Current user profile |
+| GET | `/api/v1/auth/me/export` | GDPR Art. 15 personal data export |
+| DELETE | `/api/v1/auth/me` | GDPR Art. 17 right to erasure |
 
 **Assets**
 
@@ -178,20 +199,25 @@ Pass the returned token as `Authorization: Bearer <token>` on all subsequent req
 
 | Variable | Description |
 |---|---|
-| `SECRET_KEY` | JWT signing key, minimum 32 characters |
 | `DATABASE_URL` | PostgreSQL async URL (`postgresql+asyncpg://...`) |
 | `REDIS_URL` | Redis URL (`redis://:password@host:6379/0`) |
+| `KEYCLOAK_URL` | Keycloak base URL (`https://host:8443`) |
+| `KEYCLOAK_CLIENT_SECRET` | OIDC client secret (from `setup-realm.py`) |
 | `FABRIC_WALLET_PATH` | Path to `fabric_wallet.json` |
 | `FABRIC_CONNECTION_PROFILE` | Path to `connection_profile.yaml` |
 | `FABRIC_CHANNEL` | Fabric channel name |
 | `FABRIC_CHAINCODE` | Chaincode name |
-| `VAULT_ADDR` | HashiCorp Vault address (e.g. `http://127.0.0.1:8200`) |
+| `VAULT_ADDR` | HashiCorp Vault address (`http://host:8200`) |
 | `VAULT_TOKEN` | Vault authentication token |
 
 **Optional**
 
 | Variable | Default | Description |
 |---|---|---|
+| `KEYCLOAK_REALM` | `rwa-platform` | Keycloak realm name |
+| `KEYCLOAK_CLIENT_ID` | `rwa-api` | OIDC client identifier |
+| `KEYCLOAK_VERIFY_TLS` | `false` | Verify Keycloak TLS certificate |
+| `KEYCLOAK_CA_CERT_PATH` | | Path to pinned CA for Keycloak TLS |
 | `GROQ_API_KEY` | `""` | Groq API key for the regulatory agent |
 | `GROQ_MODEL` | `llama-3.3-70b-versatile` | Groq model ID |
 | `NEO4J_URI` | | Neo4j bolt URI |
@@ -212,8 +238,9 @@ regx/
 │   │   ├── assets/             # Asset lifecycle
 │   │   ├── compliance/         # AML, KYC, MiCA rules
 │   │   ├── audit/              # Trail, integrity, PDF reports
+│   │   ├── auth/               # Keycloak OIDC/PKCE, GDPR
 │   │   ├── zkp/                # ZK-KYC proofs
-│   │   ├── fhe/                # FHE fraud scorer
+│   │   ├── fhe/                # FHE fraud scorer (HElib CKKS)
 │   │   └── agent/              # RAG pipeline, ChromaDB
 │   ├── fabric_client/          # Wallet, events, retry, circuit breaker
 │   └── grpc_server/            # gRPC servicers
@@ -223,7 +250,9 @@ regx/
 │   ├── docker/                 # docker-compose.yaml
 │   └── scripts/                # Network lifecycle scripts
 ├── deployment/
-│   ├── systemd/
+│   ├── keycloak/               # Compose, TLS, realm setup
+│   ├── systemd/                # Service units (deprecated, see Docker)
+│   ├── vault/                  # Vault config, policy, unseal service
 │   └── monitoring/             # Prometheus, Grafana, Loki
 └── database/
     ├── migrations/
