@@ -6,6 +6,18 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [3.0.0] - 2026-05-28
+
+### Added
+- **Pex CLI**: Complete overhaul of the Command Line Interface featuring a modernized, full-screen TUI (Text User Interface) dashboard (`Pex CLI`).
+- **Assets**: Added vectorized SVG logos and specialized CLI ASCII art graphics (`cli_logo.svg`).
+
+### Changed
+- **Rebranding**: Complete institutional rebranding from "RegX" (and internal "Qx") to **Pex** (Provenance and Exchange) across the entire codebase, documentation, GitHub assets, Keycloak themes, and TUI interfaces.
+- **Repository**: Renamed GitHub remote repository to `zak-li/Pex`.
+
+---
+
 ## [1.2.0] - 2026-05-24
 
 ### Changed
@@ -33,6 +45,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **AI Agent**: Regulatory RAG agent powered by ChromaDB and Groq LLM.
 - **Security & Ops**: HashiCorp Vault integration, Neo4j graph scanning, and complete Prometheus/Grafana monitoring stack.
 
-[1.2.0]: https://github.com/zak-li/pex/releases/tag/v1.2.0
-[1.1.0]: https://github.com/zak-li/pex/releases/tag/v1.1.0
-[1.0.0]: https://github.com/zak-li/pex/releases/tag/v1.0.0
+[3.0.0]: https://github.com/zak-li/Pex/releases/tag/v3.0.0
+[1.2.0]: https://github.com/zak-li/Pex/releases/tag/v1.2.0
+[1.1.0]: https://github.com/zak-li/Pex/releases/tag/v1.1.0
+[1.0.0]: https://github.com/zak-li/Pex/releases/tag/v1.0.0
