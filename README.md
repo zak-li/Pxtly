@@ -46,6 +46,14 @@ The platform embeds compliance directly into transaction execution and asset lif
   <img src=".github/assets/diagrams/compliance-flow-v2.svg" alt="Compliance Flow" width="800">
 </p>
 
+### Interactive TUI & AI Assistant
+
+Pex comes with a powerful Command Line Interface and a full-screen TUI (Text User Interface) that streams network health and events in real-time. It also includes an embedded **RAG-based AI Assistant** to answer regulatory questions dynamically.
+
+<p align="center">
+  <img src=".github/assets/images/cli-demo.png" alt="Pex CLI Demo" width="800">
+</p>
+
 Pex exposes a FastAPI REST API and a gRPC server in parallel. Authentication is OIDC-based via Keycloak with PKCE (authorization_code flow). Private keys for Fabric identities are stored in HashiCorp Vault (KV v2), and every response carries six security headers with rate limiting and host filtering.
 
 Every transaction produces an on-chain audit entry. An off-chain integrity checker verifies hashes independently, PDF audit reports are generated asynchronously via Celery, and the RAG agent answers regulatory questions by querying a ChromaDB vector store with Groq LLM.
