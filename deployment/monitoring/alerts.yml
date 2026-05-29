@@ -1,5 +1,5 @@
 groups:
-  - name: rwa-platform-alerts
+  - name: pex-alerts
     rules:
       - alert: FabricPeerDown
         expr: up{job=~"fabric-peer.*"} == 0

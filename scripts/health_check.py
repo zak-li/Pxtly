@@ -100,7 +100,7 @@ def run_health_check() -> bool:
     if critical_down:
         print("\n  💡  Solution : Connectez-vous en SSH et lancez :")
         print(f"      ssh zakaria@{VM_HOST}")
-        print("      sudo systemctl start rwa-platform")
+        print("      cd /home/zakaria/rwa-platform && sudo docker compose up -d")
         print()
         return False
 

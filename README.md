@@ -228,8 +228,8 @@ curl -H "Authorization: Bearer <token>" http://localhost:8000/api/v1/assets
 
 | Variable | Default | Description |
 |---|---|---|
-| `KEYCLOAK_REALM` | `rwa-platform` | Keycloak realm name |
-| `KEYCLOAK_CLIENT_ID` | `rwa-api` | OIDC client identifier |
+| `KEYCLOAK_REALM` | `pex` | Keycloak realm name |
+| `KEYCLOAK_CLIENT_ID` | `pex-api` | OIDC client identifier |
 | `KEYCLOAK_VERIFY_TLS` | `false` | Verify Keycloak TLS certificate |
 | `KEYCLOAK_CA_CERT_PATH` | | Path to pinned CA for Keycloak TLS |
 | `GROQ_API_KEY` | `""` | Groq API key for the regulatory agent |

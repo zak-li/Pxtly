@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""setup-realm.py — Configure the rwa-platform realm in Keycloak via Admin REST API.
+"""setup-realm.py — Configure the pex realm in Keycloak via Admin REST API.
 
 Run once after first boot:
     python3 setup-realm.py \
@@ -30,8 +30,8 @@ APP_ROLES = [
     "READONLY",
 ]
 
-REALM = "rwa-platform"
-CLIENT_ID = "rwa-api"
+REALM = "pex"
+CLIENT_ID = "pex-api"
 
 
 def get_admin_token(base: str, user: str, password: str) -> str:
@@ -77,7 +77,7 @@ def ensure_realm(client: httpx.Client, base: str, token: str) -> None:
 def _realm_payload() -> dict:
     return {
         "realm": REALM,
-        "displayName": "RWA Platform",
+        "displayName": "Pex",
         "enabled": True,
         "sslRequired": "external",
         # Token lifetimes
@@ -131,7 +131,7 @@ def ensure_roles(client: httpx.Client) -> None:
 
 
 def ensure_client(client: httpx.Client) -> str:
-    """Create or update the rwa-api client. Returns the client UUID.
+    """Create or update the pex-api client. Returns the client UUID.
 
     Re-running this must not invalidate a previously-issued secret: if the
     client already exists we leave its secret alone. Only the first creation
@@ -190,7 +190,7 @@ def ensure_client(client: httpx.Client) -> str:
 
 
 def ensure_mappers(client: httpx.Client, client_uuid: str) -> None:
-    """Add protocol mappers so rwa_role appears as a top-level JWT claim."""
+    """Add protocol mappers so pex_role appears as a top-level JWT claim."""
     existing_names = {
         m["name"]
         for m in client.get(f"/{REALM}/clients/{client_uuid}/protocol-mappers/models").json()
@@ -198,13 +198,13 @@ def ensure_mappers(client: httpx.Client, client_uuid: str) -> None:
 
     mappers = [
         {
-            "name": "rwa_role",
+            "name": "pex_role",
             "protocol": "openid-connect",
             "protocolMapper": "oidc-usermodel-attribute-mapper",
             "consentRequired": False,
             "config": {
-                "user.attribute": "rwa_role",
-                "claim.name": "rwa_role",
+                "user.attribute": "pex_role",
+                "claim.name": "pex_role",
                 "jsonType.label": "String",
                 "id.token.claim": "true",
                 "access.token.claim": "true",
@@ -212,7 +212,7 @@ def ensure_mappers(client: httpx.Client, client_uuid: str) -> None:
             },
         },
         {
-            "name": "audience-rwa-api",
+            "name": "audience-pex-api",
             "protocol": "openid-connect",
             "protocolMapper": "oidc-audience-mapper",
             "consentRequired": False,

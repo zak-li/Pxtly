@@ -1,6 +1,6 @@
 {
-  "uid": "rwa-platform",
-  "title": "RWA Platform",
+  "uid": "pex",
+  "title": "Pex",
   "tags": [
     "rwa",
     "blockchain",
@@ -233,7 +233,7 @@
             "type": "prometheus",
             "uid": "ffgx1hbr25a0wc"
           },
-          "expr": "(sum(rate(http_requests_total{job=\"rwa-api\",status=~\"4..|5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"rwa-api\"}[5m])), 0.001) * 100",
+          "expr": "(sum(rate(http_requests_total{job=\"pex-api\",status=~\"4..|5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"pex-api\"}[5m])), 0.001) * 100",
           "legendFormat": "Error Rate",
           "refId": "A",
           "instant": false,
@@ -462,7 +462,7 @@
             "type": "prometheus",
             "uid": "ffgx1hbr25a0wc"
           },
-          "expr": "up{job=\"rwa-api\"}",
+          "expr": "up{job=\"pex-api\"}",
           "legendFormat": "RWA API",
           "refId": "A",
           "instant": false,
@@ -1014,7 +1014,7 @@
             "type": "loki",
             "uid": "loki"
           },
-          "expr": "{job=\"docker\", service=\"rwa-api\"} | json | line_format \"[{{.level}}] {{.logger}} {{.message}}\"",
+          "expr": "{job=\"docker\", service=\"pex-api\"} | json | line_format \"[{{.level}}] {{.logger}} {{.message}}\"",
           "refId": "A",
           "queryType": "range",
           "maxLines": 200

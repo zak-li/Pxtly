@@ -14,4 +14,4 @@ echo "=== Docker bridge gateway ==="
 docker network inspect bridge --format '{{range .IPAM.Config}}{{.Gateway}}{{end}}'
 
 echo "=== Keycloak container IP ==="
-docker inspect rwa-keycloak --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'
+docker inspect pex-keycloak --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}'

@@ -1,9 +1,13 @@
+name: pex
 services:
   api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: rwa-api
+      tags:
+        - pex-api:latest
+    image: pex-api:latest
+    container_name: pex-api
     restart: unless-stopped
     ports:
       - "8000:8000"
@@ -26,7 +30,7 @@ services:
       retries: 3
       start_period: 10s
     networks:
-      - rwa-network
+      - pex-network
     logging:
       driver: "json-file"
       options:
@@ -37,7 +41,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: rwa-celery-worker
+      tags:
+        - pex-celery-worker:latest
+    image: pex-celery-worker:latest
+    container_name: pex-celery-worker
     restart: unless-stopped
     command: celery -A core.core.celery_app worker -l INFO --concurrency=2
     env_file:
@@ -58,7 +65,7 @@ services:
     # Both are expected to be running externally or added as services here.
     # No dependency on `api` — the worker connects to the broker directly.
     networks:
-      - rwa-network
+      - pex-network
     logging:
       driver: "json-file"
       options:
@@ -66,11 +73,11 @@ services:
         max-file: "3"
 
 networks:
-  rwa-network:
+  pex-network:
     driver: bridge
     # ── Network Architecture ─────────────────────────────────────────────
     # The platform uses THREE separate Docker networks by design:
-    #   1. rwa-network       — API + Celery (this file)
+    #   1. pex-network       — API + Celery (this file)
     #   2. rwa-network       — Fabric peers, orderer, CouchDB, Neo4j
     #                          (dlt-nodes/docker/docker-compose.yaml)
     #   3. (default)         — Keycloak
@@ -79,7 +86,3 @@ networks:
     # Cross-network communication goes through the HOST IP (10.10.10.150)
     # via published ports. This is intentional: Fabric and Keycloak are
     # managed by separate compose files with independent lifecycles.
-    #
-    # To unify into a single network, use:
-    #   docker network create rwa-shared
-    # and set `external: true` + `name: rwa-shared` in all compose files.
