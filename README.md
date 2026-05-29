@@ -43,7 +43,7 @@ The Fabric network runs two organizations, BANK01 and REG01, each with a dedicat
 The platform embeds compliance directly into transaction execution and asset lifecycle management. Sanctions screening is backed by Ed25519-authenticated manifests, while the MiCA enforcement layer validates exposure boundaries, restricted asset classes, and supervisory reporting requirements. zk-KYC workflows enable cryptographic identity attestation through Merkle proofs without exposing underlying credentials. Encrypted fraud analytics powered by Fully Homomorphic Encryption evaluate AML risk in confidential datasets, with persistent monitoring of KYC validity and systemic concentration exposure.
 
 <p align="center">
-  <img src=".github/assets/diagrams/compliance-flow-v2.svg" alt="Compliance Flow" width="800">
+  <img src=".github/assets/diagrams/compliance-flow-v3.svg" alt="Compliance Flow" width="800">
 </p>
 
 ### Pex CLI
