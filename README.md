@@ -51,7 +51,11 @@ The platform embeds compliance directly into transaction execution and asset lif
 Pex comes with a powerful Command Line Interface and a full-screen TUI (Text User Interface) that streams network health and events in real-time. It also includes an embedded **RAG-based AI Assistant** to answer regulatory questions dynamically.
 
 <p align="center">
-  <img src=".github/assets/images/cli-demo.png" alt="Pex CLI Demo" width="800">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/images/cli-demo.png">
+    <source media="(prefers-color-scheme: light)" srcset=".github/assets/images/cli-demo-light.png">
+    <img src=".github/assets/images/cli-demo.png" alt="Pex CLI Demo" width="800">
+  </picture>
 </p>
 
 Pex exposes a FastAPI REST API and a gRPC server in parallel. Authentication is OIDC-based via Keycloak with PKCE (authorization_code flow). Private keys for Fabric identities are stored in HashiCorp Vault (KV v2), and every response carries six security headers with rate limiting and host filtering.
