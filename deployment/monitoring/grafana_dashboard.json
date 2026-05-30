@@ -206,7 +206,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(http_requests_total{job=\"pex-api\",status=~\"4..|5..\"}[5m])) / clamp_min(sum(rate(http_requests_total{job=\"pex-api\"}[5m])), 0.001) * 100",
+          "expr": "(sum(rate(http_requests_total{job=\"pex-api\",status=~\"4..|5..\"}[5m])) or vector(0)) / clamp_min(sum(rate(http_requests_total{job=\"pex-api\"}[5m])), 0.001) * 100",
           "legendFormat": "errors %",
           "refId": "A",
           "instant": false,
@@ -574,7 +574,7 @@
       },
       "targets": [
         {
-          "expr": "redis_keyspace_hits_total / clamp_min(redis_keyspace_hits_total + redis_keyspace_misses_total, 1) * 100",
+          "expr": "(redis_keyspace_hits_total or vector(0)) / clamp_min((redis_keyspace_hits_total or vector(0)) + (redis_keyspace_misses_total or vector(0)), 1) * 100",
           "legendFormat": "Hit %",
           "refId": "A",
           "instant": false,
@@ -1832,7 +1832,7 @@
           "range": true
         },
         {
-          "expr": "redis_keyspace_hits_total / clamp_min(redis_keyspace_hits_total + redis_keyspace_misses_total, 1) * 100",
+          "expr": "(redis_keyspace_hits_total or vector(0)) / clamp_min((redis_keyspace_hits_total or vector(0)) + (redis_keyspace_misses_total or vector(0)), 1) * 100",
           "legendFormat": "Hit Rate %",
           "refId": "C",
           "instant": false,
