@@ -4,20 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/hyperledger/fabric-chaincode-go/shim"
-	"github.com/hyperledger/fabric-chaincode-go/shimtest"
 	"github.com/stretchr/testify/assert"
 )
-
-func newMockStub() *shimtest.MockStub {
-	cc, _ := newChaincode()
-	stub := shimtest.NewMockStub("rwa-token", cc)
-	return stub
-}
-
-func newChaincode() (shim.Chaincode, error) {
-	return nil, nil
-}
 
 func TestTokenizeAsset(t *testing.T) {
 	contract := new(AssetTraceContract)

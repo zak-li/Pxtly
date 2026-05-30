@@ -1,26 +1,29 @@
 # `rwa-token` chaincode
 
 Go smart contract that runs on the AIP Qx Hyperledger Fabric channel
-(`rwa-channel`). It implements the on-chain side of the tokenization
-workflow: asset lifecycle, transfer, freeze, and the dual-endorsement
-quorum between `BANK01MSP` (issuer) and `REG01MSP` (regulator).
+(`rwa-channel`). Implements the on-chain side of the tokenisation
+workflow with the **2-of-2 endorsement quorum** between `BANK01MSP`
+(issuer) and `REG01MSP` (regulator).
 
-## Files
+## Layout
 
-| File                  | Role                                                           |
-|-----------------------|----------------------------------------------------------------|
-| `main.go`             | Entry point. Starts the chaincode in CCaaS or peer-launched mode. |
-| `chaincode.go`        | `AssetTraceContract` — tokenize, transfer, freeze, query.      |
-| `access_control.go`   | Role check helpers (`verifyRole`) and MSP-to-role mapping.     |
-| `compliance.go`       | ID/format validation (ISIN, LEI, decimals).                    |
-| `models.go`           | On-chain types (`Asset`, `AssetStatus`, transfer record).      |
-| `chaincode_test.go`   | Unit tests using `MockTransactionContext`.                     |
-| `Dockerfile.ccaas`    | Image for Chaincode-as-a-Service mode.                         |
-| `go.mod` / `go.sum`   | Go module declaration and locked dependencies.                 |
+Flat single-package layout — Hyperledger Fabric chaincode convention
+(see `fabric-samples/chaincode-go`). Files are split by concern:
 
-## Build
+| File                | Role                                                              |
+|---------------------|-------------------------------------------------------------------|
+| `doc.go`            | Package documentation (Go convention — `go doc` reads it).        |
+| `main.go`           | Entry point. Selects peer-launched vs CCaaS mode at start-up.     |
+| `contract.go`       | `AssetTraceContract` — Tokenize/Transfer/Freeze/Unfreeze + reads. |
+| `access.go`         | `verifyRole`, MSP/DN extraction, per-function ACL map.            |
+| `compliance.go`     | Format validators (AssetID, ISIN, LEI, currency) + MiCA Art. 68.  |
+| `models.go`         | On-chain types (`FinancialAsset`, `ProvenanceRecord`, statuses).  |
+| `contract_test.go`  | Unit tests (`go test ./...`).                                     |
+| `Dockerfile.ccaas`  | Image for Chaincode-as-a-Service mode.                            |
+| `go.mod` / `go.sum` | Go module declaration and locked dependency tree.                 |
+| `.gitignore`        | Excludes Go build artefacts (`*.exe`, `*.test`, vendored deps).   |
 
-Run from this directory:
+## Build & test
 
 ```bash
 go vet ./...
@@ -28,10 +31,12 @@ go test ./...
 go build -o rwa-token .
 ```
 
+CI runs the same three commands — see [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml) (`go-build` job).
+
 ## Run as CCaaS
 
-The chaincode binary acts as a gRPC server when the environment variables
-below are set; the peer connects to it instead of spawning a container.
+The binary acts as a gRPC server when the two env vars below are set;
+the peer connects to it instead of spawning a chaincode container.
 
 ```bash
 export CHAINCODE_ID="<package-id-from-peer-lifecycle>"
@@ -47,7 +52,13 @@ docker build -f Dockerfile.ccaas -t rwa-token:ccaas .
 
 ## Endorsement policy
 
-State changes require the **2-of-2** policy
-`AND('BANK01MSP.peer','REG01MSP.peer')` — see `fabric/config/configtx.yaml`.
-Without an endorsement from both organisations the peer rejects the
-proposal at commit time.
+State changes require **2-of-2** endorsement:
+
+```
+AND('BANK01MSP.peer','REG01MSP.peer')
+```
+
+Declared in [`fabric/config/configtx.yaml`](../../fabric/config/configtx.yaml) and enforced by the peer at
+commit time. The function-level ACL in `access.go` is an extra gate
+on the proposal side — it rejects calls from a non-authorised MSP
+*before* the proposal is endorsed, saving a round-trip.

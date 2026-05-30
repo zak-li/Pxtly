@@ -7,14 +7,18 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
+// authorisedMSPs is the per-function ACL applied by verifyRole. It is the
+// chaincode-side counterpart of the configtx endorsement policy — keep them
+// in sync: a function listed here for a single MSP still needs the 2-of-2
+// endorsement policy to commit.
 var authorisedMSPs = map[string][]string{
-	"TokenizeAsset":  {"BANK01MSP"},
-	"TransferAsset":  {"BANK01MSP"},
-	"FreezeAsset":    {"REG01MSP"},
-	"UnfreezeAsset":  {"REG01MSP"},
-	"QueryAssets":    {"BANK01MSP", "REG01MSP"},
-	"GetAsset":       {"BANK01MSP", "REG01MSP"},
-	"GetAssetHistory": {"BANK01MSP", "REG01MSP"},
+	"TokenizeAsset":      {"BANK01MSP"},
+	"TransferAsset":      {"BANK01MSP"},
+	"FreezeAsset":        {"REG01MSP"},
+	"UnfreezeAsset":      {"REG01MSP"},
+	"QueryAssets":        {"BANK01MSP", "REG01MSP"},
+	"GetAsset":           {"BANK01MSP", "REG01MSP"},
+	"GetAssetHistory":    {"BANK01MSP", "REG01MSP"},
 	"GetProvenanceTrail": {"BANK01MSP", "REG01MSP"},
 }
 
