@@ -163,13 +163,13 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
-          cache-dependency-path: chaincode/rwa-token/go.sum
+          cache-dependency-path: chaincode/go.sum
       - name: Build chaincode
-        working-directory: chaincode/rwa-token
+        working-directory: chaincode
         run: go build ./...
       - name: Vet chaincode
-        working-directory: chaincode/rwa-token
+        working-directory: chaincode
         run: go vet ./...
       - name: Test chaincode
-        working-directory: chaincode/rwa-token
+        working-directory: chaincode
         run: go test ./...

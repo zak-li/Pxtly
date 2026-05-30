@@ -249,7 +249,7 @@ aip-qx/
 │   │   └── agent/              # RAG pipeline, ChromaDB
 │   ├── fabric_client/          # Wallet, events, retry, circuit breaker
 │   └── grpc_server/            # gRPC servicers
-├── chaincode/rwa-token/        # Go chaincode (CCaaS)
+├── chaincode/                  # Go chaincode (CCaaS) — rwa-token contract
 ├── fabric/
 │   ├── config/                 # core.yaml, connection_profile.yaml
 │   ├── docker/                 # docker-compose.yaml

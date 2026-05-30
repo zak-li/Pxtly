@@ -1,4 +1,4 @@
-module github.com/zak-li/aip-qx/chaincode/rwa-token
+module github.com/zak-li/aip-qx/chaincode
 
 go 1.21
 
