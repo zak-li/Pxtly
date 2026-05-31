@@ -10,22 +10,27 @@
 <br>
 
 <p align="center">
-  <a href="https://github.com/zak-li/pxtly/actions/workflows/ci.yml"><img src="https://github.com/zak-li/pxtly/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.12+-3776AB.svg" alt="Python 3.12+"></a>
-  <a href="https://hyperledger-fabric.readthedocs.io/"><img src="https://img.shields.io/badge/Hyperledger_Fabric-2.5-2F3134.svg" alt="Hyperledger Fabric 2.5"></a>
-  <a href="https://go.dev/"><img src="https://img.shields.io/badge/Go-1.21+-00ADD8.svg" alt="Go 1.21+"></a>
-  <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-0.135-009688.svg" alt="FastAPI"></a>
-  <a href="https://www.keycloak.org/"><img src="https://img.shields.io/badge/Keycloak-24-4D4D4D.svg" alt="Keycloak 24"></a>
-  <a href="https://github.com/zak-li/pxtly/releases"><img src="https://img.shields.io/github/v/tag/zak-li/pxtly?label=version" alt="Version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-BUSL_1.1-A2C2E8.svg" alt="License: BUSL 1.1"></a>
-  <a href="https://github.com/zak-li/pxtly/commits/master"><img src="https://img.shields.io/github/last-commit/zak-li/pxtly" alt="Last commit"></a>
+  <a href="https://github.com/zak-li/pxtly/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/zak-li/pxtly/ci.yml?branch=master&label=CI&color=0049FF" alt="CI"></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.12+-7BF3FC.svg" alt="Python 3.12+"></a>
+  <a href="https://hyperledger-fabric.readthedocs.io/"><img src="https://img.shields.io/badge/Hyperledger_Fabric-2.5-0049FF.svg" alt="Hyperledger Fabric 2.5"></a>
+  <a href="https://go.dev/"><img src="https://img.shields.io/badge/Go-1.21+-7BF3FC.svg" alt="Go 1.21+"></a>
+  <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-0.135-0049FF.svg" alt="FastAPI"></a>
+  <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-14+-7BF3FC.svg" alt="PostgreSQL 14+"></a>
+  <a href="https://redis.io/"><img src="https://img.shields.io/badge/Redis-7+-0049FF.svg" alt="Redis 7+"></a>
+  <a href="https://www.keycloak.org/"><img src="https://img.shields.io/badge/Keycloak-24-7BF3FC.svg" alt="Keycloak 24"></a>
+  <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-ready-0049FF.svg" alt="Docker"></a>
+  <a href="https://docs.astral.sh/ruff/"><img src="https://img.shields.io/badge/code_style-ruff-7BF3FC.svg" alt="Code style: ruff"></a>
+  <a href="https://docs.pytest.org/"><img src="https://img.shields.io/badge/tested_with-pytest-0049FF.svg" alt="Tested with pytest"></a>
+  <a href="https://github.com/zak-li/pxtly/releases"><img src="https://img.shields.io/github/v/tag/zak-li/pxtly?label=version&color=7BF3FC" alt="Version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-BUSL_1.1-0049FF.svg" alt="License: BUSL 1.1"></a>
+  <a href="https://github.com/zak-li/pxtly/commits/master"><img src="https://img.shields.io/github/last-commit/zak-li/pxtly?color=7BF3FC" alt="Last commit"></a>
 </p>
 
 <br>
 
 ## Pxtly
 
-> **Pxtly** — *pact* (Latin *pactum*, binding agreement) + *exchange*. A consortium pact made executable on-chain.
+> **Pxtly**: turning regulatory trust into executable code. Compliance isn't bolted on, it endorses every transaction.
 
 Pxtly is an institutional platform for tokenising Real World Assets on a permissioned Hyperledger Fabric network. It handles the full asset lifecycle from issuance to redemption, with built-in AML/KYC compliance, ZK-KYC identity proofs, FHE-based fraud scoring, and a RAG regulatory agent for MiCA queries.
 
@@ -97,7 +102,7 @@ Open `.env` and fill in at minimum `DATABASE_URL`, `REDIS_URL`, the `FABRIC_*` v
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
+source .venv/bin/activate                # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
@@ -124,12 +129,12 @@ cp .env.keycloak.example .env.keycloak   # fill in admin/DB credentials
 bash deploy.sh
 ```
 
-The `setup-realm.py` script prints a `KEYCLOAK_CLIENT_SECRET` — copy it into your `.env`.
+The `setup-realm.py` script prints a `KEYCLOAK_CLIENT_SECRET`. Copy it into your `.env`.
 
 **Step 5: Start the API and worker**
 
 ```bash
-docker compose up -d   API + Celery worker
+docker compose up -d                     # API + Celery worker
 # Or without Docker:
 uvicorn core.main:app --host 0.0.0.0 --port 8000 --workers 1
 celery -A core.core.celery_app worker --loglevel=info -Q celery,compliance,reports,fabric_events
@@ -165,7 +170,7 @@ python -m cli.main events stream               # live SSE tail
 python -m cli.main dashboard                   # full-screen Textual TUI
 ```
 
-Configuration precedence: `PXTLY_*` env vars → `~/.pxtly/config.json` → defaults. Sub-apps: `auth`, `assets`, `tx`, `audit`, `compliance`, `zkp`, `tribunal`, `orgs`, `agent`, `events`, `system`, `dashboard`.
+Configuration precedence: `PXTLY_*` env vars, then `~/.pxtly/config.json`, then defaults. Sub-apps: `auth`, `assets`, `tx`, `audit`, `compliance`, `zkp`, `tribunal`, `orgs`, `agent`, `events`, `system`, `dashboard`.
 
 ## API Reference
 
@@ -175,8 +180,8 @@ REST root: `/api/v1`. Every endpoint requires a valid OIDC access token unless m
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/auth/login` | Redirect to Keycloak login (PKCE) — *public* |
-| GET | `/auth/callback` | OIDC callback, exchanges code for tokens — *public* |
+| GET | `/auth/login` | Redirect to Keycloak login (PKCE). *public* |
+| GET | `/auth/callback` | OIDC callback, exchanges code for tokens. *public* |
 | POST | `/auth/refresh` | Refresh access token via cookie |
 | POST | `/auth/logout` | Revoke session (clear cookies + Keycloak) |
 | GET | `/auth/me` | Current user profile |
@@ -240,7 +245,7 @@ REST root: `/api/v1`. Every endpoint requires a valid OIDC access token unless m
 | GET | `/organizations` | List organisations |
 | GET | `/organizations/users` | List users (filter by role / country) |
 | GET | `/organizations/{org_id}/portfolio` | Per-org portfolio aggregate |
-| GET | `/metrics` | Prometheus metrics — *public* |
+| GET | `/metrics` | Prometheus metrics. *public* |
 
 ## Environment Variables
 
@@ -253,7 +258,7 @@ REST root: `/api/v1`. Every endpoint requires a valid OIDC access token unless m
 | `REDIS_URL` | Redis URL (`redis://:password@host:6379/0`) |
 | `KEYCLOAK_URL` | Keycloak base URL (`https://host:8443`) |
 | `KEYCLOAK_CLIENT_SECRET` | OIDC client secret (printed by `setup-realm.py`) |
-| `KEYCLOAK_CALLBACK_URL` | Where Keycloak redirects after login — must match the API's public URL |
+| `KEYCLOAK_CALLBACK_URL` | Where Keycloak redirects after login. Must match the API's public URL |
 | `FABRIC_WALLET_PATH` | Path to `fabric_wallet.json` |
 | `FABRIC_CONNECTION_PROFILE` | Path to `connection_profile.yaml` |
 | `FABRIC_CHANNEL` | Fabric channel name (`rwa-channel`) |
@@ -270,84 +275,84 @@ REST root: `/api/v1`. Every endpoint requires a valid OIDC access token unless m
 | `KEYCLOAK_REALM` | `qx` | Keycloak realm name |
 | `KEYCLOAK_CLIENT_ID` | `qx-api` | OIDC client identifier |
 | `KEYCLOAK_VERIFY_TLS` | `false` | Verify Keycloak TLS certificate |
-| `KEYCLOAK_CA_CERT_PATH` | — | Path to pinned CA for Keycloak TLS (self-signed cert deployments) |
+| `KEYCLOAK_CA_CERT_PATH` | | Path to pinned CA for Keycloak TLS (self-signed cert deployments) |
 | `NEO4J_DATABASE` | `neo4j` | Neo4j database name (set to the Aura instance ID when using Aura) |
 | `GROQ_API_KEY` | `""` | Groq API key for the regulatory agent |
 | `GROQ_MODEL` | `llama-3.3-70b-versatile` | Groq model ID |
 | `FABRIC_TLS_ENABLED` | `true` | TLS for Fabric gRPC |
 | `FABRIC_GRPC_TIMEOUT` | `30` | gRPC timeout in seconds |
 | `FABRIC_RETRY_MAX_ATTEMPTS` | `5` | Retry attempts on Fabric errors |
-| `PLATFORM_ZKP_SECRET` | — | Strong secret for ZK credential signing (rejected in production if dev default) |
-| `SANCTIONS_MANIFEST_PUBKEY_HEX` | — | Ed25519 pubkey (64 hex chars) verifying the sanctions manifest signature |
+| `PLATFORM_ZKP_SECRET` | | Strong secret for ZK credential signing (rejected in production if dev default) |
+| `SANCTIONS_MANIFEST_PUBKEY_HEX` | | Ed25519 pubkey (64 hex chars) verifying the sanctions manifest signature |
 | `LOG_LEVEL` | `INFO` | Logging level |
-| `ALLOWED_ORIGINS` | — | Comma-separated CORS origins |
+| `ALLOWED_ORIGINS` | | Comma-separated CORS origins |
 
 The full list lives in [`.env.example`](.env.example).
 
 ## Project Structure
 
-The repository is organised by responsibility — application code, the Fabric consortium, side services, persistence, and tooling each live under their own top-level directory.
+The repository is organised by responsibility: application code, the Fabric consortium, side services, persistence, and tooling each live under their own top-level directory.
 
 ### Application code
 
 ```
-core/                         # FastAPI + Celery — application backend
-├── main.py                   #   ASGI entry, middleware, metrics
-├── config.py                 #   pydantic-settings root
+core/                         # FastAPI + Celery, application backend
+├── main.py                   # ASGI entry, middleware, metrics
+├── config.py                 # pydantic-settings root
 ├── features/
-│   ├── assets/               #     Asset lifecycle (issue, transfer, freeze)
-│   ├── compliance/           #     AML / KYC / MiCA rules
-│   ├── audit/                #     On-chain trail, integrity, PDF reports
-│   ├── auth/                 #     Keycloak OIDC + PKCE + GDPR
-│   ├── zkp/                  #     ZK-KYC Schnorr proofs
-│   ├── fhe/                  #     HElib CKKS fraud scorer
-│   └── agent/                #     RAG pipeline + ChromaDB
-├── fabric_client/            #   Wallet, events, retry, circuit breaker
-├── grpc_server/              #   gRPC servicers
-└── grpc_generated/           #   protoc-generated stubs
+│   ├── assets/               # Asset lifecycle (issue, transfer, freeze)
+│   ├── compliance/           # AML / KYC / MiCA rules
+│   ├── audit/                # On-chain trail, integrity, PDF reports
+│   ├── auth/                 # Keycloak OIDC + PKCE + GDPR
+│   ├── zkp/                  # ZK-KYC Schnorr proofs
+│   ├── fhe/                  # HElib CKKS fraud scorer
+│   └── agent/                # RAG pipeline + ChromaDB
+├── fabric_client/            # Wallet, events, retry, circuit breaker
+├── grpc_server/              # gRPC servicers
+└── grpc_generated/           # protoc-generated stubs
 
-chaincode/                    # Go smart contract — rwa-token, CCaaS
+chaincode/                    # Go smart contract (rwa-token, CCaaS)
 
-cli/                          # Pxtly CLI — Typer + Rich + Textual
-├── api/                      #   One client per REST resource
-├── commands/                 #   One Typer sub-app per domain
-├── http/                     #   Transport + auto-refresh on 401
-├── security/                 #   Keyring tokens, PKCE, audit log
-└── ui/                       #   Rich console, REPL, dashboard
+cli/                          # Pxtly CLI (Typer + Rich + Textual)
+├── api/                      # One client per REST resource
+├── commands/                 # One Typer sub-app per domain
+├── http/                     # Transport + auto-refresh on 401
+├── security/                 # Keyring tokens, PKCE, audit log
+└── ui/                       # Rich console, REPL, dashboard
 ```
 
 ### Consortium and side services
 
 ```
 fabric/                       # Hyperledger Fabric 2.5 network
-├── config/                   #   configtx, connection profile, MSP material
-├── docker/                   #   Peers, orderer, CouchDB compose
-└── scripts/                  #   deploy-chaincode.sh
+├── config/                   # configtx, connection profile, MSP material
+├── docker/                   # Peers, orderer, CouchDB compose
+└── scripts/                  # deploy-chaincode.sh
 
 stack/                        # Side services (run alongside the API)
-├── keycloak/                 #   Compose, TLS, identity-first flow
-├── monitoring/               #   Prometheus, Grafana, Loki, Promtail
-└── vault/                    #   Policy + hcl config
+├── keycloak/                 # Compose, TLS, identity-first flow
+├── monitoring/               # Prometheus, Grafana, Loki, Promtail
+└── vault/                    # Policy + hcl config
 ```
 
 ### Persistence and tooling
 
 ```
 db/                           # Schema, seeds, Alembic migrations
-├── migrations/               #   alembic env + versions/
-├── sql/                      #   01_schema … 08_zkp_tables
-└── fixtures/                 #   csv/, json/ (sanctions manifest, …)
+├── migrations/               # alembic env + versions/
+├── sql/                      # 01_schema to 08_zkp_tables
+└── fixtures/                 # csv/, json/ (sanctions manifest)
 
 proto/                        # gRPC service definitions (.proto)
 
 scripts/                      # Operational scripts (Python + bash)
-├── benchmarks/               #   fhe.py, zkp.py
-├── simulations/              #   dashboard.py, full.py, jitter.py, game_theory.py
-├── seed_db.py                #   Apply SQL seeds + compliance fixtures
-├── health_check.py           #   Liveness probe for CI / oncall
-├── generate_report.py        #   Build a sample audit PDF locally
-├── generate_protos.sh        #   Regenerate Python gRPC stubs
-└── install_latex.sh          #   Install LaTeX deps (TeX Live)
+├── benchmarks/               # fhe.py, zkp.py
+├── simulations/              # dashboard.py, full.py, jitter.py, game_theory.py
+├── seed_db.py                # Apply SQL seeds + compliance fixtures
+├── health_check.py           # Liveness probe for CI / oncall
+├── generate_report.py        # Build a sample audit PDF locally
+├── generate_protos.sh        # Regenerate Python gRPC stubs
+└── install_latex.sh          # Install LaTeX deps (TeX Live)
 
 tests/                        # pytest suite + fixtures
 ```
@@ -358,7 +363,7 @@ tests/                        # pytest suite + fixtures
 
 ## Observability
 
-Pxtly ships a full monitoring stack deployed via Docker Compose. **Prometheus** scrapes twelve targets — the API itself, Fabric peers (BANK01 + REG01), CouchDB for each peer, Keycloak, Vault, Redis, PostgreSQL, node-exporter, the Celery exporter, and Prometheus itself. **Grafana** renders one curated dashboard covering service health, API throughput / latency percentiles, infrastructure utilisation, datastores, blockchain activity, and compliance metrics. **Loki** aggregates structured JSON logs from the API container, Celery worker, Fabric peers, and the host's systemd journal.
+Pxtly ships a full monitoring stack deployed via Docker Compose. **Prometheus** scrapes twelve targets: the API itself, Fabric peers (BANK01 + REG01), CouchDB for each peer, Keycloak, Vault, Redis, PostgreSQL, node-exporter, the Celery exporter, and Prometheus itself. **Grafana** renders one curated dashboard covering service health, API throughput / latency percentiles, infrastructure utilisation, datastores, blockchain activity, and compliance metrics. **Loki** aggregates structured JSON logs from the API container, Celery worker, Fabric peers, and the host's systemd journal.
 
 The dashboard is auto-provisioned from [`stack/monitoring/grafana_dashboard.json`](stack/monitoring/grafana_dashboard.json) via the file provider in [`stack/monitoring/grafana-provisioning/`](stack/monitoring/grafana-provisioning/). Datasource UIDs are pinned (`ffgx1hbr25a0wc` for Prometheus, `loki` for Loki) so the dashboard JSON is portable across deployments.
 
@@ -384,4 +389,4 @@ Custom metrics exposed at `/metrics`:
 
 ## License
 
-This project is licensed under the [Business Source License 1.1](LICENSE) — converts to Apache 2.0 on the change date defined in `LICENSE`. Vulnerability reports: see [SECURITY.md](SECURITY.md). Contributions: see [CONTRIBUTING.md](CONTRIBUTING.md).
+This project is licensed under the [Business Source License 1.1](LICENSE). It converts to Apache 2.0 on the change date defined in `LICENSE`. Vulnerability reports: see [SECURITY.md](SECURITY.md). Contributions: see [CONTRIBUTING.md](CONTRIBUTING.md).
