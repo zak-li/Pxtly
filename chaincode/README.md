@@ -1,6 +1,6 @@
 # `rwa-token` chaincode
 
-Go smart contract that runs on the AIP Qx Hyperledger Fabric channel
+Go smart contract that runs on the Pxtly Hyperledger Fabric channel
 (`rwa-channel`). Implements the on-chain side of the tokenisation
 workflow with the **2-of-2 endorsement quorum** between `BANK01MSP`
 (issuer) and `REG01MSP` (regulator).

@@ -1,4 +1,4 @@
-// Command rwa-token is the AIP Qx Hyperledger Fabric chaincode.
+// Command rwa-token is the Pxtly Hyperledger Fabric chaincode.
 //
 // AssetTraceContract is the entry type registered with the contract API.
 // Its methods fall into three groups, each with its own MSP authorisation:
@@ -18,6 +18,6 @@
 //     container after a successful lifecycle install.
 //   - Chaincode-as-a-Service (CCaaS): when CHAINCODE_ID and CHAINCODE_SERVER_ADDRESS
 //     are set, the binary starts a gRPC server that the peer connects to. This
-//     is the mode used by the AIP Qx production deployment — see
+//     is the mode used by the Pxtly production deployment — see
 //     fabric/scripts/deploy-chaincode.sh.
 package main

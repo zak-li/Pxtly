@@ -11,8 +11,8 @@ RUN pip install --no-cache-dir --prefix=/install -r requirements.txt
 
 FROM python:3.12-slim AS runtime
 
-LABEL maintainer="AIP Qx Team"
-LABEL description="AIP Qx Tokenization Backend — FastAPI + Celery"
+LABEL maintainer="Pxtly Team"
+LABEL description="Pxtly Tokenisation Backend — FastAPI + Celery"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends libpq5 curl && \
