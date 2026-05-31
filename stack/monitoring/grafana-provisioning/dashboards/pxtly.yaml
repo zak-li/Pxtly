@@ -1,12 +1,12 @@
 apiVersion: 1
 
 providers:
-  - name: qx
+  - name: pxtly
     orgId: 1
     # Empty folder = root: the dashboard appears directly in the Dashboards
-    # list with no enclosing folder. A previous `folder` + `folderUid: qx`
+    # list with no enclosing folder. A previous `folder` + `folderUid: pxtly`
     # caused a click-through bug because the folder UID collided with the
-    # dashboard UID (both `qx`).
+    # dashboard UID (both `pxtly`).
     folder: ''
     type: file
     disableDeletion: false

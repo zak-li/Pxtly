@@ -77,8 +77,8 @@ class Settings(BaseSettings):
 
     # ── Keycloak ────────────────────────────────────────────────────────────
     keycloak_url: str = Field(default="https://10.10.10.150:8443")
-    keycloak_realm: str = Field(default="qx")
-    keycloak_client_id: str = Field(default="qx-api")
+    keycloak_realm: str = Field(default="pxtly")
+    keycloak_client_id: str = Field(default="pxtly-api")
     # Only set when using a confidential client. Public clients (PKCE) leave
     # this empty. Read from env only; never persisted.
     keycloak_client_secret: str | None = Field(default=None, repr=False)

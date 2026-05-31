@@ -147,7 +147,7 @@ def _decode(token: str, jwks: dict, options: dict) -> dict[str, Any]:
 
 
 def _check_audience(payload: dict[str, Any]) -> None:
-    """Token must be intended for qx-api (aud) or issued by it (azp)."""
+    """Token must be intended for pxtly-api (aud) or issued by it (azp)."""
     aud: str | list[str] = payload.get("aud", [])
     if isinstance(aud, str):
         aud = [aud]
@@ -164,10 +164,10 @@ def _check_audience(payload: dict[str, Any]) -> None:
 def extract_role(payload: dict[str, Any]) -> str | None:
     """Return the application role from the token payload.
 
-    Checks the custom `qx_role` claim first (set via Keycloak attribute mapper),
+    Checks the custom `pxtly_role` claim first (set via Keycloak attribute mapper),
     then falls back to scanning `realm_access.roles`.
     """
-    role = payload.get("qx_role")
+    role = payload.get("pxtly_role")
     if role and role in VALID_APP_ROLES:
         return role
     for r in payload.get("realm_access", {}).get("roles", []):

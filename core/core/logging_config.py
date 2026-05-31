@@ -64,7 +64,7 @@ class JSONFormatter(logging.Formatter):
             "timestamp": self.formatTime(record, self.datefmt),
             "level": record.levelname,
             "logger": record.name,
-            "service": "qx-api",
+            "service": "pxtly-api",
             "message": record.getMessage(),
         }
 

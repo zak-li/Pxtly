@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""setup-realm.py — Configure the qx realm in Keycloak via Admin REST API.
+"""setup-realm.py — Configure the pxtly realm in Keycloak via Admin REST API.
 
 Run once after first boot:
     python3 setup-realm.py \
@@ -30,8 +30,8 @@ APP_ROLES = [
     "READONLY",
 ]
 
-REALM = "qx"
-CLIENT_ID = "qx-api"
+REALM = "pxtly"
+CLIENT_ID = "pxtly-api"
 
 
 def get_admin_token(base: str, user: str, password: str) -> str:
@@ -131,7 +131,7 @@ def ensure_roles(client: httpx.Client) -> None:
 
 
 def ensure_client(client: httpx.Client) -> str:
-    """Create or update the qx-api client. Returns the client UUID.
+    """Create or update the pxtly-api client. Returns the client UUID.
 
     Re-running this must not invalidate a previously-issued secret: if the
     client already exists we leave its secret alone. Only the first creation
@@ -190,7 +190,7 @@ def ensure_client(client: httpx.Client) -> str:
 
 
 def ensure_mappers(client: httpx.Client, client_uuid: str) -> None:
-    """Add protocol mappers so qx_role appears as a top-level JWT claim."""
+    """Add protocol mappers so pxtly_role appears as a top-level JWT claim."""
     existing_names = {
         m["name"]
         for m in client.get(f"/{REALM}/clients/{client_uuid}/protocol-mappers/models").json()
@@ -198,13 +198,13 @@ def ensure_mappers(client: httpx.Client, client_uuid: str) -> None:
 
     mappers = [
         {
-            "name": "qx_role",
+            "name": "pxtly_role",
             "protocol": "openid-connect",
             "protocolMapper": "oidc-usermodel-attribute-mapper",
             "consentRequired": False,
             "config": {
-                "user.attribute": "qx_role",
-                "claim.name": "qx_role",
+                "user.attribute": "pxtly_role",
+                "claim.name": "pxtly_role",
                 "jsonType.label": "String",
                 "id.token.claim": "true",
                 "access.token.claim": "true",
@@ -212,7 +212,7 @@ def ensure_mappers(client: httpx.Client, client_uuid: str) -> None:
             },
         },
         {
-            "name": "audience-qx-api",
+            "name": "audience-pxtly-api",
             "protocol": "openid-connect",
             "protocolMapper": "oidc-audience-mapper",
             "consentRequired": False,

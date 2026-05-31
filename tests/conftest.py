@@ -370,22 +370,22 @@ async def test_user_sophie(async_session: AsyncSession, test_amf_org: Organizati
 
 @pytest.fixture
 def token_thomas_martin() -> str:
-    payload = {"sub": "kc-sub-thomas-martin", "email": "thomas.martin@bank01.fr", "qx_role": "EMETTEUR"}
+    payload = {"sub": "kc-sub-thomas-martin", "email": "thomas.martin@bank01.fr", "pxtly_role": "EMETTEUR"}
     return create_access_token(payload, expires_delta=timedelta(hours=24))
 
 @pytest.fixture
 def token_sophie_lambert() -> str:
-    payload = {"sub": "kc-sub-sophie-lambert", "email": "sophie.lambert@amf.fr", "qx_role": "REGULATEUR"}
+    payload = {"sub": "kc-sub-sophie-lambert", "email": "sophie.lambert@amf.fr", "pxtly_role": "REGULATEUR"}
     return create_access_token(payload, expires_delta=timedelta(hours=24))
 
 @pytest.fixture
 def token_james_wilson() -> str:
-    payload = {"sub": "kc-sub-james-wilson", "email": "james.wilson@natwest.com", "qx_role": "TRADER"}
+    payload = {"sub": "kc-sub-james-wilson", "email": "james.wilson@natwest.com", "pxtly_role": "TRADER"}
     return create_access_token(payload, expires_delta=timedelta(hours=24))
 
 @pytest.fixture
 def token_expired() -> str:
-    payload = {"sub": "kc-sub-thomas-martin", "email": "thomas.martin@bank01.fr", "qx_role": "EMETTEUR"}
+    payload = {"sub": "kc-sub-thomas-martin", "email": "thomas.martin@bank01.fr", "pxtly_role": "EMETTEUR"}
     return create_access_token(payload, expires_delta=timedelta(hours=-1))
 
 @pytest.fixture

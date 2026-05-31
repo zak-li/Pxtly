@@ -272,8 +272,8 @@ REST root: `/api/v1`. Every endpoint requires a valid OIDC access token unless m
 
 | Variable | Default | Description |
 |---|---|---|
-| `KEYCLOAK_REALM` | `qx` | Keycloak realm name |
-| `KEYCLOAK_CLIENT_ID` | `qx-api` | OIDC client identifier |
+| `KEYCLOAK_REALM` | `pxtly` | Keycloak realm name |
+| `KEYCLOAK_CLIENT_ID` | `pxtly-api` | OIDC client identifier |
 | `KEYCLOAK_VERIFY_TLS` | `false` | Verify Keycloak TLS certificate |
 | `KEYCLOAK_CA_CERT_PATH` | | Path to pinned CA for Keycloak TLS (self-signed cert deployments) |
 | `NEO4J_DATABASE` | `neo4j` | Neo4j database name (set to the Aura instance ID when using Aura) |

@@ -19,7 +19,7 @@ rebuilds it so the configuration is deterministic.
 
     KEYCLOAK_ADMIN_PASSWORD=... python3 configure-identity-first.py \
         --keycloak-url https://10.10.10.150:8443 \
-        --realm qx \
+        --realm pxtly \
         --admin-user admin \
         --ca-bundle /etc/ssl/keycloak/ca.crt
 """

@@ -5,7 +5,7 @@ For each row in the local `users` table that has no `keycloak_sub` yet:
 
   1. Create a Keycloak user (username=email, email=email).
   2. Carry over attributes Keycloak needs to mint a useful JWT — primarily
-     `qx_role` (drives RBAC in the API) and `org_id` (drives row-level scoping).
+     `pxtly_role` (drives RBAC in the API) and `org_id` (drives row-level scoping).
   3. Force `UPDATE_PASSWORD` as a required action: we no longer store any
      password hash in the DB, so the user must set one on first login.
   4. Mark email as verified — we trust the email seeded from the DB.
@@ -19,7 +19,7 @@ users that exist in Keycloak by email but were never linked back.
     DATABASE_URL=postgresql://rwaadmin:****@10.10.10.150:5432/rwadb \\
         python3 migrate-users.py \\
             --keycloak-url https://10.10.10.150:8443 \\
-            --realm qx \\
+            --realm pxtly \\
             --ca-bundle /etc/ssl/keycloak/ca.crt
 """
 from __future__ import annotations
@@ -74,7 +74,7 @@ def upsert_kc_user(c: httpx.Client, realm: str, row: dict) -> str:
         "enabled": bool(row["is_active"]),
         "emailVerified": True,
         "attributes": {
-            "qx_role": [row["role"]],
+            "pxtly_role": [row["role"]],
             "org_id": [str(row["org_id"])],
         },
         "requiredActions": ["UPDATE_PASSWORD"],
