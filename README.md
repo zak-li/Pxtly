@@ -3,7 +3,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset=".github/assets/logos/logo-dark.svg">
-    <img src=".github/assets/logos/logo.svg" alt="Pxtly" width="180">
+    <img src=".github/assets/logos/logo.svg" alt="Pxtly" width="300">
   </picture>
 </p>
 

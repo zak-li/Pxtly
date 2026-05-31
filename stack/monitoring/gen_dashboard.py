@@ -348,7 +348,7 @@ y += 1
 
 panels.append(state_timeline(pid, "Service Availability",
     [
-        q('up{job="qx-api"}', "AIP Qx API", "A"),
+        q('up{job="qx-api"}', "Pxtly API", "A"),
         q('up{job="postgres"}', "PostgreSQL", "B"),
         q('up{job="redis"}', "Redis", "C"),
         q('up{job="node-exporter"}', "System", "D"),
@@ -561,7 +561,7 @@ y += 7
 # ════════════════════════════════════════════════════════════════════════════
 dash = {
     "uid": "qx",
-    "title": "AIP Qx",
+    "title": "Pxtly",
     "tags": ["rwa", "blockchain", "production"],
     "timezone": "browser",
     "refresh": "30s",

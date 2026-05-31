@@ -1,4 +1,4 @@
-module github.com/zak-li/aip-qx/chaincode
+module github.com/zak-li/pxtly/chaincode
 
 go 1.21
 

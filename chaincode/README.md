@@ -20,7 +20,7 @@ by concern:
 | `models.go`         | On-chain types (`FinancialAsset`, `ProvenanceRecord`, statuses).  |
 | `contract_test.go`  | Unit tests (`go test ./...`).                                     |
 | `Dockerfile.ccaas`  | Image for Chaincode-as-a-Service mode.                            |
-| `go.mod` / `go.sum` | Go module: `github.com/zak-li/aip-qx/chaincode`.                  |
+| `go.mod` / `go.sum` | Go module: `github.com/zak-li/pxtly/chaincode`.                  |
 | `.gitignore`        | Excludes Go build artefacts (`*.exe`, `*.test`, vendored deps).   |
 
 ## Build & test

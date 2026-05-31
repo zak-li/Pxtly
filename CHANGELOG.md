@@ -8,23 +8,34 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+- **Brand assets** under `.github/assets/logos/` — `logo.svg`
+  (default, dark fill for light backgrounds) and `logo-dark.svg`
+  (light fill for dark backgrounds), with matching PNGs. The README
+  uses a `<picture>` element so GitHub renders the right variant
+  per OS theme.
+
 ### Changed
-- **Rebrand**: the platform is renamed from `AIP Qx` to **Pxtly** across
-  every user-facing surface (README, CHANGELOG, Dockerfile labels, LICENSE,
-  CONTRIBUTING, chaincode docs, report PDF header, simulation banners).
-  Internal infrastructure names — Keycloak realm `qx`, container names
-  `qx-api` / `qx-celery-worker`, Prometheus job `qx-api`, JWT claim
-  `qx_role`, Grafana dashboard title — are left untouched to avoid an
-  invasive redeploy.
-- **Logos**: new brand mark under `.github/assets/logos/` —
-  `logo.svg` (default) and `logo-dark.svg` (for dark backgrounds),
-  with matching PNG variants. README uses a `<picture>` element so
-  GitHub renders the right one per OS theme.
-- **Project layout** (earlier this cycle): `dlt-nodes/` → `fabric/`,
-  `database/` → `db/`, `deployment/` → `stack/`.
-- **JWT claim** (earlier this cycle): `pex_role` renamed to `qx_role`
-  across the API, gRPC interceptors, Keycloak protocol mappers and
-  user-attribute migration.
+- **Project layout**: top-level directories renamed for clarity —
+  `dlt-nodes/` → `fabric/`, `database/` → `db/`, `deployment/` → `stack/`.
+- **Chaincode**: flattened to a single `chaincode/` package (one Go
+  module, one binary) — previously nested under `chaincode/rwa-token/`
+  with redundant `cmd/` and `internal/` layers.
+- **Scripts**: consolidated under domain subfolders —
+  `scripts/benchmarks/{fhe,zkp}.py` and
+  `scripts/simulations/{dashboard,full,jitter,game_theory}.py`.
+  `stack/scripts/install_latex.sh` moved to `scripts/install_latex.sh`.
+- **Database seeds**: SQL file numbering collision resolved — the
+  `db/sql/` chain is now 01 → 08 with one file per prefix.
+- **JWT claim**: renamed to `qx_role` across the API, gRPC
+  interceptors, Keycloak protocol mappers and user-attribute migration.
+
+### Removed
+- Orphan `.gitignore` / `.dockerignore` entries whose targets no
+  longer existed (legacy `network/wallets`, `frontend/`, named dead
+  scripts, etc.).
+- Dead `SQLite audit_log` mechanism from `cli/cache.py` and the
+  matching `_seed_from_cache` call in the dashboard.
 
 ---
 

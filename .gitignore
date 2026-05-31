@@ -73,7 +73,6 @@ ascii_standalone.py
 
 # Local-only directories that must never reach the repo
 dapp/
-cli/
 .git.backup-*/
 
 # Windows binaries

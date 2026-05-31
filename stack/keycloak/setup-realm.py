@@ -77,7 +77,7 @@ def ensure_realm(client: httpx.Client, base: str, token: str) -> None:
 def _realm_payload() -> dict:
     return {
         "realm": REALM,
-        "displayName": "AIP Qx",
+        "displayName": "Pxtly",
         "enabled": True,
         "sslRequired": "external",
         # Token lifetimes

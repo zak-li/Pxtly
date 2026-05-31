@@ -4,7 +4,7 @@ providers:
   - name: qx
     orgId: 1
     # Empty folder = root: the dashboard appears directly in the Dashboards
-    # list with no enclosing folder. A previous `folder: AIP Qx` + `folderUid: qx`
+    # list with no enclosing folder. A previous `folder` + `folderUid: qx`
     # caused a click-through bug because the folder UID collided with the
     # dashboard UID (both `qx`).
     folder: ''
