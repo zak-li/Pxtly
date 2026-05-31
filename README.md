@@ -22,7 +22,7 @@
   <a href="https://docs.astral.sh/ruff/"><img src="https://img.shields.io/badge/code_style-ruff-7BF3FC.svg" alt="Code style: ruff"></a>
   <a href="https://docs.pytest.org/"><img src="https://img.shields.io/badge/tested_with-pytest-0049FF.svg" alt="Tested with pytest"></a>
   <a href="https://github.com/zak-li/pxtly/releases"><img src="https://img.shields.io/github/v/tag/zak-li/pxtly?label=version&color=7BF3FC" alt="Version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-BUSL_1.1-0049FF.svg" alt="License: BUSL 1.1"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache_2.0-0049FF.svg" alt="License: Apache 2.0"></a>
   <a href="https://github.com/zak-li/pxtly/commits/master"><img src="https://img.shields.io/github/last-commit/zak-li/pxtly?color=7BF3FC" alt="Last commit"></a>
 </p>
 
@@ -389,4 +389,4 @@ Custom metrics exposed at `/metrics`:
 
 ## License
 
-This project is licensed under the [Business Source License 1.1](LICENSE). It converts to Apache 2.0 on the change date defined in `LICENSE`. Vulnerability reports: see [SECURITY.md](SECURITY.md). Contributions: see [CONTRIBUTING.md](CONTRIBUTING.md).
+This project is licensed under the [Apache License 2.0](LICENSE). Vulnerability reports: see [SECURITY.md](SECURITY.md). Contributions: see [CONTRIBUTING.md](CONTRIBUTING.md).

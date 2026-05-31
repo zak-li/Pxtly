@@ -46,4 +46,4 @@ Do not open a public issue for security vulnerabilities. See [SECURITY.md](SECUR
 
 ## License
 
-By contributing you agree that your contributions will be licensed under the [Business Source License 1.1](LICENSE).
+By contributing you agree that your contributions will be licensed under the [Apache License 2.0](LICENSE).

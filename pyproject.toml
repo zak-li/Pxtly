@@ -4,7 +4,8 @@ version = "1.0.0"
 description = "Institutional Real-World Asset tokenisation on Hyperledger Fabric — MiCA compliance, dual endorsement, ZK-KYC, FHE fraud scoring, regulatory RAG agent."
 readme = "README.md"
 requires-python = ">=3.12"
-license = { file = "LICENSE" }
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 authors = [{ name = "Zakaria Rahali", email = "pxtly.yovtg@aleeas.com" }]
 keywords = ["blockchain", "hyperledger-fabric", "tokenization", "rwa", "compliance", "mica", "kyc", "aml", "zkp", "fhe"]
 classifiers = [
