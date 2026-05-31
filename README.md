@@ -20,7 +20,7 @@
 
 ## Pxtly
 
-> **Pxtly** — stylised contraction of *pact* + *exchange*. A **pact** is a formal,
+> **Pxtly** stylised contraction of *pact* + *exchange*. A **pact** is a formal,
 > binding agreement between parties (from Latin *pactum*); the **× / x** carries
 > the cross-institutional dimension. Together they describe what the platform
 > does: it turns the consortium pact between issuer and regulator into a
