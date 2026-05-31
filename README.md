@@ -20,13 +20,7 @@
 
 ## Pxtly
 
-> **Pxtly** stylised contraction of *pact* + *exchange*. A **pact** is a formal,
-> binding agreement between parties (from Latin *pactum*); the **× / x** carries
-> the cross-institutional dimension. Together they describe what the platform
-> does: it turns the consortium pact between issuer and regulator into a
-> machine-executable exchange of tokenised real-world assets, where every
-> state-changing transaction requires multi-party endorsement before it lands
-> on-chain.
+> **Pxtly** — *pact* (Latin *pactum*, binding agreement) + *exchange*. A consortium pact made executable on-chain.
 
 Pxtly is an institutional platform for tokenising Real World Assets on a permissioned Hyperledger Fabric network. It handles the full asset lifecycle from issuance to redemption, with built-in AML/KYC compliance, ZK-KYC identity proofs, FHE-based fraud scoring, and a RAG regulatory agent for MiCA queries.
 
