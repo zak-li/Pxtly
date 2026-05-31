@@ -10,20 +10,22 @@
 <br>
 
 <p align="center">
-  <a href="https://github.com/zak-li/pxtly/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/zak-li/pxtly/ci.yml?branch=master&label=CI&color=0049FF" alt="CI"></a>
-  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/python-3.12+-7BF3FC.svg" alt="Python 3.12+"></a>
-  <a href="https://hyperledger-fabric.readthedocs.io/"><img src="https://img.shields.io/badge/Hyperledger_Fabric-2.5-0049FF.svg" alt="Hyperledger Fabric 2.5"></a>
-  <a href="https://go.dev/"><img src="https://img.shields.io/badge/Go-1.21+-7BF3FC.svg" alt="Go 1.21+"></a>
-  <a href="https://fastapi.tiangolo.com/"><img src="https://img.shields.io/badge/FastAPI-0.135-0049FF.svg" alt="FastAPI"></a>
-  <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-14+-7BF3FC.svg" alt="PostgreSQL 14+"></a>
-  <a href="https://redis.io/"><img src="https://img.shields.io/badge/Redis-7+-0049FF.svg" alt="Redis 7+"></a>
-  <a href="https://www.keycloak.org/"><img src="https://img.shields.io/badge/Keycloak-24-7BF3FC.svg" alt="Keycloak 24"></a>
-  <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-ready-0049FF.svg" alt="Docker"></a>
-  <a href="https://docs.astral.sh/ruff/"><img src="https://img.shields.io/badge/code_style-ruff-7BF3FC.svg" alt="Code style: ruff"></a>
-  <a href="https://docs.pytest.org/"><img src="https://img.shields.io/badge/tested_with-pytest-0049FF.svg" alt="Tested with pytest"></a>
-  <a href="https://github.com/zak-li/pxtly/releases"><img src="https://img.shields.io/github/v/tag/zak-li/pxtly?label=version&color=7BF3FC" alt="Version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache_2.0-0049FF.svg" alt="License: Apache 2.0"></a>
-  <a href="https://github.com/zak-li/pxtly/commits/master"><img src="https://img.shields.io/github/last-commit/zak-li/pxtly?color=7BF3FC" alt="Last commit"></a>
+  <a href="https://github.com/zak-li/pxtly/releases"><img src="https://img.shields.io/github/v/tag/zak-li/pxtly?label=version&color=4AAFFD" alt="Version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache_2.0-4DB4FD.svg" alt="License: Apache 2.0"></a>
+  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.12+-50B8FD.svg" alt="Python 3.12+"></a>
+  <a href="https://go.dev/"><img src="https://img.shields.io/badge/Go-1.21+-54BDFD.svg" alt="Go 1.21+"></a>
+  <a href="https://hyperledger-fabric.readthedocs.io/"><img src="https://img.shields.io/badge/Hyperledger_Fabric-2.5-57C1FD.svg" alt="Hyperledger Fabric 2.5"></a>
+  <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-14+-5AC6FD.svg" alt="PostgreSQL 14+"></a>
+  <a href="https://neo4j.com/"><img src="https://img.shields.io/badge/Neo4j-5.23-5DCAFD.svg" alt="Neo4j 5.23"></a>
+  <a href="https://redis.io/"><img src="https://img.shields.io/badge/Redis-7+-61CFFD.svg" alt="Redis 7+"></a>
+  <a href="https://www.trychroma.com/"><img src="https://img.shields.io/badge/ChromaDB-1.5-64D3FD.svg" alt="ChromaDB 1.5"></a>
+  <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-26.1+-67D8FC.svg" alt="Docker"></a>
+  <a href="https://www.keycloak.org/"><img src="https://img.shields.io/badge/Keycloak-24-6BDCFC.svg" alt="Keycloak 24"></a>
+  <a href="https://www.vaultproject.io/"><img src="https://img.shields.io/badge/HashiCorp_Vault-1.16+-6EE1FC.svg" alt="HashiCorp Vault"></a>
+  <a href="https://prometheus.io/"><img src="https://img.shields.io/badge/Prometheus-2.52+-71E5FC.svg" alt="Prometheus"></a>
+  <a href="https://grafana.com/"><img src="https://img.shields.io/badge/Grafana-11.0+-74EAFC.svg" alt="Grafana"></a>
+  <a href="https://docs.astral.sh/ruff/"><img src="https://img.shields.io/badge/code_style-ruff-78EEFC.svg" alt="Code style: ruff"></a>
+  <a href="https://docs.pytest.org/"><img src="https://img.shields.io/badge/tested_with-pytest-7BF3FC.svg" alt="Tested with pytest"></a>
 </p>
 
 <br>
@@ -51,10 +53,6 @@ Pxtly is an institutional platform for tokenising Real World Assets on a permiss
 The Fabric network runs two organisations, **BANK01** (issuer) and **REG01** (regulator), each with a dedicated peer and CouchDB state database. The Go chaincode runs as Chaincode-as-a-Service and enforces a **2-of-2 endorsement policy** on every state-changing transaction. Assets move through an `ACTIF`, `GELE`, `EN_EMISSION`, `REMBOURSE` lifecycle recorded immutably on-chain, and Fabric events stream live via gRPC with automatic reconnection.
 
 The platform embeds compliance directly into transaction execution and asset lifecycle management. Sanctions screening is backed by Ed25519-signed manifests with fuzzy PEP/UN/EU matching, while the MiCA enforcement layer validates exposure boundaries (Art. 68 thresholds), restricted asset classes, and supervisory reporting requirements. zk-KYC workflows enable cryptographic identity attestation through Merkle proofs without exposing underlying credentials. Encrypted fraud analytics powered by Fully Homomorphic Encryption (HElib CKKS) evaluate AML risk on confidential datasets, with persistent monitoring of KYC validity and systemic concentration exposure.
-
-<p align="center">
-  <img src=".github/assets/diagrams/compliance-flow-v3.svg" alt="Compliance Flow" width="800">
-</p>
 
 Pxtly exposes a FastAPI REST API and a gRPC server in parallel. Authentication is OIDC-based via Keycloak with PKCE (authorization_code flow). Private keys for Fabric identities are stored in HashiCorp Vault (KV v2, AppRole in production), and every response carries six security headers with rate limiting and trusted-proxy host filtering.
 
@@ -102,7 +100,7 @@ Open `.env` and fill in at minimum `DATABASE_URL`, `REDIS_URL`, the `FABRIC_*` v
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate                # Windows: .venv\Scripts\activate
+source .venv/bin/activate    # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
@@ -125,7 +123,7 @@ docker compose -f docker/docker-compose.yaml up -d
 
 ```bash
 cd stack/keycloak
-cp .env.keycloak.example .env.keycloak   # fill in admin/DB credentials
+cp .env.keycloak.example .env.keycloak    # fill in admin/DB credentials
 bash deploy.sh
 ```
 
@@ -134,7 +132,7 @@ The `setup-realm.py` script prints a `KEYCLOAK_CLIENT_SECRET`. Copy it into your
 **Step 5: Start the API and worker**
 
 ```bash
-docker compose up -d                     # API + Celery worker
+docker compose up -d    # API + Celery worker
 # Or without Docker:
 uvicorn core.main:app --host 0.0.0.0 --port 8000 --workers 1
 celery -A core.core.celery_app worker --loglevel=info -Q celery,compliance,reports,fabric_events

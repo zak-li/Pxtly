@@ -67,10 +67,6 @@ node_modules/
 package.json
 package-lock.json
 
-# Standalone ASCII tools (kept local)
-ascii2.py
-ascii_standalone.py
-
 # Local-only directories that must never reach the repo
 dapp/
 .git.backup-*/
