@@ -61,6 +61,8 @@ Thumbs.db
 
 # Sensitive mock data
 tests/fixtures/crypto_config_mock/
+db/fixtures/csv/*.csv
+db/fixtures/json/*.json
 
 # Node deps (tooling scripts only — no JS app in this repo)
 node_modules/
@@ -77,3 +79,9 @@ dapp/
 # Sub-repository for custom redirect links
 pxtly-links/
 
+# Front-end demo configurations
+demo/config.local.js
+
+
+demo/dist/
+demo/node_modules/
