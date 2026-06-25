@@ -53,6 +53,15 @@ Pxtly is an institutional platform for tokenising Real World Assets on a permiss
 
 Pxtly runs a permissioned `Hyperledger Fabric` network with two organizations (`BANK01` and `REG01`) and `CouchDB` state databases, synchronized with an application `PostgreSQL` database for a dual-ledger source of truth. The Go contract is deployed as `Chaincode-as-a-Service (CCaaS)` and enforces a `2-of-2 endorsement policy`. Real-world assets transition through a strict, immutable lifecycle (`EN_EMISSION`, `ACTIF`, `GELE`, `REMBOURSE`) with all ledger modifications monitored by a resilient `gRPC block listener`.
 
+<br>
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/diagrams/cycle_vie_actif_dark.svg">
+    <img src=".github/assets/diagrams/cycle_vie_actif_light.svg" alt="Tokenized Asset Lifecycle" width="100%">
+  </picture>
+</p>
+<br>
+
 The platform embeds regulatory compliance directly into the ledger lifecycle. Sanctions screening features `Ed25519-signed manifests` with fuzzy PEP matching, while the `MiCA compliance engine` automatically enforces transaction boundaries (Art. 68) and asset restrictions. Identity verification is handled cryptographically via `Zero-Knowledge Proofs` (`zk-KYC` Schnorr proofs) to protect user privacy under `GDPR`, and confidential AML risk calculations are evaluated over encrypted indicators using `Fully Homomorphic Encryption` (`FHE` CKKS via `HElib`).
 
 Enterprise-grade security is achieved by delegating identity management to `Keycloak OIDC` (authorization flow with `PKCE`) and storing Fabric signing keys in `HashiCorp Vault` (`KV v2`). To mitigate memory-dump attacks, private keys are cleared from RAM immediately after signature generation using low-level memory operations. Distributed transaction consistency between `PostgreSQL` and `Fabric` is guaranteed through the `SAGA orchestration pattern`, which triggers automated compensating actions on execution failures.

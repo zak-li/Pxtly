@@ -1,47 +1,37 @@
-# Database migrations (Alembic)
+<br>
 
-Schema migrations for the RWA platform Postgres database.
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../../.github/assets/logos/logo-dark.svg">
+    <img src="../../.github/assets/logos/logo.svg" alt="Pxtly" width="300">
+  </picture>
+</p>
 
-## Setup
+<br>
 
+# DB
+
+Schema migrations for the Pxtly PostgreSQL application database, managed via Alembic.
+
+## Initial Setup
+
+Apply the base SQL seeds to an empty database, then initialize the Alembic revision tree:
 ```bash
-pip install -r requirements.txt
+alembic stamp head
 ```
 
-## Generating the initial revision
+## Creating Migrations
 
-The repo currently has hand-written `db/sql/0[1-7]_*.sql` seeds but no
-Alembic baseline. To bootstrap:
+When you modify SQLAlchemy models in the `core/features` directories, generate a new migration automatically:
+```bash
+alembic revision --autogenerate -m "description of change"
+```
 
-1. Apply the SQL seeds against an empty database (so the schema matches the
-   ORM models in `core/features/*/models.py`).
-2. Stamp the database as if it were already at the head of an empty Alembic
-   tree:
-
-   ```bash
-   alembic stamp head
-   ```
-
-3. Generate the first real migration on top of any future model change:
-
-   ```bash
-   alembic revision --autogenerate -m "describe change"
-   alembic upgrade head
-   ```
+Apply the migration to update the schema:
+```bash
+alembic upgrade head
+```
 
 ## Configuration
 
-Connection details come from `core.config.settings.database_url` (env var
-`DATABASE_URL`). `alembic.ini` does **not** contain credentials.
-
-## Models registered for autogenerate
-
-`env.py` imports the model modules below — adding a new feature with its own
-models means adding the import there too:
-
-- `core.features.assets.models`
-- `core.features.auth.models`
-- `core.features.compliance.models`
-- `core.features.transactions.models`
-- `core.features.tribunal.models`
-- `core.features.zkp.models`
+Database connections are handled securely via the `DATABASE_URL` environment variable. Alembic reads the configuration directly from `core.config.settings` to prevent exposing credentials in `alembic.ini`.
