@@ -129,11 +129,11 @@ services:
     restart: unless-stopped
   rwa-token-ccaas:
     build:
-      context: ../chaincode/rwa-token
+      context: ../../chaincode
       dockerfile: Dockerfile.ccaas
     environment:
     - CHAINCODE_SERVER_ADDRESS=0.0.0.0:9999
-    - CHAINCODE_ID=rwa-token_1.0:26af1d017a0f119a93a9309794cfbbb84c407593a98495e81a460215ab13bf39
+    - CHAINCODE_ID=rwa-token_1.0:eccb8d425eb7e70ec32bf93aa11320fa76f7662d442d7419feb20103759f7b44
     ports:
     - 9999:9999
     networks:
@@ -143,11 +143,11 @@ services:
     image: neo4j:5.23.0
     container_name: rwa-neo4j
     environment:
-    - NEO4J_AUTH=${NEO4J_USER:-neo4j}/${NEO4J_PASS}
+    - NEO4J_AUTH=neo4j/LV6VfaPgP#qdvG5TJP5^LjMWKO
     - NEO4J_dbms_memory_heap_initial__size=128m
-    - NEO4J_dbms_memory_heap_max__size=512m
-    - NEO4J_dbms_memory_pagecache_size=256m
-    - NEO4J_server_memory_pagecache_size=256m
+    - NEO4J_dbms_memory_heap_max__size=256m
+    - NEO4J_dbms_memory_pagecache_size=128m
+    - NEO4J_server_memory_pagecache_size=128m
     ports:
     - 7474:7474
     - 7687:7687

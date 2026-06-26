@@ -1,4 +1,4 @@
-﻿name: rwa-network
+name: rwa-network
 version: "1.0"
 client:
   organization: BANK01
@@ -11,33 +11,33 @@ organizations:
   BANK01:
     mspid: BANK01MSP
     peers:
-      - peer0.bank01.finance-trust.com
+      - peer0.bnpparibas.finance-trust.com
     certificateAuthorities:
       - ca.bank01.finance-trust.com
 
   REG01:
     mspid: REG01MSP
     peers:
-      - peer0.reg01-regulateur.finance-trust.com
+      - peer0.amf-regulateur.finance-trust.com
     certificateAuthorities:
       - ca.reg01-regulateur.finance-trust.com
 
 peers:
-  peer0.bank01.finance-trust.com:
+  peer0.bnpparibas.finance-trust.com:
     url: grpcs://127.0.0.1:7051
     tlsCACerts:
       path: ./crypto-config/peerOrganizations/bank01.finance-trust.com/peers/peer0.bank01.finance-trust.com/tls/ca.crt
     grpcOptions:
-      ssl-target-name-override: peer0.bank01.finance-trust.com
-      hostnameOverride: peer0.bank01.finance-trust.com
+      ssl-target-name-override: peer0.bnpparibas.finance-trust.com
+      hostnameOverride: peer0.bnpparibas.finance-trust.com
 
-  peer0.reg01-regulateur.finance-trust.com:
+  peer0.amf-regulateur.finance-trust.com:
     url: grpcs://127.0.0.1:7091
     tlsCACerts:
       path: ./crypto-config/peerOrganizations/reg01-regulateur.finance-trust.com/peers/peer0.reg01-regulateur.finance-trust.com/tls/ca.crt
     grpcOptions:
-      ssl-target-name-override: peer0.reg01-regulateur.finance-trust.com
-      hostnameOverride: peer0.reg01-regulateur.finance-trust.com
+      ssl-target-name-override: peer0.amf-regulateur.finance-trust.com
+      hostnameOverride: peer0.amf-regulateur.finance-trust.com
 
 certificateAuthorities:
   ca.bank01.finance-trust.com:
@@ -51,12 +51,12 @@ certificateAuthorities:
 channels:
   rwa-channel:
     peers:
-      peer0.bank01.finance-trust.com:
+      peer0.bnpparibas.finance-trust.com:
         endorsingPeer: true
         chaincodeQuery: true
         ledgerQuery: true
         eventSource: true
-      peer0.reg01-regulateur.finance-trust.com:
+      peer0.amf-regulateur.finance-trust.com:
         endorsingPeer: true
         chaincodeQuery: true
         ledgerQuery: true

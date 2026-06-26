@@ -9,20 +9,26 @@ services:
     image: pxtly-api:latest
     container_name: pxtly-api
     restart: unless-stopped
-    ports:
-      - "8000:8000"
+    network_mode: host
     env_file:
       - .env
     environment:
       - ENVIRONMENT=production
+      - FABRIC_PEER_BIN=/usr/local/bin/peer
+      - FABRIC_CFG_PATH_BASE=/etc/hyperledger/fabric
+      - FABRIC_CRYPTO_CONFIG=/app/fabric/crypto-config
     volumes:
       # Pinned CA used to validate Keycloak's self-signed TLS cert.
       # Path inside the container must match KEYCLOAK_CA_CERT_PATH in .env.
       - ./stack/keycloak/tls/tls.crt:/etc/ssl/keycloak/ca.crt:ro
       # Fabric identity wallet and crypto material — excluded from the image
       # by .dockerignore, so they must be mounted at runtime.
-      - ./fabric/wallets:/app/fabric/wallets:ro
-      - ./fabric/crypto-config:/app/fabric/crypto-config:ro
+      - ./network/wallets:/app/fabric/wallets:ro
+      - ./crypto-config:/app/fabric/crypto-config:ro
+      # Fabric peer binary
+      - /home/zakaria/go/src/github.com/hyperledger/fabric-samples/bin/peer:/usr/local/bin/peer:ro
+      # Fabric config (core.yaml)
+      - /home/zakaria/go/src/github.com/hyperledger/fabric-samples/config:/etc/hyperledger/fabric:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -36,8 +42,6 @@ services:
           memory: 1024M
         reservations:
           memory: 256M
-    networks:
-      - pxtly-network
     logging:
       driver: "json-file"
       options:
