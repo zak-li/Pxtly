@@ -34,7 +34,7 @@ CREATE TABLE organizations (
     short_name          VARCHAR(100) NOT NULL,
     org_type            org_type_enum NOT NULL,
     lei                 CHAR(20)     UNIQUE NOT NULL,
-    bic_swift           VARCHAR(11),
+    bic_swift           VARCHAR(20),
     msp_id              VARCHAR(100) UNIQUE NOT NULL,
     country_code        CHAR(2)      NOT NULL,
     jurisdiction        VARCHAR(100) NOT NULL,
