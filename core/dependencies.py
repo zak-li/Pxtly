@@ -16,7 +16,7 @@ from core.features.auth.models import User
 # MSP ID → Fabric wallet identity label.
 _MSP_TO_IDENTITY: dict[str, str] = {
     "BANK01MSP": "admin@bank01",
-    "REG01MSP": "admin@reg01-regulateur",
+    "REG01MSP": "admin@amf-regulateur",
 }
 
 

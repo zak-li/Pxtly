@@ -96,15 +96,15 @@ class ValuationResponse(BaseModel):
     pricing_source: str | None = None
 
 class ProvenanceRecord(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
-    txID: str
+    txID: str = Field(alias="tx_id")
     timestamp: str
-    actorMSP: str
-    actorDN: str
+    actorMSP: str = Field(alias="actor_msp")
+    actorDN: str = Field(alias="actor_dn")
     action: str
-    fromOwner: str | None = None
-    toOwner: str | None = None
+    fromOwner: str | None = Field(default=None, alias="from_owner")
+    toOwner: str | None = Field(default=None, alias="to_owner")
     amount: Decimal | None = None
     justification: str | None = None
-    blockNumber: int | None = None
+    blockNumber: int | None = Field(default=None, alias="block_number")

@@ -1,4 +1,4 @@
-﻿import datetime
+import datetime
 import gc
 import json
 import logging
@@ -82,14 +82,28 @@ class FabricWallet:
 
         metadata = json.loads(wallet_path.read_text(encoding='utf-8'))
 
-        for target in ["admin@bank01", "admin@reg01-regulateur"]:
+        for target in ["admin@bank01", "admin@amf-regulateur"]:
             if target in metadata:
                 info = metadata[target]
                 if not isinstance(info, dict):
                     continue
 
-                cert_path = Path(str(info.get("cert_path", ""))).resolve()
-                key_path = Path(str(info.get("key_path", ""))).resolve()
+                cert_path_str = str(info.get("cert_path", ""))
+                key_path_str = str(info.get("key_path", ""))
+
+                if "network/wallets/" in cert_path_str:
+                    cert_path = (base_dir / cert_path_str.split("network/wallets/")[-1]).resolve()
+                elif "wallets/" in cert_path_str:
+                    cert_path = (base_dir / cert_path_str.split("wallets/")[-1]).resolve()
+                else:
+                    cert_path = Path(cert_path_str).resolve()
+
+                if "network/wallets/" in key_path_str:
+                    key_path = (base_dir / key_path_str.split("network/wallets/")[-1]).resolve()
+                elif "wallets/" in key_path_str:
+                    key_path = (base_dir / key_path_str.split("wallets/")[-1]).resolve()
+                else:
+                    key_path = Path(key_path_str).resolve()
 
                 if not cert_path.is_relative_to(base_dir) or not key_path.is_relative_to(base_dir):
                     raise PermissionError("Path traversal bypass intercepted explicitly bounding limits natively.")

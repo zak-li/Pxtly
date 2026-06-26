@@ -16,6 +16,7 @@ from collections.abc import Awaitable, Callable
 
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
+from jose import JWTError
 from starlette.middleware.base import BaseHTTPMiddleware
 
 from core.core.auth_cookies import CSRF_COOKIE, CSRF_HEADER, SESSION_COOKIE
@@ -108,7 +109,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             finally:
                 await redis_gen.aclose()
 
-        except ValueError:
+        except (ValueError, JWTError):
             return _unauthorized("Invalid or expired token.")
         except Exception:
             logger.exception("AuthMiddleware: unexpected error validating token")

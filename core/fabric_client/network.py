@@ -115,13 +115,13 @@ class FabricClient:
         "bank01": {
             "msp_id":    "BANK01MSP",
             "domain":    "bank01.finance-trust.com",
-            "admin":     "admin@bank01.finance-trust.com",
+            "admin":     "Admin@bank01.finance-trust.com",
             "peer_port": "7051",
         },
         "reg01": {
             "msp_id":    "REG01MSP",
             "domain":    "reg01-regulateur.finance-trust.com",
-            "admin":     "admin@reg01-regulateur.finance-trust.com",
+            "admin":     "Admin@reg01-regulateur.finance-trust.com",
             "peer_port": "7091",
         },
     }
@@ -140,16 +140,18 @@ class FabricClient:
         env = os.environ.copy()
         env["FABRIC_CFG_PATH"] = self.fabric_cfg
 
-        if "bank01" in identity_label.lower():
+        if "bank01" in identity_label.lower() or "bnp" in identity_label.lower():
             cfg = self._org_cfg("bank01")
-        elif "reg01" in identity_label.lower():
+            peer_host = "peer0.bnpparibas.finance-trust.com"
+        elif "reg01" in identity_label.lower() or "amf" in identity_label.lower():
             cfg = self._org_cfg("reg01")
+            peer_host = "peer0.amf-regulateur.finance-trust.com"
         else:
             raise ValueError(f"Unknown identity mapping {identity_label}")
 
         domain = cfg["domain"]
         env["CORE_PEER_LOCALMSPID"]     = cfg["msp_id"]
-        env["CORE_PEER_ADDRESS"]        = f"peer0.{domain}:{cfg['peer_port']}"
+        env["CORE_PEER_ADDRESS"]        = f"{peer_host}:{cfg['peer_port']}"
         env["CORE_PEER_MSPCONFIGPATH"]  = f"{self.crypto_base}/peerOrganizations/{domain}/users/{cfg['admin']}/msp"
         env["CORE_PEER_TLS_CERT_FILE"]  = f"{self.crypto_base}/peerOrganizations/{domain}/peers/peer0.{domain}/tls/server.crt"
         env["CORE_PEER_TLS_KEY_FILE"]   = f"{self.crypto_base}/peerOrganizations/{domain}/peers/peer0.{domain}/tls/server.key"
@@ -238,20 +240,38 @@ class FabricClient:
             raise
         finally:
             RWA_CHAINCODE_DURATION.labels(function=function, status=status).observe(time.perf_counter() - start_time)
-            # Assuming org="BANK01" or parse from identity
-            org = "BANK01" if "BANK01" in identity_label else "REG01"
+            org = "BANK01" if ("bank01" in identity_label.lower() or "bnp" in identity_label.lower()) else "REG01"
             RWA_TRANSACTIONS.labels(tx_type="invoke", org=org, status=status).inc()
+
+        tx_id = ""
+        import re
+        match = re.search(r"txid\s*\[([a-f0-9A-F]+)\]", stderr)
+        if match:
+            tx_id = match.group(1)
 
         try:
             lines = stdout.split('\n')
             for line in reversed(lines):
                 if line.startswith('payload:'):
                     p_str = line.split('payload:', 1)[1].strip().strip('"')
-                    return json.loads(p_str.replace('\\"', '"'))
+                    if p_str:
+                        res = json.loads(p_str.replace('\\"', '"'))
+                        if isinstance(res, dict):
+                            if "txID" not in res and tx_id:
+                                res["txID"] = tx_id
+                            return res
+                        elif isinstance(res, list):
+                            return res
                 if '{' in line:
-                    return json.loads(line)
-            return None
+                    res = json.loads(line)
+                    if isinstance(res, dict):
+                        if "txID" not in res and tx_id:
+                            res["txID"] = tx_id
+                        return res
+            return {"txID": tx_id} if tx_id else None
         except (json.JSONDecodeError, IndexError, ValueError) as exc:
+            if tx_id:
+                return {"txID": tx_id}
             logger.error(f"submit_transaction: impossible de parser la réponse Fabric: {exc}")
             raise FabricEndorsementError(f"Réponse Fabric illisible: {stdout[:200]}") from exc
 
@@ -304,7 +324,7 @@ class FabricClient:
             raise
         finally:
             RWA_CHAINCODE_DURATION.labels(function=function, status=status).observe(time.perf_counter() - start_time)
-            org = "BANK01" if "BANK01" in identity_label else "REG01"
+            org = "BANK01" if ("bank01" in identity_label.lower() or "bnp" in identity_label.lower()) else "REG01"
             RWA_TRANSACTIONS.labels(tx_type="query", org=org, status=status).inc()
 
         try:

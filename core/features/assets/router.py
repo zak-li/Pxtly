@@ -130,6 +130,7 @@ async def search_assets(
     limit: int = Query(10, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> list[AssetResponse]:
     fabric = get_fabric()
 
@@ -150,6 +151,40 @@ async def search_assets(
 
     if not isinstance(payload, list):
         return []
+
+    # Map blockchain response keys to db UUIDs to satisfy AssetResponse validation
+    from sqlalchemy import select
+
+    from core.features.auth.models import Organization
+
+    owner_emails = {item.get("current_owner") for item in payload if item.get("current_owner")}
+    issuer_msps = {item.get("issuer_msp") for item in payload if item.get("issuer_msp")}
+
+    users_map = {}
+    if owner_emails:
+        res = await db.execute(select(User).where(User.email.in_(owner_emails)))
+        for u in res.scalars().all():
+            users_map[u.email] = u
+
+    orgs_map = {}
+    if issuer_msps:
+        res = await db.execute(select(Organization).where(Organization.msp_id.in_(issuer_msps)))
+        for o in res.scalars().all():
+            orgs_map[o.msp_id] = o
+
+    for item in payload:
+        o_email = item.get("current_owner")
+        i_msp = item.get("issuer_msp")
+
+        if o_email and o_email in users_map:
+            item["current_owner_id"] = str(users_map[o_email].id)
+        else:
+            item["current_owner_id"] = str(current_user.id)
+
+        if i_msp and i_msp in orgs_map:
+            item["issuer_org_id"] = str(orgs_map[i_msp].id)
+        else:
+            item["issuer_org_id"] = str(current_user.org_id)
 
     adapter = TypeAdapter(list[AssetResponse])
     return adapter.validate_python(payload)

@@ -225,7 +225,7 @@ async def generate_stream(
                     f"[GROQ] Attempt {attempt + 1}/{_MAX_RETRIES} failed "
                     f"({type(exc).__name__}), retrying in {wait:.1f}s"
                 )
-                yield f"\n\n*⏳ Modèle surchargé — nouvelle tentative dans {wait:.0f}s...*\n\n"
+                yield f"\n\n* Modèle surchargé — nouvelle tentative dans {wait:.0f}s...*\n\n"
                 await asyncio.sleep(wait)
             else:
                 raise

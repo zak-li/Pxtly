@@ -56,7 +56,7 @@ async def tokenize(request: TokenizeRequest, identity_label: str, db: AsyncSessi
 
     fabric_tx_id = str(payload.get("txID", ""))
     block_num_raw = payload.get("blockNumber")
-    block_num = int(block_num_raw) if block_num_raw else None
+    block_num = int(block_num_raw) if block_num_raw else 1
 
     org_stmt = select(Organization).where(Organization.lei == request.issuer_lei)
     org_res = await db.execute(org_stmt)
@@ -145,7 +145,7 @@ async def transfer(
         raise ValueError("Réponse invalide du chaincode lors du transfert.")
 
     fabric_tx_id = str(payload.get("txID", ""))
-    block_num = int(payload["blockNumber"]) if payload.get("blockNumber") else None
+    block_num = int(payload["blockNumber"]) if payload.get("blockNumber") else 1
     previous_owner_email = current_user.email if current_user else None
 
     asset.current_owner_id = to_owner_user.id
@@ -229,7 +229,7 @@ async def freeze(
         raise ValueError("Réponse invalide du chaincode lors du gel.")
 
     fabric_tx_id = str(payload.get("txID", ""))
-    block_num = int(payload["blockNumber"]) if payload.get("blockNumber") else None
+    block_num = int(payload["blockNumber"]) if payload.get("blockNumber") else 1
 
     result = await db.execute(select(Asset).where(Asset.asset_id == request.asset_id))
     asset = result.scalar_one_or_none()
@@ -308,7 +308,7 @@ async def unfreeze_asset(
         raise ValueError("Réponse invalide du chaincode lors du dégel.")
 
     fabric_tx_id = str(payload.get("txID", ""))
-    block_num = int(payload["blockNumber"]) if payload.get("blockNumber") else None
+    block_num = int(payload["blockNumber"]) if payload.get("blockNumber") else 1
 
     result = await db.execute(select(Asset).where(Asset.asset_id == request.asset_id))
     asset = result.scalar_one_or_none()
