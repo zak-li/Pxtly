@@ -60,7 +60,10 @@ def main() -> None:
         sys.exit("Set KEYCLOAK_ADMIN_PASSWORD before running.")
 
     base = args.keycloak_url.rstrip("/")
-    verify = args.ca_bundle if args.ca_bundle else True
+    if args.ca_bundle and args.ca_bundle.lower() in ("false", "no", "none", "0"):
+        verify = False
+    else:
+        verify = args.ca_bundle if args.ca_bundle else True
 
     token = get_admin_token(base, args.admin_user, pwd, verify)
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
@@ -137,7 +140,7 @@ def main() -> None:
             elif ex.get("authenticationFlow") and ex.get("displayName") == FORMS_ALIAS:
                 want = "ALTERNATIVE"
             if want and ex.get("requirement") != want:
-                print(f"    set {ex.get('displayName')} → {want}")
+                print(f"    set {ex.get('displayName')} -> {want}")
                 ex["requirement"] = want
                 c.put(
                     f"{realm_url}/authentication/flows/{FLOW}/executions",
@@ -146,7 +149,7 @@ def main() -> None:
 
         for ex in c.get(f"{realm_url}/authentication/flows/{FORMS_ALIAS}/executions").json():
             if ex.get("requirement") != "REQUIRED":
-                print(f"    set {ex.get('displayName')} → REQUIRED")
+                print(f"    set {ex.get('displayName')} -> REQUIRED")
                 ex["requirement"] = "REQUIRED"
                 c.put(
                     f"{realm_url}/authentication/flows/{FORMS_ALIAS}/executions",

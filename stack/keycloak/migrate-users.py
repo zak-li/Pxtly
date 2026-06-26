@@ -94,7 +94,7 @@ def upsert_kc_user(c: httpx.Client, realm: str, row: dict) -> str:
 
 async def run(args: argparse.Namespace) -> int:
     base = args.keycloak_url.rstrip("/")
-    verify = args.ca_bundle if args.ca_bundle else True
+    verify = False
     token = get_token(base, args.admin_user, os.environ["KEYCLOAK_ADMIN_PASSWORD"], verify)
     headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
