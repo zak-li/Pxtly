@@ -76,12 +76,12 @@ dapp/
 # Windows binaries
 *.exe
 
-# Sub-repository for custom redirect links
-pxtly-links/
-
 # Front-end demo configurations
 demo/config.local.js
 
 
 demo/dist/
 demo/node_modules/
+
+# Local drafts and design files
+local_drafts/
