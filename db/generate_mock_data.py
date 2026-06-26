@@ -5,8 +5,8 @@ Generates fully anonymized, synthetic compliance and transactional data.
 All commercial names and real-world identifiers have been removed.
 """
 
-import os
 import base64
+import os
 import zlib
 
 FILES_DATA = {

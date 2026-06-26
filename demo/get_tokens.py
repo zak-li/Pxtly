@@ -9,7 +9,7 @@ from Keycloak and write them to `config.local.js` for the demo frontend.
 """
 import os
 import sys
-import json
+
 import httpx
 from dotenv import load_dotenv
 

@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from core.config import settings
 from core.core.database_base import Base
 from core.features.assets import models as _assets_models  # noqa: F401
-from core.features.auth import models as _auth_models      # noqa: F401
+from core.features.auth import models as _auth_models  # noqa: F401
 from core.features.compliance import models as _compl_models  # noqa: F401
 from core.features.transactions import models as _tx_models  # noqa: F401
 from core.features.tribunal import models as _tribunal_models  # noqa: F401
