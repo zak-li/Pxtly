@@ -11,7 +11,7 @@ async def simulate_failed_request (req_id :int ,use_jitter :bool ):
 
     await asyncio .sleep (wait_delay )
 
-    print (f"   [Requête {req_id :02d}] ➔ Frappe le serveur à +{wait_delay :.3f} secondes")
+    print (f"   [Requête {req_id :02d}]  Frappe le serveur à +{wait_delay :.3f} secondes")
 
 async def run_simulation (use_jitter :bool ):
     etat ="AVEC JITTER (Protection Activée)"if use_jitter else "SANS JITTER (Troupeau Tonitruant)"
@@ -32,7 +32,7 @@ async def main ():
     await asyncio .sleep (1 )
 
     await run_simulation (use_jitter =True )
-    print ("   ✓ SÉCURISÉ : Les requêtes sont diluées sur une plage de 200ms. La charge serveur est lissée.")
+    print ("    SÉCURISÉ : Les requêtes sont diluées sur une plage de 200ms. La charge serveur est lissée.")
 
 if __name__ =="__main__":
     asyncio .run (main ())

@@ -34,18 +34,18 @@ def run_health_check() -> bool:
 
     print()
     print("═" * 66)
-    print("  🔍  RWA PLATFORM — INFRASTRUCTURE HEALTH CHECK")
-    print(f"  📡  Cible : {VM_HOST}")
-    print(f"  🕐  {now}")
+    print("    RWA PLATFORM — INFRASTRUCTURE HEALTH CHECK")
+    print(f"    Cible : {VM_HOST}")
+    print(f"    {now}")
     print("═" * 66)
 
     print("\n── Connectivité réseau ──")
     if not check_tcp(VM_HOST, 22, timeout=5.0):
-        print(f"  ❌  VM {VM_HOST} INJOIGNABLE (port 22 fermé)")
+        print(f"    VM {VM_HOST} INJOIGNABLE (port 22 fermé)")
         print("      → La machine est probablement éteinte ou le réseau est coupé.")
         print("═" * 66)
         return False
-    print(f"  ✅  VM {VM_HOST} accessible (SSH port 22)")
+    print(f"    VM {VM_HOST} accessible (SSH port 22)")
 
     results = []
     critical_down = []
@@ -60,7 +60,7 @@ def run_health_check() -> bool:
         alive = check_tcp(VM_HOST, port)
         results.append((name, port, alive, critical))
 
-        icon = "✅" if alive else "❌"
+        icon = "" if alive else ""
         status = "UP" if alive else "DOWN"
         tag = "CRITIQUE" if critical and not alive else ""
         print(f"  {icon}  {name:<25s} :{port:<6d} {status:<6s} {tag}")
@@ -79,18 +79,18 @@ def run_health_check() -> bool:
     print("═" * 66)
 
     if down_count == 0:
-        print("  🟢  TOUS LES SERVICES SONT OPÉRATIONNELS")
+        print("    TOUS LES SERVICES SONT OPÉRATIONNELS")
         print(f"      {up_count}/{total} services UP")
         print("═" * 66)
         return True
 
     if critical_down:
-        print(f"  🔴  {len(critical_down)} SERVICE(S) CRITIQUE(S) DOWN")
+        print(f"    {len(critical_down)} SERVICE(S) CRITIQUE(S) DOWN")
         for name, port, desc in critical_down:
-            print(f"      ⚠  {name} (:{port}) — {desc}")
+            print(f"        {name} (:{port}) — {desc}")
 
     if optional_down:
-        print(f"  🟡  {len(optional_down)} service(s) optionnel(s) DOWN")
+        print(f"    {len(optional_down)} service(s) optionnel(s) DOWN")
         for name, port, desc in optional_down:
             print(f"      [i] {name} (:{port}) -- {desc}")
 
@@ -98,7 +98,7 @@ def run_health_check() -> bool:
     print("═" * 66)
 
     if critical_down:
-        print("\n  💡  Solution : Connectez-vous en SSH et lancez :")
+        print("\n    Solution : Connectez-vous en SSH et lancez :")
         print(f"      ssh zakaria@{VM_HOST}")
         print("      cd /home/zakaria/rwa-platform && sudo docker compose up -d")
         print()

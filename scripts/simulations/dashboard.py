@@ -1,4 +1,4 @@
-﻿"""
+"""
 Pxtly — Dashboard Load Simulation
 Generates realistic API traffic so Prometheus metrics populate the Grafana dashboard.
 
@@ -96,15 +96,25 @@ def status_line(token: bool, elapsed: float, duration: float) -> None:
 
 async def login(client: httpx.AsyncClient) -> str | None:
     try:
+        keycloak_url = "https://10.10.10.150:8443"
+        realm = "pxtly"
+        client_id = "pxtly-api"
+        client_secret = os.environ.get("KEYCLOAK_CLIENT_SECRET", "dummy_secret_for_test")
+        
+
         resp = await client.post(
-            f"{BASE_URL}/api/v1/auth/login",
-            json={"email": THOMAS_EMAIL, "password": THOMAS_PASSWORD},
-            timeout=10,
+            f"{keycloak_url}/realms/{realm}/protocol/openid-connect/token",
+            data={
+                "grant_type": "password",
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "username": THOMAS_EMAIL,
+                "password": THOMAS_PASSWORD,
+            },
+            timeout=30
         )
         if resp.status_code == 200:
-            data = resp.json()
-            token = data.get("access_token") or data.get("token")
-            return token
+            return resp.json()["access_token"]
         print(f"\n{c('red', 'Login failed')}: {resp.status_code} — {resp.text[:200]}")
     except Exception as exc:
         print(f"\n{c('red', 'Login error')}: {exc}")
@@ -307,7 +317,7 @@ async def simulate(duration: float, rps: float) -> None:
     print(f"  User     : {c('dim', THOMAS_EMAIL)}")
     print(f"{c('bold', SEP)}\n")
 
-    async with httpx.AsyncClient(follow_redirects=True) as client:
+    async with httpx.AsyncClient(verify=False, follow_redirects=True) as client:  # noqa: S501  # nosec B501
 
         print(f"  {c('dim', 'Authenticating...')} ", end="")
         token = await login(client)

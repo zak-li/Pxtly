@@ -268,10 +268,11 @@ async def test_client(
             raise exc
 
     transport = ASGITransport(app=app)
-    with patch("core.api.middleware.rate_limiter.get_redis", fake_get_redis):
-        with patch("core.api.middleware.auth_middleware.validate_token", fake_validate_token):
-            async with AsyncClient(transport=transport, base_url="http://testserver") as client:
-                yield client
+    with patch("core.api.middleware.rate_limiter.get_redis", fake_get_redis), \
+         patch("core.api.middleware.auth_middleware.get_redis", fake_get_redis), \
+         patch("core.api.middleware.auth_middleware.validate_token", fake_validate_token):
+        async with AsyncClient(transport=transport, base_url="http://testserver") as client:
+            yield client
 
     app.dependency_overrides.clear()
 

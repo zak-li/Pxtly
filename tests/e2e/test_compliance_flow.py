@@ -65,7 +65,6 @@ async def test_compliance_check_blocks_expired_kyc_james_wilson(
     async_session: AsyncSession,
     test_org, test_user_thomas,
 ):
-    from core.core.security import hash_password
 
     bank04 = Organization(
         id=uuid.UUID("00000000-0000-0000-0000-000000000003"),
@@ -82,9 +81,12 @@ async def test_compliance_check_blocks_expired_kyc_james_wilson(
         id=uuid.UUID("10000000-0000-0000-0000-000000000003"),
         org_id=bank04.id,
         email="james.e2e@bank04.com",
-        hashed_password=hash_password("Passw0rd!"),
+        keycloak_sub="10000000-0000-0000-0000-000000000003",
+        first_name="James",
+        last_name="Wilson",
         role="TRADER",
         is_active=True,
+        msp_id="BANK04E2EMSP",
     )
     async_session.add(james)
     

@@ -229,14 +229,25 @@ def fresh_pubkey() -> tuple[str, str]:
 
 async def login(client: httpx.AsyncClient) -> str | None:
     try:
+        keycloak_url = "https://10.10.10.150:8443"
+        realm = "pxtly"
+        client_id = "pxtly-api"
+        client_secret = os.environ.get("KEYCLOAK_CLIENT_SECRET", "dummy_secret_for_test")
+        
+
         resp = await client.post(
-            f"{BASE_URL}/api/v1/auth/login",
-            json={"email": SIM_EMAIL, "password": SIM_PASSWORD},
-            timeout=10,
+            f"{keycloak_url}/realms/{realm}/protocol/openid-connect/token",
+            data={
+                "grant_type": "password",
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "username": SIM_EMAIL,
+                "password": SIM_PASSWORD,
+            },
+            timeout=30
         )
         if resp.status_code == 200:
-            data = resp.json()
-            return data.get("access_token") or data.get("token")
+            return resp.json()["access_token"]
         print(col("r", f"  login failed: {resp.status_code} -- {resp.text[:200]}"))
     except Exception as exc:
         print(col("r", f"  login error: {exc}"))
@@ -309,11 +320,13 @@ async def phase_kyc(client: httpx.AsyncClient, headers: dict, count: int) -> Pha
 # Phase 3 -- Tokenization burst
 # ---------------------------------------------------------------------------
 
+SIM_RUN_ID = f"SIM{random.randint(1000, 9999)}"
+
 def make_asset_payload(seq: int) -> dict:
     atype = random.choice(ASSET_TYPES)
     prefix = ASSET_PREFIX[atype]
     year = random.randint(2024, 2026)
-    asset_id = f"RWA-{prefix}-SIM-{year}-{(seq % 1000):03d}"
+    asset_id = f"RWA-{prefix}-{SIM_RUN_ID}-{year}-{(seq % 1000):03d}"
     issuance = date(year, random.randint(1, 12), random.randint(1, 28))
     nominal = random.choice([5_000_000, 10_000_000, 25_000_000, 50_000_000, 100_000_000])
     return {
@@ -321,7 +334,7 @@ def make_asset_payload(seq: int) -> dict:
         "isin": f"FR{uuid.uuid4().hex[:10].upper()}"[:12],
         "asset_type": atype,
         "asset_name": f"{random.choice(ASSET_NAMES[atype])} #{seq}",
-        "issuer_lei": f"969500{uuid.uuid4().hex[:14].upper()}",
+        "issuer_lei": "R0MUWSFPU8MPRO8K5P83",
         "nominal_value": float(nominal),
         "currency": random.choice(["EUR", "EUR", "EUR", "USD", "GBP"]),
         "issuance_date": issuance.isoformat(),
@@ -789,7 +802,7 @@ async def run(args: argparse.Namespace) -> None:
 
     STATS.start = time.time()
 
-    async with httpx.AsyncClient(follow_redirects=True) as client:
+    async with httpx.AsyncClient(verify=False, follow_redirects=True) as client:  # noqa: S501  # nosec B501
         print(f"\n  {col('dim', 'authenticating...')} ", end="")
         token = await login(client)
         if not token:
