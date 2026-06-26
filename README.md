@@ -43,9 +43,8 @@ Pxtly is an institutional platform for tokenising Real World Assets on a permiss
 - [Requirements](#requirements)
 - [Quick Start](#quick-start)
 - [CLI](#cli)
-- [API Reference](#api-reference)
-- [Environment Variables](#environment-variables)
-- [Project Structure](#project-structure)
+- [Core API](#core-api)
+- [Environment](#environment)
 - [Observability](#observability)
 - [License](#license)
 
@@ -53,18 +52,7 @@ Pxtly is an institutional platform for tokenising Real World Assets on a permiss
 
 Pxtly runs a permissioned `Hyperledger Fabric` network with two organizations (`BANK01` and `REG01`) and `CouchDB` state databases, synchronized with an application `PostgreSQL` database for a dual-ledger source of truth. The Go contract is deployed as `Chaincode-as-a-Service (CCaaS)` and enforces a `2-of-2 endorsement policy`. Real-world assets transition through a strict, immutable lifecycle (`EN_EMISSION`, `ACTIF`, `GELE`, `REMBOURSE`) with all ledger modifications monitored by a resilient `gRPC block listener`.
 
-<br>
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset=".github/assets/diagrams/cycle_vie_actif_dark.svg">
-    <img src=".github/assets/diagrams/cycle_vie_actif_light.svg" alt="Tokenized Asset Lifecycle" width="100%">
-  </picture>
-</p>
-<br>
-
 The platform embeds regulatory compliance directly into the ledger lifecycle. Sanctions screening features `Ed25519-signed manifests` with fuzzy PEP matching, while the `MiCA compliance engine` automatically enforces transaction boundaries (Art. 68) and asset restrictions. Identity verification is handled cryptographically via `Zero-Knowledge Proofs` (`zk-KYC` Schnorr proofs) to protect user privacy under `GDPR`, and confidential AML risk calculations are evaluated over encrypted indicators using `Fully Homomorphic Encryption` (`FHE` CKKS via `HElib`).
-
-Enterprise-grade security is achieved by delegating identity management to `Keycloak OIDC` (authorization flow with `PKCE`) and storing Fabric signing keys in `HashiCorp Vault` (`KV v2`). To mitigate memory-dump attacks, private keys are cleared from RAM immediately after signature generation using low-level memory operations. Distributed transaction consistency between `PostgreSQL` and `Fabric` is guaranteed through the `SAGA orchestration pattern`, which triggers automated compensating actions on execution failures.
 
 Platform monitoring and auditing are decentralized. A dedicated `Tribunal` resolves transaction disputes through a three-phase `Commit-Reveal` voting protocol, applying `game-theoretic slashing` to penalize dishonest auditors. Real-time updates are streamed to clients via `Server-Sent Events (SSE)` backed by `Redis Pub/Sub`, and an automated `Celery` pipeline compiles certified PDF audit reports and feeds a regulatory `RAG agent` powered by `ChromaDB` and `Groq`.
 
@@ -184,7 +172,7 @@ python -m cli.main dashboard                   # full-screen Textual TUI
 
 Configuration precedence: `PXTLY_*` env vars, then `~/.pxtly/config.json`, then defaults. Sub-apps: `auth`, `assets`, `tx`, `audit`, `compliance`, `zkp`, `tribunal`, `orgs`, `agent`, `events`, `system`, `dashboard`.
 
-## API Reference
+## Core API
 
 REST root: `/api/v1`. Every endpoint requires a valid OIDC access token unless marked *public*.
 
@@ -259,7 +247,7 @@ REST root: `/api/v1`. Every endpoint requires a valid OIDC access token unless m
 | GET | `/organizations/{org_id}/portfolio` | Per-org portfolio aggregate |
 | GET | `/metrics` | Prometheus metrics. *public* |
 
-## Environment Variables
+## Environment
 
 **Required**
 
@@ -300,78 +288,6 @@ REST root: `/api/v1`. Every endpoint requires a valid OIDC access token unless m
 | `ALLOWED_ORIGINS` | | Comma-separated CORS origins |
 
 The full list lives in [`.env.example`](.env.example).
-
-## Project Structure
-
-The repository is organised by responsibility: application code, the Fabric consortium, side services, persistence, and tooling each live under their own top-level directory.
-
-### Application code
-
-```
-core/                         # FastAPI + Celery, application backend
-├── main.py                   # ASGI entry, middleware, metrics
-├── config.py                 # pydantic-settings root
-├── features/
-│   ├── assets/               # Asset lifecycle (issue, transfer, freeze)
-│   ├── compliance/           # AML / KYC / MiCA rules
-│   ├── audit/                # On-chain trail, integrity, PDF reports
-│   ├── auth/                 # Keycloak OIDC + PKCE + GDPR
-│   ├── zkp/                  # ZK-KYC Schnorr proofs
-│   ├── fhe/                  # HElib CKKS fraud scorer
-│   └── agent/                # RAG pipeline + ChromaDB
-├── fabric_client/            # Wallet, events, retry, circuit breaker
-├── grpc_server/              # gRPC servicers
-└── grpc_generated/           # protoc-generated stubs
-
-chaincode/                    # Go smart contract (rwa-token, CCaaS)
-
-cli/                          # Pxtly CLI (Typer + Rich + Textual)
-├── api/                      # One client per REST resource
-├── commands/                 # One Typer sub-app per domain
-├── http/                     # Transport + auto-refresh on 401
-├── security/                 # Keyring tokens, PKCE, audit log
-└── ui/                       # Rich console, REPL, dashboard
-```
-
-### Consortium and side services
-
-```
-fabric/                       # Hyperledger Fabric 2.5 network
-├── config/                   # configtx, connection profile, MSP material
-├── docker/                   # Peers, orderer, CouchDB compose
-└── scripts/                  # deploy-chaincode.sh
-
-stack/                        # Side services (run alongside the API)
-├── keycloak/                 # Compose, TLS, identity-first flow
-├── monitoring/               # Prometheus, Grafana, Loki, Promtail
-└── vault/                    # Policy + hcl config
-```
-
-### Persistence and tooling
-
-```
-db/                           # Schema, seeds, Alembic migrations
-├── migrations/               # alembic env + versions/
-├── sql/                      # 01_schema to 08_zkp_tables
-└── fixtures/                 # csv/, json/ (sanctions manifest)
-
-proto/                        # gRPC service definitions (.proto)
-
-scripts/                      # Operational scripts (Python + bash)
-├── benchmarks/               # fhe.py, zkp.py
-├── simulations/              # dashboard.py, full.py, jitter.py, game_theory.py
-├── seed_db.py                # Apply SQL seeds + compliance fixtures
-├── health_check.py           # Liveness probe for CI / oncall
-├── generate_report.py        # Build a sample audit PDF locally
-├── generate_protos.sh        # Regenerate Python gRPC stubs
-└── install_latex.sh          # Install LaTeX deps (TeX Live)
-
-tests/                        # pytest suite + fixtures
-```
-
-### Repository root
-
-`.github/` (assets + CI), `.env.example`, `Dockerfile`, `docker-compose.yml`, `requirements.txt`, `pyproject.toml`, `alembic.ini`, plus the metadata files (`README.md`, `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`, `LICENSE`).
 
 ## Observability
 
