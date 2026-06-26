@@ -73,6 +73,7 @@ def build_authorization_url(
             "state": state,
             "code_challenge": code_challenge,
             "code_challenge_method": "S256",
+            "prompt": "login",
         }
     )
     return f"{base}?{qs}"

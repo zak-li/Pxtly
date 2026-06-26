@@ -31,6 +31,7 @@ log = logging.getLogger(__name__)
 
 _SERVICE = "pxtly-cli"
 _KEY = "session"
+_CHUNK_SIZE = 500  # 500 chars = 1000 bytes in UTF-16. Windows CredWrite limit is 2560 bytes.
 
 # JWTs frequently exceed the 1 KB Windows Credential Manager item limit when
 # they carry roles / realm_access / scopes. Base64 the JSON bundle so the
@@ -90,8 +91,12 @@ class TokenBundle:
 def save_token_bundle(bundle: TokenBundle) -> None:
     """Persist the full bundle to the OS keyring."""
     try:
-        keyring.set_password(_SERVICE, _KEY, bundle.to_b64())
-        log.debug("Token bundle saved (expires_at=%.0f).", bundle.expires_at)
+        raw = bundle.to_b64()
+        chunks = [raw[i:i+_CHUNK_SIZE] for i in range(0, len(raw), _CHUNK_SIZE)]
+        keyring.set_password(_SERVICE, f"{_KEY}_count", str(len(chunks)))
+        for i, chunk in enumerate(chunks):
+            keyring.set_password(_SERVICE, f"{_KEY}_{i}", chunk)
+        log.debug("Token bundle saved in %d chunks (expires_at=%.0f).", len(chunks), bundle.expires_at)
     except keyring.errors.KeyringError as exc:
         raise RuntimeError(
             f"OS keyring is unavailable ({exc}). The Pxtly CLI requires a "
@@ -105,10 +110,22 @@ def save_token_bundle(bundle: TokenBundle) -> None:
 def get_token_bundle() -> TokenBundle | None:
     """Return the persisted bundle or None if nothing is stored."""
     try:
-        raw = keyring.get_password(_SERVICE, _KEY)
+        count_str = keyring.get_password(_SERVICE, f"{_KEY}_count")
+        if not count_str:
+            return None
+        count = int(count_str)
+        raw = ""
+        for i in range(count):
+            chunk = keyring.get_password(_SERVICE, f"{_KEY}_{i}")
+            if not chunk:
+                return None
+            raw += chunk
     except keyring.errors.KeyringError as exc:
         log.warning("Keyring read failed: %s", exc)
         return None
+    except ValueError:
+        return None
+
     if not raw:
         return None
     try:
@@ -131,9 +148,21 @@ def has_tokens() -> bool:
 
 def delete_tokens() -> None:
     try:
-        keyring.delete_password(_SERVICE, _KEY)
+        count_str = keyring.get_password(_SERVICE, f"{_KEY}_count")
+        if count_str:
+            count = int(count_str)
+            for i in range(count):
+                try:
+                    keyring.delete_password(_SERVICE, f"{_KEY}_{i}")
+                except keyring.errors.PasswordDeleteError:
+                    pass
+            keyring.delete_password(_SERVICE, f"{_KEY}_count")
+        else:
+            # Fallback to delete the old unchunked key if it exists
+            keyring.delete_password(_SERVICE, _KEY)
         log.info("Token bundle cleared from keyring.")
     except keyring.errors.PasswordDeleteError:
         pass
     except keyring.errors.KeyringError as exc:
         log.warning("Keyring delete failed: %s", exc)
+

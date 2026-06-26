@@ -197,7 +197,7 @@ def start_repl() -> None:
             console.print()
             try:
                 raw: str = session.prompt(
-                    HTML(f'  <b><style color="{V1}">></style></b> ')
+                    HTML(f'<b><style color="{V1}">></style></b> ')
                 ).strip()
             except (KeyboardInterrupt, EOFError):
                 console.print(f"\n  [{MUTED}]Type /exit to quit.[/]\n")
@@ -295,7 +295,6 @@ def _handle_auth(arg: str) -> None:
         return
 
     if arg.lower() == "pkce" or arg == "":
-        display_info("PKCE login — opening browser…")
         with console.status("", spinner="dots2", spinner_style=f"bold {V2}"):
             try:
                 run(login_pkce())

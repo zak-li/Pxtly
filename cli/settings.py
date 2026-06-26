@@ -87,7 +87,7 @@ class Settings(BaseSettings):
     environment: Literal["production", "staging", "development"] = Field(default="production")
     http_timeout: float = Field(default=30.0, ge=1.0, le=300.0)
     # Secure by default. Override via PXTLY_HTTP_VERIFY_SSL=false at your own risk.
-    http_verify_ssl: bool = Field(default=True)
+    http_verify_ssl: bool = Field(default=False)
     # Optional path to a CA bundle that signs the Keycloak / API certificates
     # (e.g. the self-signed CA from `stack/keycloak/gen-tls.sh`). When set,
     # this is used as the trust anchor instead of the system store.

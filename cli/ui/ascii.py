@@ -1,104 +1,86 @@
 #!/usr/bin/env python3
-"""
-cli/ui/ascii.py
------------------
-Pixel-Bird ASCII Art Coloré - Version Dégradé SVG avec Socle Noir
-Spécifiquement optimisé pour le banner de démarrage de Pxtly CLI.
-"""
-import base64
+
 import sys
-import zlib
 
-# Sprite compressé du grand oiseau cool
-BIRD_DATA = {
-    "encoded": "eJw7f+zYeTBiYuBHRudh4sgIKP7202dkhKYSonf19HnIRsG5yMrgglv2HUbTch6bkyDKIAjNXiD7apsxHOF3Hpr7gQhoMrJKiF1Y1SCbSZIyNJXIIsgexI/gBmJVjDXiICEDl4KwsUYrXApTGQAT2S/t",
-    "width": 13,
-    "height": 14
-}
 
-GRADIENT_START = (0, 73, 255)   # Bleu (#0049FF)
-GRADIENT_END = (123, 243, 252)  # Cyan (#7BF3FC)
+def rgb(r: int, g: int, b: int) -> str:
+    return f"\033[38;2;{r};{g};{b}m"
 
-def init_terminal():
-    """Initialise le terminal pour l'interprétation des codes couleurs ANSI et l'UTF-8."""
-    if hasattr(sys.stdout, "reconfigure"):
-        sys.stdout.reconfigure(encoding="utf-8")
-    
-    if sys.platform == "win32":
-        try:
-            import ctypes
-            kernel32 = ctypes.windll.kernel32
-            hStdOut = kernel32.GetStdHandle(-11)
-            if hStdOut != -1:
-                mode = ctypes.c_ulong()
-                if kernel32.GetConsoleMode(hStdOut, ctypes.byref(mode)):
-                    kernel32.SetConsoleMode(hStdOut, mode.value | 0x0004)
-        except Exception:
-            pass
-
-def lerp(a, b, t):
+def lerp(a: int, b: int, t: float) -> int:
     return int(a + (b - a) * t)
 
-def lerp_rgb(c0, c1, t):
-    return (lerp(c0[0], c1[0], t), lerp(c0[1], c1[1], t), lerp(c0[2], c1[2], t))
+def lc(c0: tuple, c1: tuple, t: float) -> tuple:
+    return (lerp(c0[0],c1[0],t), lerp(c0[1],c1[1],t), lerp(c0[2],c1[2],t))
 
-def get_pixel_color(r, g, b, x, y, width, height):
-    """Calcule la couleur avec dégradé diagonal du corps."""
-    t = (y / max(1, height - 1) + x / max(1, width - 1)) / 2.0
-    t = max(0.0, min(1.0, t))
-    
-    if (r, g, b) == (2, 0, 15):
-        return 35, 35, 40 # Contour visible
-    elif (r, g, b) == (237, 242, 243):
-        return lerp_rgb(GRADIENT_START, GRADIENT_END, t)
-    elif (r, g, b) == (180, 190, 195):
-        start_dark = (0, 45, 160)
-        end_dark = (75, 160, 175)
-        return lerp_rgb(start_dark, end_dark, t)
-        
-    return r, g, b
+RESET = "\033[0m"
 
-def write(s):
-    sys.stdout.write(s)
-    sys.stdout.flush()
+C = 12
+
+def make_body(ca: tuple, cb: tuple, mode: str = "diag"):
+    def body(r: int, c: int, rows: int, cols: int) -> str:
+        if mode == "vert":
+            t = r / (rows - 1)
+        elif mode == "horiz":
+            t = c / (cols - 1)
+        elif mode == "diag":
+            t = r / (rows - 1) * 0.55 + c / (cols - 1) * 0.45
+        elif mode == "rdiag":
+            t = r / (rows - 1) * 0.55 + (1 - c / (cols - 1)) * 0.45
+        return rgb(*lc(ca, cb, min(1.0, t))) + "██"
+    return body
+
+def render_shape(sh: dict) -> None:
+    grid    = sh["grid"]
+    rows    = len(grid)
+    ec      = sh["ec"]
+    er      = sh["er"]
+    offset_x = sh.get("eye_offset_x", 0)
+    el_pos  = (er, ec + offset_x)
+    er_pos  = (er, C - 1 - ec + offset_x)
+    body    = make_body(sh["ca"], sh["cb"], sh.get("mode", "diag"))
+
+    print()
+    for r in range(rows):
+        seg = "  "
+        for c in range(C):
+            if (r, c) == el_pos or (r, c) == er_pos:
+                seg += rgb(*sh["eye_col"]) + "██"
+            elif grid[r][c] == 1:
+                seg += body(r, c, rows, C)
+            elif "palette" in sh and grid[r][c] in sh["palette"]:
+                seg += rgb(*sh["palette"][grid[r][c]]) + "██"
+            else:
+                seg += "  "
+        print(seg + RESET)
+
+SHAPES = [
+    # 1. Haut-de-forme (Top Hat Élegant)
+    dict(
+        grid=[
+            # Haut de forme limité au corps
+            [0,0,2,2,2,2,2,2,2,2,0,0],
+            [0,0,2,2,2,2,2,2,2,2,0,0],
+            [0,0,2,2,2,2,2,2,2,2,0,0],
+            [0,0,2,2,2,2,2,2,2,2,0,0],
+            [0,0,3,3,3,3,3,3,3,3,0,0], # Ruban rouge
+            [2,2,2,2,2,2,2,2,2,2,2,2], # Bord du chapeau (prolongé à gauche et à droite)
+            # Corps
+            [0,1,1,1,1,1,1,1,1,1,1,0], # Ligne sous le chapeau
+            [0,1,1,1,1,1,1,1,1,1,1,0], # Ligne des yeux
+            [1,1,1,1,1,1,1,1,1,1,1,1], # Mains
+            [0,1,1,1,1,1,1,1,1,1,1,0],
+            [0,0,1,0,0,0,0,0,0,1,0,0],
+        ],
+        ec=3, er=7, eye_offset_x=1,
+        ca=(123, 243, 252), cb=(0, 73, 255), eye_col=(0,0,0), mode="diag",
+        palette={2: (30, 30, 30), 3: (220, 20, 60)} # Noir profond et Ruban Cramoisi
+    ),
+]
 
 def animate():
-    """Affiche le magnifique oiseau de démarrage de Pxtly CLI avec son socle noir."""
-    init_terminal()
-    
-    raw = zlib.decompress(base64.b64decode(BIRD_DATA["encoded"]))
-    pixels = [raw[i:i+3] for i in range(0, len(raw), 3)]
-    
-    width = BIRD_DATA["width"]
-    height = BIRD_DATA["height"]
-    BLOCK = "██"
-    
-    # 1. Rendu de l'oiseau
-    for y in range(height):
-        line = ["  "] # Marge gauche pour centrage esthétique dans la console
-        for x in range(width):
-            r, g, b = pixels[y * width + x]
-            if (r, g, b) == (207, 198, 198):
-                line.append("  ")
-            else:
-                r_adj, g_adj, b_adj = get_pixel_color(r, g, b, x, y, width, height)
-                line.append(f"\033[38;2;{r_adj};{g_adj};{b_adj}m{BLOCK}\033[0m")
-        write("".join(line) + "\n")
-        
-    # 2. Rendu du socle de support noir de sécurité
-    r_ped, g_ped, b_ped = 35, 35, 40
-    
-    # Niveau 1 (Supérieur)
-    l1 = ["  ", "  "] # Double marge pour centrer la barre réduite
-    for _ in range(1, width - 1):
-        l1.append(f"\033[38;2;{r_ped};{g_ped};{b_ped}m{BLOCK}\033[0m")
-    write("".join(l1) + "\n")
-    
-    # Niveau 2 (Inférieur)
-    l2 = ["  "]
-    for _ in range(width):
-        l2.append(f"\033[38;2;{r_ped};{g_ped};{b_ped}m▄▄\033[0m")
-    write("".join(l2) + "\n")
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+    render_shape(SHAPES[0])
 
 if __name__ == "__main__":
     animate()

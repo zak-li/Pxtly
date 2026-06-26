@@ -104,10 +104,10 @@ class _CallbackHandler(http.server.BaseHTTPRequestHandler):
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.end_headers()
         self.wfile.write(
-            "<html><body style='font-family:system-ui;text-align:center;"
-            "padding:3rem'><h2>Pxtly CLI</h2>"
-            "<p>Authentication complete — you can close this tab.</p>"
-            "</body></html>".encode()
+            b"<html><body style='font-family:system-ui;text-align:center;"
+            b"padding:3rem'><h2>Pxtly CLI</h2>"
+            b"<p>Authentication complete, you can close this tab.</p>"
+            b"</body></html>"
         )
         _CallbackHandler.done.set()
 

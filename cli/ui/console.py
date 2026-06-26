@@ -111,9 +111,9 @@ def display_banner() -> None:
     console.print()
 
     ver = Text("  ")
-    ver.append("Pxtly", style=f"bold {V2}")
+    ver.append("Pxtly CLI", style=f"bold {V2}")
     ver.append("   //   ", style=MUTED)
-    ver.append("Crafted by ", style=NEUTRAL)
+    ver.append("By ", style=NEUTRAL)
     ver.append("@zak-li ", style=f"italic {MUTED}")
     ver.append("x ", style=NEUTRAL)
     ver.append("@itsayaah20", style=f"italic {MUTED}")
@@ -178,7 +178,27 @@ def display_agent_response(query: str, response: str) -> None:
     agent_header = Text("  Pxtly", style=f"bold {V2}")
     console.print(agent_header)
 
-    md = Markdown(response, justify="left")
+    import re
+    
+    # 1. Remove "Réponse" heading completely (whether ATX or Setext)
+    response = re.sub(r'^Réponse\s*\n[=-]+\s*$', '', response, flags=re.MULTILINE|re.IGNORECASE)
+    response = re.sub(r'^(#+\s*)?Réponse\s*$', '', response, flags=re.MULTILINE|re.IGNORECASE)
+
+    # 2. Downgrade ATX H1/H2 to H3
+    response = re.sub(r'^(#{1,2})\s+', '### ', response, flags=re.MULTILINE)
+    
+    # 3. Downgrade Setext H1/H2 to H3
+    response = re.sub(r'^([A-Za-z0-9_][^\n]*)\n={3,}\s*$', r'### \1', response, flags=re.MULTILINE)
+    response = re.sub(r'^([A-Za-z0-9_][^\n]*)\n-{3,}\s*$', r'### \1', response, flags=re.MULTILINE)
+
+    # 4. Strip any residual raw JSON chart blobs the LLM might still generate
+    response = re.sub(r'\{"type"\s*:\s*"[^"]+".*?"data"\s*:.*?\}\}', '', response, flags=re.DOTALL)
+    response = re.sub(r'```(?:json|chart)?\s*\{"type".*?\}\}\s*```', '', response, flags=re.DOTALL)
+    
+    # 5. Clean up redundant empty lines
+    response = re.sub(r'\n{3,}', '\n\n', response)
+
+    md = Markdown(response.strip(), justify="left")
     console.print(Padding(md, (0, 0, 0, 2)))
     console.print()
 
