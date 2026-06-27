@@ -10,7 +10,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ### Added
 - **Docker publish workflow**: Automated Docker image build and push
-  to GitHub Container Registry (`ghcr.io/zak-li/trust-engine`) on
+  to GitHub Container Registry (`ghcr.io/zak-li/x-engine`) on
   every push to `master` and on version tags.
 - **Interactive frontend demo**: Full interactive demonstration UI under
   `demo/` with Vite, an offline simulator mode (with a dynamic plug icon
