@@ -12,7 +12,7 @@ from jose import jwt as _jose_jwt
 
 from core.core.oidc import extract_role, validate_token
 
-__all__ = ["validate_token", "extract_role", "create_access_token", "hash_password"]
+__all__ = ["create_access_token", "extract_role", "hash_password", "validate_token"]
 
 # Fixed signing key used exclusively by test fixtures.
 # Tests that need to call validate_token must patch it to decode with this key.

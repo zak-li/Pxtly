@@ -1,6 +1,6 @@
 # Grafana dashboard generator — one-off script, panels are kept on single
 # lines on purpose (compact layout maths). Ruff style rules waived locally.
-# ruff: noqa: E701,E702,I001
+# ruff: noqa: E701, E702
 import json
 import os
 
