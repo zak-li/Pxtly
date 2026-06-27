@@ -57,5 +57,6 @@ stack/
 db/
 !db/migrations/
 chaincode/
-fabric/
+fabric/docker/
+fabric/scripts/
 proto/
