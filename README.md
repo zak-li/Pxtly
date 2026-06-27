@@ -12,21 +12,12 @@
 <p align="center">
   <a href="https://github.com/zak-li/pxtly/releases"><img src="https://img.shields.io/github/v/tag/zak-li/pxtly?label=version&color=4AAFFD" alt="Version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL_3.0-4DB3FD.svg" alt="License: AGPL 3.0"></a>
-  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.12+-50B8FD.svg" alt="Python 3.12+"></a>
-  <a href="https://go.dev/"><img src="https://img.shields.io/badge/Go-1.21+-53BCFD.svg" alt="Go 1.21+"></a>
-  <a href="https://docs.celeryq.dev/"><img src="https://img.shields.io/badge/Celery-5.6+-56C0FD.svg" alt="Celery"></a>
-  <a href="https://hyperledger-fabric.readthedocs.io/"><img src="https://img.shields.io/badge/Hyperledger_Fabric-2.5-59C4FD.svg" alt="Hyperledger Fabric 2.5"></a><br>
-  <a href="https://www.postgresql.org/"><img src="https://img.shields.io/badge/PostgreSQL-14+-5CC9FD.svg" alt="PostgreSQL 14+"></a>
-  <a href="https://neo4j.com/"><img src="https://img.shields.io/badge/Neo4j-5.23-5FCDFD.svg" alt="Neo4j 5.23"></a>
-  <a href="https://redis.io/"><img src="https://img.shields.io/badge/Redis-7+-63D1FD.svg" alt="Redis 7+"></a>
-  <a href="https://docs.trychroma.com/"><img src="https://img.shields.io/badge/ChromaDB-1.5-66D5FC.svg" alt="ChromaDB"></a>
-  <a href="https://www.keycloak.org/"><img src="https://img.shields.io/badge/Keycloak-24-69DAFC.svg" alt="Keycloak 24"></a>
-  <a href="https://www.vaultproject.io/"><img src="https://img.shields.io/badge/HashiCorp_Vault-1.16+-6CDEFC.svg" alt="HashiCorp Vault"></a><br>
-  <a href="https://prometheus.io/"><img src="https://img.shields.io/badge/Prometheus-2.x-6FE2FC.svg" alt="Prometheus"></a>
-  <a href="https://grafana.com/"><img src="https://img.shields.io/badge/Grafana-11.0+-72E6FC.svg" alt="Grafana"></a>
-  <a href="https://www.docker.com/"><img src="https://img.shields.io/badge/Docker-26.1+-75EBFC.svg" alt="Docker"></a>
-  <a href="https://docs.astral.sh/ruff/"><img src="https://img.shields.io/badge/code_style-ruff-78EFFC.svg" alt="Code style: ruff"></a>
-  <a href="https://docs.pytest.org/"><img src="https://img.shields.io/badge/tested_with-pytest-7BF3FC.svg" alt="Tested with pytest"></a>
+  <a href="https://github.com/zak-li/Pxtly/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/zak-li/Pxtly/ci.yml?label=CI&color=50B8FD" alt="CI"></a>
+  <a href="https://github.com/zak-li/Pxtly/issues"><img src="https://img.shields.io/github/issues/zak-li/Pxtly?color=53BCFD" alt="Issues"></a>
+  <a href="https://github.com/zak-li/Pxtly/commits/master"><img src="https://img.shields.io/github/last-commit/zak-li/Pxtly?color=56C0FD" alt="Last Commit"></a><br>
+  <a href="https://docs.astral.sh/ruff/"><img src="https://img.shields.io/badge/code_style-ruff-59C4FD.svg" alt="Code style: ruff"></a>
+  <a href="https://docs.pytest.org/"><img src="https://img.shields.io/badge/tested_with-pytest-5CC9FD.svg" alt="Tested with pytest"></a>
+  <a href="https://github.com/zak-li/Pxtly/pkgs/container/trust-engine"><img src="https://img.shields.io/badge/docker-trust--engine-5FCDFD.svg" alt="Docker"></a>
 </p>
 
 <br>
