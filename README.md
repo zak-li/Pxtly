@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://github.com/zak-li/pxtly/releases"><img src="https://img.shields.io/github/v/tag/zak-li/pxtly?label=version&color=4AAFFD" alt="Version"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache_2.0-4DB3FD.svg" alt="License: Apache 2.0"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-AGPL_3.0-4DB3FD.svg" alt="License: AGPL 3.0"></a>
   <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3.12+-50B8FD.svg" alt="Python 3.12+"></a>
   <a href="https://go.dev/"><img src="https://img.shields.io/badge/Go-1.21+-53BCFD.svg" alt="Go 1.21+"></a>
   <a href="https://docs.celeryq.dev/"><img src="https://img.shields.io/badge/Celery-5.6+-56C0FD.svg" alt="Celery"></a>
@@ -317,4 +317,4 @@ Custom metrics exposed at `/metrics`:
 
 ## License
 
-This project is licensed under the [Apache License 2.0](LICENSE). Vulnerability reports: see [SECURITY.md](SECURITY.md). Contributions: see [CONTRIBUTING.md](CONTRIBUTING.md).
+This project is licensed under the [GNU AGPLv3](LICENSE). Vulnerability reports: see [SECURITY.md](SECURITY.md). Contributions: see [CONTRIBUTING.md](CONTRIBUTING.md).
