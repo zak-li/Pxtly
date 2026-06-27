@@ -6,6 +6,51 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [2.0.1] - 2026-06-27
+
+### Added
+- **Docker publish workflow**: Automated Docker image build and push
+  to GitHub Container Registry (`ghcr.io/zak-li/trust-engine`) on
+  every push to `master` and on version tags.
+- **Offline demo application**: Full offline simulation UI under
+  `demo/` with Vite, dynamic plug icon, animated tooltip, and a
+  standalone token helper (`get_tokens.py`).
+- **CLI documentation**: Comprehensive CLI usage guide added under
+  `cli/README.md`.
+- **Mock data generator**: `db/generate_mock_data.py` for clean,
+  reproducible test fixtures.
+
+### Changed
+- **License**: Switched from Apache 2.0 to AGPL-3.0 for strict
+  copyleft protection.
+- **CLI**: Enhanced TUI with improved ASCII chart rendering, updated
+  auth flow (PKCE token storage), and console output.
+- **Core**: Updated Fabric client network/wallet modules, added new
+  asset routing endpoints, and refined schemas.
+- **Database**: Updated schema definitions, seed data, and migration
+  config. Sanitized fixtures by removing stale CSV/JSON mock files.
+- **Fabric**: Updated deployment scripts, connection profiles, and
+  Docker Compose configuration.
+- **README**: Streamlined badges to essential indicators (version,
+  license, CI, issues, last commit, docker, ruff, pytest). Added
+  Pxtly etymology section.
+
+### Fixed
+- **Linting**: Resolved project-wide Ruff formatting and Bandit
+  security issues across `core/`, `scripts/`, `tests/`, and `stack/`.
+- **Docker build**: Fixed `.dockerignore` to include `fabric/config/`
+  in the build context for runtime connection profiles.
+- **Tests**: Updated `conftest.py` and end-to-end compliance flow
+  tests for compatibility with the updated schemas.
+
+### Removed
+- Stale fixture files (`compliance_kyc_aml.json`,
+  `fabric_wallets.json`, `fabric_world_state.json`, and CSV history
+  files) replaced by the mock data generator.
+- Outdated architecture SVG diagrams and compliance flow diagram.
+
+---
+
 ## [2.0.0] - 2026-05-31
 
 ### Added
@@ -81,5 +126,6 @@ changes; every user must log in again.
 - **Security and Ops**: HashiCorp Vault integration, Neo4j graph
   scanning, and a complete Prometheus / Grafana monitoring stack.
 
+[2.0.1]: https://github.com/zak-li/pxtly/releases/tag/v2.0.1
 [2.0.0]: https://github.com/zak-li/pxtly/releases/tag/v2.0.0
 [1.0.0]: https://github.com/zak-li/pxtly/releases/tag/v1.0.0
