@@ -12,16 +12,16 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - **Docker publish workflow**: Automated Docker image build and push
   to GitHub Container Registry (`ghcr.io/zak-li/trust-engine`) on
   every push to `master` and on version tags.
-- **Offline demo application**: Full offline simulation UI under
-  `demo/` with Vite, dynamic plug icon, animated tooltip, and a
-  standalone token helper (`get_tokens.py`).
-- **CLI documentation**: Comprehensive CLI usage guide added under
-  `cli/README.md`.
+- **Interactive frontend demo**: Full interactive demonstration UI under
+  `demo/` with Vite, an offline simulator mode (with a dynamic plug icon
+  and animated tooltip), and a standalone token helper (`get_tokens.py`).
+- **CLI documentation**: Comprehensive CLI usage guide and REPL
+  architecture overview added under `cli/README.md`.
 - **Mock data generator**: `db/generate_mock_data.py` for clean,
   reproducible test fixtures.
 
 ### Changed
-- **License**: Switched from Apache 2.0 to AGPL-3.0 for strict
+- **License**: Switched from Apache 2.0 to AGPLv3 for strict
   copyleft protection.
 - **CLI**: Enhanced TUI with improved ASCII chart rendering, updated
   auth flow (PKCE token storage), and console output.
